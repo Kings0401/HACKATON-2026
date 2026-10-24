@@ -8,13 +8,13 @@
   "viewBox": [0, 0, 1000, 680],
   "start": "recepcion",
   "zones": {
-    "PUBLICA": { "label": "Área pública", "color": "#4fd1c5" },
-    "SOCIOS": { "label": "Casa club", "color": "#7f9cf5" },
-    "CAMPO": { "label": "Campo de golf", "color": "#68d391" },
-    "VIP": { "label": "Zona VIP", "color": "#d6b16a" },
-    "PERSONAL": { "label": "Solo personal", "color": "#f6ad55" },
-    "SERVICIO": { "label": "Servicio y proveedores", "color": "#fc8181" },
-    "TECNICA": { "label": "Zona técnica", "color": "#f687b3" }
+    "PUBLICA": { "label": "Área pública", "color": "#3a9a8f" },
+    "SOCIOS": { "label": "Casa club", "color": "#5b7fd6" },
+    "CAMPO": { "label": "Campo de golf", "color": "#3f9a5f" },
+    "VIP": { "label": "Zona VIP", "color": "#b8955a" },
+    "PERSONAL": { "label": "Solo personal", "color": "#c98a2e" },
+    "SERVICIO": { "label": "Servicio y proveedores", "color": "#c2513d" },
+    "TECNICA": { "label": "Zona técnica", "color": "#b8558a" }
   },
   "access": {
     "VIP": ["PUBLICA", "SOCIOS", "CAMPO", "VIP"],

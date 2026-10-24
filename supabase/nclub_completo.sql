@@ -27,8 +27,27 @@ alter table public.personas add constraint personas_categoria_check
   check (categoria in ('VIP','REGULAR','INVITADO','PERSONAL_INTERNO','TRABAJADOR_EXTERNO','ADMIN'));
 alter table public.personas add column if not exists auth_user_id uuid references auth.users(id) on delete set null;
 alter table public.personas add column if not exists email text;
+alter table public.personas add column if not exists telefono text;
+alter table public.personas add column if not exists tipo_documento text;
+alter table public.personas add column if not exists numero_documento text;
 alter table public.personas add column if not exists cargo text;
 create unique index if not exists personas_auth_user_unique on public.personas(auth_user_id);
+create unique index if not exists personas_documento_unico
+  on public.personas(tipo_documento, numero_documento) where numero_documento is not null;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname='personas_documento_tipo_check' and conrelid='public.personas'::regclass) then
+    alter table public.personas add constraint personas_documento_tipo_check
+      check (tipo_documento is null or tipo_documento in ('CC','CE','PASAPORTE','OTRO'));
+  end if;
+  if not exists (select 1 from pg_constraint where conname='personas_documento_pareja_check' and conrelid='public.personas'::regclass) then
+    alter table public.personas add constraint personas_documento_pareja_check
+      check ((tipo_documento is null) = (numero_documento is null));
+  end if;
+  if not exists (select 1 from pg_constraint where conname='personas_documento_longitud_check' and conrelid='public.personas'::regclass) then
+    alter table public.personas add constraint personas_documento_longitud_check
+      check (numero_documento is null or length(numero_documento) between 5 and 30);
+  end if;
+end $$;
 
 create table if not exists public.membresias (
   persona_id text primary key references public.personas(id),
@@ -174,7 +193,7 @@ do $$ declare t text; columnas text; begin
     execute format('grant all on public.%I to service_role',t);
   end loop;
 end $$;
-grant select(id,nombre,categoria,grupo_facial,tipo_credencial,activo,created_at,auth_user_id,email,cargo) on public.personas to authenticated;
+grant select(id,nombre,categoria,grupo_facial,tipo_credencial,activo,created_at,auth_user_id,email,telefono,tipo_documento,numero_documento,cargo) on public.personas to authenticated;
 grant select on public.membresias,public.servicios,public.reservas,public.invitaciones,public.permisos_laborales,public.eventos_acceso to authenticated;
 grant insert(persona_id,servicio_id,fecha_inicio,fecha_fin,estado) on public.reservas to authenticated;
 grant update(servicio_id,fecha_inicio,fecha_fin,estado) on public.reservas to authenticated;
@@ -329,34 +348,68 @@ begin
   return jsonb_build_object('token',token,'expires_at',vence);
 end $$;
 
-create or replace function public.actualizar_persona(p_id text,p_nombre text,p_estado text) returns void
+drop function if exists public.actualizar_persona(text,text,text);
+drop function if exists public.actualizar_persona(text,text,text,text,text,text,text,timestamptz);
+create or replace function public.actualizar_persona(
+  p_id text,p_nombre text,p_estado text,p_email text,p_telefono text,
+  p_tipo_documento text,p_numero_documento text,p_cargo text,p_vigencia_hasta timestamptz
+) returns void
 language plpgsql security definer set search_path='' as $$
-declare p public.personas;
+declare p public.personas; documento text;
 begin
   if not private.nclub_es_admin() then raise exception 'Solo administradores activos.'; end if;
+  if (p_tipo_documento is null)<>(p_numero_documento is null) then raise exception 'Completa el tipo y numero de documento.'; end if;
+  if p_tipo_documento is not null and p_tipo_documento not in ('CC','CE','PASAPORTE','OTRO') then raise exception 'Tipo de documento no valido.'; end if;
+  documento:=case when p_numero_documento is null then null else regexp_replace(upper(trim(p_numero_documento)),'[^A-Z0-9]','','g') end;
+  if documento is not null and length(documento) not between 5 and 30 then raise exception 'Numero de documento no valido.'; end if;
   if p_estado is null or p_estado not in ('active','inactive','suspended') or p_nombre is null or length(trim(p_nombre)) not between 3 and 100 then raise exception 'Nombre o estado no válido.'; end if;
   select * into p from public.personas where id=p_id for update;
   if p.id is null then raise exception 'Persona inexistente.'; end if;
   if p.id=private.nclub_persona_id() and p_estado<>'active' then raise exception 'No puedes desactivar tu propia cuenta administrativa.'; end if;
-  update public.personas set nombre=trim(p_nombre),activo=(p_estado='active' or (p_estado='suspended' and categoria in ('VIP','REGULAR'))) where id=p_id;
+  update public.personas set nombre=trim(p_nombre),email=nullif(lower(trim(coalesce(p_email,''))),''),
+    telefono=nullif(trim(coalesce(p_telefono,'')),''),tipo_documento=p_tipo_documento,numero_documento=documento,
+    cargo=nullif(trim(coalesce(p_cargo,'')),''),activo=(p_estado='active' or (p_estado='suspended' and categoria in ('VIP','REGULAR'))) where id=p_id;
   if p.categoria in ('VIP','REGULAR') then
     update public.membresias set estado=case when p_estado='suspended' then 'SUSPENDIDA' else 'ACTIVA' end where persona_id=p_id;
+    if p_vigencia_hasta is not null then update public.membresias set vigencia_hasta=p_vigencia_hasta where persona_id=p_id; end if;
     -- Activar una persona no renueva una membresía vencida.
   end if;
 end $$;
 
-create or replace function public.crear_visitante(p_nombre text,p_categoria text,p_anfitrion text,p_empresa text,p_desde timestamptz,p_hasta timestamptz,p_destino text) returns jsonb
+drop function if exists public.crear_visitante(text,text,text,text,timestamptz,timestamptz,text);
+create or replace function public.crear_visitante(
+  p_nombre text,p_categoria text,p_anfitrion text,p_empresa text,p_desde timestamptz,p_hasta timestamptz,p_destino text,
+  p_email text,p_telefono text,p_tipo_documento text,p_numero_documento text
+) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare persona text; codigo text; resultado jsonb;
+declare persona text; persona_categoria text; codigo text; resultado jsonb; documento text;
 begin
   if not private.nclub_es_admin() then raise exception 'Solo administradores activos.'; end if;
+  if p_tipo_documento is null or p_tipo_documento not in ('CC','CE','PASAPORTE','OTRO') or p_numero_documento is null then raise exception 'El documento de identidad es obligatorio.'; end if;
+  documento:=regexp_replace(upper(trim(p_numero_documento)),'[^A-Z0-9]','','g');
+  if length(documento) not between 5 and 30 then raise exception 'Numero de documento no valido.'; end if;
   if p_categoria is null or p_categoria not in ('INVITADO','PERSONAL_INTERNO','TRABAJADOR_EXTERNO') then raise exception 'Categoría no válida para este formulario.'; end if;
   if p_nombre is null or length(trim(p_nombre)) not between 3 and 100 then raise exception 'Escribe un nombre válido.'; end if;
   if p_desde is null or p_hasta is null or p_desde>=p_hasta or p_hasta<=now() or p_hasta>p_desde+interval '7 days' then raise exception 'Vigencia no válida (máximo 7 días).'; end if;
   if p_categoria<>'INVITADO' and (p_empresa is null or length(trim(p_empresa)) not between 2 and 100) then raise exception 'Escribe una empresa válida.'; end if;
-  persona:='PER-'||gen_random_uuid()::text; codigo:='AUT-'||gen_random_uuid()::text;
-  insert into public.personas(id,nombre,categoria,grupo_facial,tipo_credencial,codigo_credencial,cargo)
-  values(persona,trim(p_nombre),p_categoria,'non_member',case when p_categoria='PERSONAL_INTERNO' then 'CARNET' else 'QR' end,codigo,p_empresa);
+  perform pg_advisory_xact_lock(hashtextextended('nclub:documento:'||p_tipo_documento||':'||documento,0));
+  select id,categoria into persona,persona_categoria from public.personas
+    where tipo_documento=p_tipo_documento and numero_documento=documento for update;
+  if persona is not null then
+    if persona_categoria<>p_categoria then raise exception 'Ese documento ya esta registrado como otra categoria de persona.'; end if;
+    if p_categoria='INVITADO' and exists(select 1 from public.invitaciones where persona_id=persona and estado='ACTIVA' and valido_hasta>now()) then
+      raise exception 'Esta persona ya tiene una invitacion vigente.';
+    end if;
+    update public.invitaciones set estado='UTILIZADA' where persona_id=persona and estado='ACTIVA' and valido_hasta<=now();
+    codigo:='AUT-'||gen_random_uuid()::text;
+    update public.personas set nombre=trim(p_nombre),email=nullif(lower(trim(coalesce(p_email,''))),''),
+      telefono=nullif(trim(coalesce(p_telefono,'')),''),cargo=nullif(trim(coalesce(p_empresa,'')),''),activo=true where id=persona;
+  else
+    persona:='PER-'||gen_random_uuid()::text; codigo:='AUT-'||gen_random_uuid()::text;
+    insert into public.personas(id,nombre,categoria,grupo_facial,tipo_credencial,codigo_credencial,cargo,email,telefono,tipo_documento,numero_documento)
+    values(persona,trim(p_nombre),p_categoria,'non_member',case when p_categoria='PERSONAL_INTERNO' then 'CARNET' else 'QR' end,codigo,
+      nullif(trim(coalesce(p_empresa,'')),''),nullif(lower(trim(coalesce(p_email,''))),''),nullif(trim(coalesce(p_telefono,'')),''),p_tipo_documento,documento);
+  end if;
   if p_categoria='INVITADO' then
     insert into public.invitaciones(codigo_qr,persona_id,anfitrion,anfitrion_id,destino,valido_desde,valido_hasta)
     values(codigo,persona,'Por confirmar',p_anfitrion,p_destino,p_desde,p_hasta);
@@ -368,8 +421,8 @@ begin
   return resultado||jsonb_build_object('user_id',persona);
 end $$;
 
-revoke all on function public.consultar_disponibilidad(text,date),public.emitir_credencial(text),public.actualizar_persona(text,text,text),public.crear_visitante(text,text,text,text,timestamptz,timestamptz,text) from public,anon;
-grant execute on function public.consultar_disponibilidad(text,date),public.emitir_credencial(text),public.actualizar_persona(text,text,text),public.crear_visitante(text,text,text,text,timestamptz,timestamptz,text) to authenticated;
+revoke all on function public.consultar_disponibilidad(text,date),public.emitir_credencial(text),public.actualizar_persona(text,text,text,text,text,text,text,text,timestamptz),public.crear_visitante(text,text,text,text,timestamptz,timestamptz,text,text,text,text,text) from public,anon;
+grant execute on function public.consultar_disponibilidad(text,date),public.emitir_credencial(text),public.actualizar_persona(text,text,text,text,text,text,text,text,timestamptz),public.crear_visitante(text,text,text,text,timestamptz,timestamptz,text,text,text,text,text) to authenticated;
 revoke all on function private.nclub_validar_membresia(),private.nclub_validar_reserva(),private.nclub_validar_permiso() from public,anon,authenticated;
 
 -- Publicación opcional: el polling de la app sigue funcionando si no existe.

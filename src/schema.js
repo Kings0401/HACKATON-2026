@@ -1,6 +1,6 @@
 // Adaptación de las tablas reales en español a los modelos de presentación.
 export const personColumns =
-  "id,nombre,categoria,activo,created_at,auth_user_id,email,cargo";
+  "id,nombre,categoria,activo,created_at,auth_user_id,email,telefono,tipo_documento,numero_documento,cargo";
 export const categoryToRole = {
   VIP: "VIP",
   REGULAR: "REGULAR",
@@ -40,6 +40,9 @@ export function profileFromRow(p, memberships = []) {
     auth_user_id: p.auth_user_id,
     full_name: p.nombre,
     email: p.email,
+    phone: p.telefono,
+    document_type: p.tipo_documento,
+    document_number: p.numero_documento,
     role: categoryToRole[p.categoria],
     membership_status,
     membership_expires_at: membership?.vigencia_hasta,
@@ -95,6 +98,7 @@ export const invitationFromRow = (r) => ({
   valid_until: r.valido_hasta,
   destination: r.destino,
   status: r.estado === "ACTIVA" ? "active" : "revoked",
+  created_at: r.created_at,
 });
 export const assignmentFromRow = (r) => ({
   id: r.codigo_autorizacion,

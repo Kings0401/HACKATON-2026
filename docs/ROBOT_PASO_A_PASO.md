@@ -1,5 +1,7 @@
 # Programar el AGIBOT X2 Ultra físico — paso a paso
 
+> **Desde Windows (forma rápida y verificada):** ver [deploy/README.md](../deploy/README.md). No necesita Ubuntu en el PC: el agente corre en el computador de desarrollo del robot.
+
 Basado en la documentación oficial AimDK_X2 1.1.0 (<https://x2-aimdk.agibot.com/en/latest/>), consultada el 24-10-2026. **Nada de esto se ha ejecutado en el robot físico.** Cada fase termina en una comprobación: no avance si falla. El agente N Club **no envía comandos de movimiento**.
 
 ## Fase 0 · Seguridad y datos del equipo

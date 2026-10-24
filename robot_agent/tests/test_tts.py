@@ -31,7 +31,9 @@ def install_fake_ros():
                                   priority_weight=-1, priority_level=NS(value=0))
 
     mods["aimdk_msgs.srv"].PlayTts = PlayTts
+    mods["aimdk_msgs.srv"].SetMcInputSource = mods["aimdk_msgs.srv"].SetMcPresetMotion = object
     mods["aimdk_msgs.msg"].TtsPriorityLevel = NS(INTERACTION_L6=6)
+    mods["aimdk_msgs.msg"].McInputAction = NS(INPUTACTION_ADD=1001, INPUTACTION_ENABLE=2001)
     mods["aimdk_msgs.msg"].ProcessedAudioOutput = object
     sys.modules.update(mods)
 

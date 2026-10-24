@@ -25,11 +25,30 @@ export async function restoreSession() {
   }
   if (!supabase) return null;
   const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) return null;
-  return loadProfile(user.id);
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session?.user?.id) return null;
+
+  // Auth verification and the RLS-protected profile lookup are independent;
+  // overlap them so a reload pays for one network round trip instead of two.
+  const [authResult, profileResult] = await Promise.allSettled([
+    supabase.auth.getUser(),
+    loadProfile(session.user.id),
+  ]);
+  const auth = authResult.status === "fulfilled" ? authResult.value : null;
+  if (
+    !auth ||
+    auth.error ||
+    auth.data.user?.id !== session.user.id
+  ) {
+    sessionState.profile = null;
+    sessionState.mode = "live";
+    await supabase.auth.signOut();
+    return null;
+  }
+  if (profileResult.status === "rejected") throw profileResult.reason;
+  return profileResult.value;
 }
 async function loadProfile(authId) {
   const { data, error } = await supabase
@@ -222,6 +241,14 @@ export async function updateProfile(id, values) {
   const allowed = {
     full_name: values.full_name,
     membership_status: values.membership_status,
+    email: values.email?.trim().toLowerCase() || null,
+    phone: values.telefono?.trim() || null,
+    document_type: values.tipo_documento || null,
+    document_number: values.numero_documento?.replace(/[^a-z0-9]/gi, "").toUpperCase() || null,
+    position: values.cargo?.trim() || null,
+    membership_expires_at: values.vigencia_hasta
+      ? `${values.vigencia_hasta}T23:59:59-05:00`
+      : null,
   };
   if (sessionState.mode === "demo") {
     const d = readDemo();
@@ -233,7 +260,17 @@ export async function updateProfile(id, values) {
     return;
   }
   return unwrap(
-    await supabase.rpc("actualizar_persona", { p_id: id, p_nombre: allowed.full_name, p_estado: allowed.membership_status }),
+    await supabase.rpc("actualizar_persona", {
+      p_id: id,
+      p_nombre: allowed.full_name,
+      p_estado: allowed.membership_status,
+      p_email: allowed.email,
+      p_telefono: allowed.phone,
+      p_tipo_documento: allowed.document_type,
+      p_numero_documento: allowed.document_number,
+      p_cargo: allowed.position,
+      p_vigencia_hasta: allowed.membership_expires_at,
+    }),
   );
 }
 export async function createVisitor(values) {
@@ -251,18 +288,35 @@ export async function createVisitor(values) {
         p_desde: values.valid_from,
         p_hasta: values.valid_until,
         p_destino: destinations[values.destination] || values.destination,
+        p_email: values.email?.trim().toLowerCase() || null,
+        p_telefono: values.telefono?.trim() || null,
+        p_tipo_documento: values.tipo_documento,
+        p_numero_documento: values.numero_documento?.replace(/[^a-z0-9]/gi, "").toUpperCase(),
       }),
     );
   const d = readDemo();
-  const id = uid();
-  d.profiles.push({
+  const documentNumber = values.numero_documento?.replace(/[^a-z0-9]/gi, "").toUpperCase();
+  const existing = d.profiles.find((p) => p.document_type === values.tipo_documento && p.document_number === documentNumber);
+  if (existing && existing.role !== values.role)
+    throw new Error("Ese documento ya está registrado con otra categoría de persona.");
+  if (existing && values.role === "GUEST" && d.invitations.some((invitation) => invitation.guest_id === existing.id && invitation.status === "active" && new Date(invitation.valid_until) > new Date()))
+    throw new Error("Esta persona ya tiene una invitación vigente.");
+  const id = existing?.id || uid();
+  const person = {
     id,
     full_name: values.name,
     role: values.role,
     membership_status: "active",
-    public_id: `NC-${id.slice(0, 6).toUpperCase()}`,
-    created_at: new Date().toISOString(),
-  });
+    public_id: existing?.public_id || `NC-${id.slice(0, 6).toUpperCase()}`,
+    created_at: existing?.created_at || new Date().toISOString(),
+    email: values.email?.trim().toLowerCase() || null,
+    phone: values.telefono?.trim() || null,
+    document_type: values.tipo_documento,
+    document_number: documentNumber,
+    position: values.company?.trim() || null,
+  };
+  if (existing) Object.assign(existing, person);
+  else d.profiles.push(person);
   if (values.role === "GUEST") {
     if (
       !d.profiles.some(

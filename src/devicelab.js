@@ -41,7 +41,7 @@ export function deviceLabPanel() {
   const demo = sessionState.mode === "demo";
   const needsToken = demo && backendUrl;
   return `<section class="panel device-lab" data-device-lab>
-    <div class="monitor-section-heading"><div><span class="eyebrow">ROBOT SIMULADO · ESTE DISPOSITIVO</span><strong>Probar con la cámara del dispositivo</strong></div><span class="demo-tag">SIMULACIÓN</span></div>
+    <div class="monitor-section-heading"><div><span class="eyebrow">Robot simulado en este dispositivo</span><strong>Probar con la cámara del dispositivo</strong></div><span class="demo-tag">Simulación</span></div>
     <p class="device-lab-intro">Si no hay un AGIBOT conectado, este equipo actúa como el robot: su cámara envía fotogramas al backend, que reconoce rostros, lee el QR, decide el acceso según la membresía y traza la ruta. El reconocimiento facial solo saluda: el ingreso siempre exige credencial.</p>
     <p class="notice device-lab-agibot" data-lab-agibot hidden>${icon("bot")} Hay un AGIBOT conectado: el monitor muestra su cámara real.</p>
     ${
@@ -196,10 +196,16 @@ async function captureFrame() {
 export async function startDeviceLab() {
   if (stream) return;
   if (!navigator.mediaDevices?.getUserMedia)
-    throw new Error("Este navegador no permite usar la cámara (se requiere HTTPS o localhost).");
+    throw new Error(
+      "Este navegador no permite usar la cámara (se requiere HTTPS o localhost).",
+    );
   await api.labStatus(); // valida sesión ADMIN y disponibilidad del reconocimiento
   stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+    video: {
+      facingMode: "user",
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    },
     audio: false,
   });
   const video = document.querySelector("[data-lab-video]");
@@ -286,7 +292,8 @@ export function markAgibot(connected) {
 
 // Reduce y recodifica una foto (elimina EXIF) antes de subirla.
 export async function photoToJpeg(file, max = 1280) {
-  if (!file?.type?.startsWith("image/")) throw new Error("Seleccione una imagen.");
+  if (!file?.type?.startsWith("image/"))
+    throw new Error("Seleccione una imagen.");
   let bitmap;
   try {
     bitmap = await createImageBitmap(file);

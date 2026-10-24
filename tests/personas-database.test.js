@@ -127,17 +127,17 @@ test("Spanish SQL upgrades the supplied tables and enforces real access boundari
     });
     await t.test("admin visitor creation is atomic, has no app account, enforces zone and escort", async () => {
       await login("ADMIN001");
-      const guest = (await db.query("select public.crear_visitante('Invitado nuevo','INVITADO','VIP001',null,now()+interval '3 days',now()+interval '3 days 2 hours','Restaurante principal') as visitor")).rows[0].visitor;
+      const guest = (await db.query("select public.crear_visitante('Invitado nuevo','INVITADO','VIP001',null,now()+interval '3 days',now()+interval '3 days 2 hours','Restaurante principal',null,null,'CC','TEST00001') as visitor")).rows[0].visitor;
       assert.ok(new Date(guest.expires_at).getTime() > Date.now() + 3 * 86400000);
       assert.equal((await db.query("select auth_user_id from public.personas where id=$1", [guest.user_id])).rows[0].auth_user_id, null);
       const before = (await db.query("select count(*) from public.personas")).rows[0].count;
-      await assert.rejects(db.exec("select public.crear_visitante('Proveedor malo','TRABAJADOR_EXTERNO',null,'Empresa',now(),now()+interval '1 hour','VIP Lounge')"), /Zona laboral/);
+      await assert.rejects(db.exec("select public.crear_visitante('Proveedor malo','TRABAJADOR_EXTERNO',null,'Empresa',now(),now()+interval '1 hour','VIP Lounge',null,null,'CC','TEST00002')"), /Zona laboral/);
       assert.equal((await db.query("select count(*) from public.personas")).rows[0].count, before);
-      const worker = (await db.query("select public.crear_visitante('Proveedor nuevo','TRABAJADOR_EXTERNO',null,'Empresa',now(),now()+interval '1 hour','Zona técnica') as visitor")).rows[0].visitor;
+      const worker = (await db.query("select public.crear_visitante('Proveedor nuevo','TRABAJADOR_EXTERNO',null,'Empresa',now(),now()+interval '1 hour','Zona técnica',null,null,'CC','TEST00003') as visitor")).rows[0].visitor;
       assert.equal((await db.query("select requiere_acompanamiento from public.permisos_laborales where persona_id=$1", [worker.user_id])).rows[0].requiere_acompanamiento, true);
-      await assert.rejects(db.exec("select public.crear_visitante('Administrador falso','ADMIN',null,null,now(),now()+interval '1 hour','Recepción')"), /Categoría/);
+      await assert.rejects(db.exec("select public.crear_visitante('Administrador falso','ADMIN',null,null,now(),now()+interval '1 hour','Recepción',null,null,'CC','TEST00004')"), /Categoría/);
       await login("REG001");
-      await assert.rejects(db.exec("select public.crear_visitante('Invitado falso','INVITADO','VIP001',null,now(),now()+interval '1 hour','Restaurante principal')"), /administradores/);
+      await assert.rejects(db.exec("select public.crear_visitante('Invitado falso','INVITADO','VIP001',null,now(),now()+interval '1 hour','Restaurante principal',null,null,'CC','TEST00005')"), /administradores/);
     });
     await t.test("browser cannot write access decisions; anonymous reads are denied", async () => {
       await login("ADMIN001");

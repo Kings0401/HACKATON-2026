@@ -16,7 +16,7 @@ import { sessionState } from "./data.js";
 import { configured, demoEnabled, backendUrl } from "./config.js";
 import { demoPeople } from "./demo.js";
 import { clubMapBanner } from "./clubmap.js";
-import { routeCard } from "./navigation.js";
+import { routeCard, destinationLabel } from "./navigation.js";
 import { deviceLabPanel } from "./devicelab.js";
 
 const link = (route, label, ico, active) =>
@@ -56,7 +56,7 @@ export function landing() {
         <div class="hero-shade"></div>
         <div class="hero-copy">
           <div class="eyebrow light">
-            <span></span> A WORLD BEYOND THE ORDINARY
+            <span></span> Club privado de golf · Colombia
           </div>
           <h1>Tu club.<br />A tu <em>manera.</em></h1>
           <p>
@@ -75,15 +75,15 @@ export function landing() {
           </div>
         </div>
         <div class="hero-footer">
-          <span>01 <span class="hero-line"></span> 03</span
+          <span></span
           ><a href="#/experiences"
-            >DESCUBRE TU PRÓXIMA EXPERIENCIA ${icon("arrow-down-right")}</a
-          ><span>EST. 2026 · COLOMBIA</span>
+            >Descubre el club ${icon("arrow-down-right")}</a
+          ><span></span>
         </div>
-        <div class="vertical-note">THE ART OF BELONGING</div>
+        
       </section>
       <section class="landing-intro">
-        <span class="eyebrow">BIENVENIDO A TU MUNDO</span>
+        <span class="eyebrow"></span>
         <h2>
           Hay lugares que visitas.<br /><em>Y lugares a los que perteneces.</em>
         </h2>
@@ -129,7 +129,7 @@ export function loginPage(showDemo = false) {
       <div class="auth-photo-shade"></div>
       ${brand(true)}
       <div>
-        <span class="eyebrow light">TU MUNDO TE ESPERA</span>
+        <span class="eyebrow light"></span>
         <h1>El placer de<br /><em>volver a casa.</em></h1>
         <p>Un lugar excepcional. Una experiencia que es tuya.</p>
       </div>
@@ -139,7 +139,7 @@ export function loginPage(showDemo = false) {
       <a class="back-link" href="#/">${icon("arrow-left")} Volver al club</a>
       <div class="auth-box">
         <div class="mobile-brand">${brand()}</div>
-        <span class="eyebrow">THE ART OF BELONGING</span>
+        <span class="eyebrow"></span>
         <h1>Bienvenido a tu club.</h1>
         <p>Ingresa para reservar y tener tu credencial a mano.</p>
         <div class="auth-tabs">
@@ -206,7 +206,7 @@ export function shell(content, route, p) {
     <aside class="sidebar">
       ${brand()}
       <div class="sidebar-section">
-        ${admin ? "CLUB MANAGEMENT" : "TU ESPACIO PERSONAL"}
+        ${admin ? "Administración" : "Tu espacio"}
       </div>
       <nav aria-label="Navegación del panel">
         ${nav.map((n) => link(...n, route)).join("")}
@@ -221,7 +221,7 @@ export function shell(content, route, p) {
         </div>
         <button class="nav-item" data-action="logout">
           ${icon("log-out")} Cerrar sesión</button
-        ><small>PRIVATE MEMBERS CLUB · EST. 2026</small>
+        ><small>Club privado de golf</small>
       </div>
     </aside>
     <div class="app-body">
@@ -235,7 +235,7 @@ export function shell(content, route, p) {
         <div class="header-tools">
           <span id="sync-status" class="connection"
             ><span></span
-            >${sessionState.mode === "demo" ? "DEMO LOCAL" : "Sincronizando"}</span
+            >${sessionState.mode === "demo" ? "Demo local" : "Sincronizando"}</span
           ><a class="header-avatar" href="#/profile" aria-label="Mi perfil"
             >${e(
               p.full_name
@@ -298,7 +298,7 @@ export function reservationCard(r, data, { manage = false } = {}) {
     </div>
     <div class="reservation-details">
       <span class="eyebrow"
-        >${service?.category === "golf" ? "GOLF EXPERIENCE" : "CLUB EXPERIENCE"}</span
+        >${service?.category === "golf" ? "Golf" : "Club"}</span
       >
       <h3>${e(service?.name || "Servicio")}</h3>
       <p>
@@ -328,7 +328,7 @@ export function dashboard(p, data) {
   if (!member) return operationalDashboard(p, data);
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">TU ESPACIO EN N CLUB</span>
+        <span class="eyebrow"></span>
         <h1>
           ${vip ? "Bienvenida de nuevo" : "Bienvenido de nuevo"},<br
             class="mobile-only"
@@ -344,7 +344,7 @@ export function dashboard(p, data) {
         <img src="${images.golf}" alt="Campo de golf N Club World" />
         <div class="dashboard-hero-shade"></div>
         <div class="dashboard-hero-copy">
-          <span class="eyebrow light">HAZ TIEMPO PARA TI</span>
+          <span class="eyebrow light"></span>
           <h2>Tu tiempo.<br />Tu juego. <em>Tu mundo.</em></h2>
           <p>Hay momentos que merecen un escenario extraordinario.</p>
           <a href="#/bookings" class="button gold"
@@ -352,7 +352,7 @@ export function dashboard(p, data) {
           >
         </div>
         <div class="hero-mini-note">
-          ${icon("flag")} CINCO CANCHAS · UNA PASIÓN
+          ${icon("flag")} Cinco canchas
         </div>
       </section>
       <section class="membership-panel">
@@ -381,7 +381,7 @@ export function dashboard(p, data) {
     ${clubMapBanner(p, data)}
     <div class="dashboard-lower">
       <section>
-        ${sectionHead("CADA MOMENTO CUENTA", "Tu próxima experiencia", `<a class="text-link" href="#/bookings?tab=mine">Ver todas ${icon("arrow-right")}</a>`)}${
+        ${sectionHead("", "Tu próxima experiencia", `<a class="text-link" href="#/bookings?tab=mine">Ver todas ${icon("arrow-right")}</a>`)}${
           reservations.length
             ? reservations
                 .slice(0, 2)
@@ -397,7 +397,7 @@ export function dashboard(p, data) {
       <aside class="concierge-card">
         <span class="concierge-icon">${icon(vip ? "sparkles" : "leaf")}</span
         ><span class="eyebrow"
-          >${vip ? "TU ASISTENTE VIP" : "INSPIRACIÓN N CLUB"}</span
+          >${vip ? "Tu asistente VIP" : "Inspiración N Club"}</span
         >
         <h3>${vip ? "Un día a tu altura." : "El placer de desconectar."}</h3>
         <p>
@@ -408,7 +408,7 @@ export function dashboard(p, data) {
         >
       </aside>
     </div>
-    ${sectionHead("SELECCIONADAS PARA TI", vip ? "El privilegio de lo extraordinario" : "Más razones para volver", `<a class="text-link" href="#/experiences">Descubrir ${icon("arrow-right")}</a>`)}
+    ${sectionHead("", vip ? "El privilegio de lo extraordinario" : "Más razones para volver", `<a class="text-link" href="#/experiences">Descubrir ${icon("arrow-right")}</a>`)}
     <div class="experience-grid">
       ${experienceCards(p).slice(0, 3).join("")}
     </div>`;
@@ -422,7 +422,7 @@ function operationalDashboard(p, data) {
   );
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">TU ESPACIO EN EL CLUB</span>
+        <span class="eyebrow"></span>
         <h1>Hola, ${e(p.full_name.split(" ")[0])}.</h1>
         <p>Tu información de ingreso, en un solo lugar.</p>
       </div>
@@ -462,7 +462,7 @@ function operationalDashboard(p, data) {
         >
       </section>
       <section class="panel">
-        <span class="eyebrow">ACCESO PERSONAL</span>
+        <span class="eyebrow">Acceso personal</span>
         <h2>Un ingreso sencillo y seguro.</h2>
         <p>
           Presenta tu credencial al robot de recepción. El equipo verificará tu
@@ -483,7 +483,7 @@ export function experienceCards(p) {
   return [
     {
       image: images.course,
-      tag: "THE GOLF COLLECTION",
+      tag: "Golf",
       title: "Donde el juego se vuelve arte.",
       text: "Cinco recorridos únicos. Un nuevo desafío cada día.",
       href: "#/bookings",
@@ -492,7 +492,7 @@ export function experienceCards(p) {
     },
     {
       image: images.restaurant,
-      tag: "TASTE THE EXTRAORDINARY",
+      tag: "Restaurante",
       title: "Sabores que cuentan historias.",
       text: "Cocina de temporada en un entorno excepcional.",
       href: "#/bookings?category=restaurant",
@@ -501,7 +501,7 @@ export function experienceCards(p) {
     },
     {
       image: images.lounge,
-      tag: "EXCLUSIVO BLACK VIP",
+      tag: "Exclusivo Black VIP",
       title: "Un espacio solo para ti.",
       text: "Privacidad, comodidad y atención personalizada.",
       href: "#/bookings?category=lounge",
@@ -520,7 +520,7 @@ export function experienceCards(p) {
 export function experiences(p) {
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">THE N CLUB COLLECTION</span>
+        <span class="eyebrow"></span>
         <h1>El arte de disfrutar.</h1>
         <p>
           Experiencias cuidadosamente elegidas para hacer de tu día algo
@@ -530,7 +530,7 @@ export function experiences(p) {
     </div>
     <div class="experience-grid">${experienceCards(p).join("")}</div>
     <section class="benefits-block">
-      <span class="eyebrow">BLACK VIP MEMBERSHIP</span>
+      <span class="eyebrow">Membresía Black VIP</span>
       <h2>El privilegio está en los detalles.</h2>
       <div class="benefits-grid">
         ${[
@@ -569,7 +569,7 @@ export function bookings(p, data, params) {
     );
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">MAKE TIME FOR THE EXTRAORDINARY</span>
+        <span class="eyebrow"></span>
         <h1>Reserva tu próximo plan.</h1>
         <p>Elige una experiencia, la fecha y un horario disponible.</p>
       </div>
@@ -603,7 +603,7 @@ export function bookings(p, data, params) {
             )
             .map(
               (s) =>
-                `<article class="service-card"><div class="service-image"><img src="${e(s.image || images[s.category === "golf" ? "course" : s.category] || images.golf)}" alt="${e(s.name)}" loading="lazy"/>${s.vip_only ? `<span>${icon("crown")} BLACK VIP</span>` : ""}</div><div class="service-copy"><span class="eyebrow">${s.category === "golf" ? "GOLF EXPERIENCE" : s.category === "restaurant" ? "FINE DINING" : "PRIVATE LOUNGE"}</span><h3>${e(s.name)}</h3><p>${e(s.description)}</p><div class="service-bottom"><span>${icon("clock-3")} 60 minutos</span>${canBook(p, s) ? `<button class="button primary small" data-action="book" data-id="${e(s.id)}">Ver horarios ${icon("arrow-up-right")}</button>` : `<span class="locked-link">${icon("lock-keyhole")} ${s.vip_only ? "Exclusivo VIP" : "Membresía requerida"}</span>`}</div></div></article>`,
+                `<article class="service-card"><div class="service-image"><img src="${e(s.image || images[s.category === "golf" ? "course" : s.category] || images.golf)}" alt="${e(s.name)}" loading="lazy"/>${s.vip_only ? `<span>${icon("crown")} BLACK VIP</span>` : ""}</div><div class="service-copy"><span class="eyebrow">${s.category === "golf" ? "Golf" : s.category === "restaurant" ? "Restaurante" : "Lounge privado"}</span><h3>${e(s.name)}</h3><p>${e(s.description)}</p><div class="service-bottom"><span>${icon("clock-3")} 60 minutos</span>${canBook(p, s) ? `<button class="button primary small" data-action="book" data-id="${e(s.id)}">Ver horarios ${icon("arrow-up-right")}</button>` : `<span class="locked-link">${icon("lock-keyhole")} ${s.vip_only ? "Exclusivo VIP" : "Membresía requerida"}</span>`}</div></div></article>`,
             )
             .join("")}</div>`
     }`;
@@ -612,7 +612,7 @@ export function bookings(p, data, params) {
 export function credential(p) {
   return /* HTML */ `<div class="page-heading credential-heading">
       <div>
-        <span class="eyebrow">YOUR KEY TO THE CLUB</span>
+        <span class="eyebrow"></span>
         <h1>Tu QR de ingreso.</h1>
         <p>
           Preséntalo en recepción. Se renueva automáticamente cada 15 minutos.
@@ -629,8 +629,8 @@ export function credential(p) {
             <span class="eyebrow"
               >${
                 sessionState.mode === "demo"
-                  ? "CREDENCIAL DEMO · SIN ACCESO REAL"
-                  : "CREDENCIAL DE VERIFICACIÓN"
+                  ? "Credencial demo, sin acceso real"
+                  : "Credencial de verificación"
               }</span
             >
             <span class="qr-live"><i aria-hidden="true"></i> EN VIVO</span>
@@ -681,7 +681,7 @@ export function credential(p) {
 
 export function eventTable(events, data) {
   return events.length
-    ? `<div class="table-scroll"><table><thead><tr><th>Visitante</th><th>Hora</th><th>Resultado</th><th>Destino</th><th>Robot</th><th>Origen</th></tr></thead><tbody>${events.map((ev) => `<tr><td><strong>${e(data.profiles.find((p) => p.id === ev.visitor_id)?.full_name || "Visitante")}</strong><small>${e(roles[ev.role])}</small></td><td>${clockLabel(ev.created_at)}<small>${dateLabel(ev.created_at)}</small></td><td>${status(ev.access_status)}</td><td>${e(ev.destination || "Recepción")}</td><td>${ev.robot_target === "robot2" ? "AGIBOT 02" : "AGIBOT 01"}${ev.event_type === "vip_handoff" ? "<small>Transferencia VIP</small>" : ""}</td><td><span class="${ev.simulation ? "demo-tag" : "live-tag"}">${ev.simulation ? "DEMO" : "BACKEND"}</span></td></tr>`).join("")}</tbody></table></div>`
+    ? `<div class="table-scroll"><table><thead><tr><th>Visitante</th><th>Hora</th><th>Resultado</th><th>Destino</th><th>Robot</th><th>Origen</th></tr></thead><tbody>${events.map((ev) => `<tr><td><strong>${e(data.profiles.find((p) => p.id === ev.visitor_id)?.full_name || "Visitante")}</strong><small>${e(roles[ev.role])}</small></td><td>${clockLabel(ev.created_at)}<small>${dateLabel(ev.created_at)}</small></td><td>${status(ev.access_status)}</td><td>${e(destinationLabel(ev.destination) || "Recepción")}</td><td>${ev.robot_target === "robot2" ? "AGIBOT 02" : "AGIBOT 01"}${ev.event_type === "vip_handoff" ? "<small>Transferencia VIP</small>" : ""}</td><td><span class="${ev.simulation ? "demo-tag" : "live-tag"}">${ev.simulation ? "Simulación" : "Real"}</span></td></tr>`).join("")}</tbody></table></div>`
     : empty(
         "El próximo capítulo está por comenzar",
         "Los eventos aparecerán cuando se registre una recepción.",
@@ -690,7 +690,7 @@ export function eventTable(events, data) {
 export function history(p, data) {
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">MOMENTOS EN TU CLUB</span>
+        <span class="eyebrow"></span>
         <h1>Tu historial de visitas.</h1>
         <p>Recepciones, destinos y experiencias que forman parte de ti.</p>
       </div>
@@ -705,7 +705,7 @@ export function history(p, data) {
 export function profile(p) {
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">MI CUENTA</span>
+        <span class="eyebrow">Mi cuenta</span>
         <h1>Tu perfil.</h1>
         <p>Una experiencia que empieza por conocerte.</p>
       </div>
@@ -799,7 +799,7 @@ export function adminPage(tab, data) {
     ];
     return /* HTML */ `<div class="page-heading">
         <div>
-          <span class="eyebrow">CLUB MANAGEMENT</span>
+          <span class="eyebrow">Administración</span>
           <h1>Una visión de tu club.</h1>
           <p>${dateLabel(today())} · Hospitalidad que se anticipa.</p>
         </div>
@@ -808,11 +808,11 @@ export function adminPage(tab, data) {
         >
       </div>
       <div class="stats-grid">
-        ${stats.map(([l, v, i]) => `<div class="stat-card">${icon(i)}<strong>${v.toString().padStart(2, "0")}</strong><span>${l}</span></div>`).join("")}
+        ${stats.map(([l, v, i]) => `<div class="stat-card">${icon(i)}<strong>${v}</strong><span>${l}</span></div>`).join("")}
       </div>
       <section class="admin-reception-banner">
         <div>
-          <span class="eyebrow light">THE FUTURE OF HOSPITALITY</span>
+          <span class="eyebrow light"></span>
           <h2>Una bienvenida extraordinaria.</h2>
           <p>Dos robots AGIBOT. Cinco experiencias personalizadas.</p>
         </div>
@@ -821,7 +821,7 @@ export function adminPage(tab, data) {
         >
       </section>
       <section class="panel">
-        ${sectionHead("EN TIEMPO REAL", "Últimas recepciones", `<a href="#/admin/access" class="text-link">Ver todas ${icon("arrow-right")}</a>`)}${eventTable(data.access_events.slice(0, 6), data)}
+        ${sectionHead("En tiempo real", "Últimas recepciones", `<a href="#/admin/access" class="text-link">Ver todas ${icon("arrow-right")}</a>`)}${eventTable(data.access_events.slice(0, 6), data)}
       </section>
       <div class="admin-links">
         ${[
@@ -846,13 +846,19 @@ export function adminPage(tab, data) {
     content = `<div class="table-scroll"><table><thead><tr><th>Miembro</th><th>Servicio</th><th>Fecha</th><th>Horario</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${data.reservations.map((r) => `<tr><td>${e(data.profiles.find((p) => p.id === r.user_id)?.full_name)}</td><td>${e(data.services.find((s) => s.id === r.service_id)?.name)}</td><td>${dateLabel(r.reservation_date)}</td><td>${timeLabel(r.start_time)} – ${timeLabel(r.end_time)}</td><td>${status(r.status)}</td><td>${r.status === "confirmed" ? `<button class="text-button danger-text" data-action="cancel-reservation" data-id="${e(r.id)}">Cancelar</button>` : "—"}</td></tr>`).join("")}</tbody></table></div>`;
   if (tab === "invitations" || tab === "work") {
     const table = tab === "invitations" ? "invitations" : "work_assignments";
-    const rows = data[table];
+    let rows = data[table];
+    if (tab === "invitations") {
+      const latestByGuest = new Map();
+      for (const row of [...rows].sort((a, b) => new Date(a.created_at || a.valid_from) - new Date(b.created_at || b.valid_from)))
+        latestByGuest.set(row.guest_id, row);
+      rows = [...latestByGuest.values()];
+    }
     content = `<div class="table-scroll"><table><thead><tr><th>${tab === "invitations" ? "Invitado" : "Persona / Empresa"}</th><th>${tab === "invitations" ? "Anfitrión" : "Tipo"}</th><th>Vigencia</th><th>Destino</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${rows.map((row) => `<tr><td><strong>${e(data.profiles.find((p) => p.id === (row.guest_id || row.worker_id))?.full_name)}</strong><small>${e(row.company || "Invitación personal")}</small></td><td>${tab === "invitations" ? e(data.profiles.find((p) => p.id === row.host_id)?.full_name) : row.assignment_type === "SHIFT" ? "Turno de personal" : "Orden externa"}</td><td>${dateLabel(row.valid_from)}<small>${clockLabel(row.valid_from)} – ${clockLabel(row.valid_until)}</small></td><td>${e(row.destination || row.authorized_zone)}</td><td>${status(row.status)}</td><td>${row.status === "active" ? `<button class="text-button danger-text" data-action="revoke" data-table="${table}" data-id="${e(row.id)}">Revocar</button>` : "—"}</td></tr>`).join("")}</tbody></table></div>${!rows.length ? empty("Sin registros", "Crea una autorización temporal para comenzar.") : ""}`;
   }
   if (tab === "access") content = eventTable(data.access_events, data);
   return /* HTML */ `<div class="page-heading">
       <div>
-        <span class="eyebrow">CLUB MANAGEMENT</span>
+        <span class="eyebrow">Administración</span>
         <h1>${names[tab] || "Administración"}.</h1>
         <p>
           ${["users", "invitations", "work"].includes(tab) ? "Invitados, personal y proveedores se gestionan aquí. No necesitan una cuenta en la app." : "Consulta y gestiona la actividad del club."}
@@ -906,7 +912,7 @@ export function adminRobotMonitor(monitor) {
       ? new Date(v).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
       : "—";
   return `<div class="robot-monitor" data-robot-monitor data-robot-id="${e(monitor?.robot_id || "")}">
-    <div class="robot-monitor-top"><div><span class="eyebrow">CENTRO DE OPERACIONES</span><h2>Recepción AGIBOT</h2><p>Vista del robot, voz transcrita, identificación y decisión de cada llegada.</p></div><div class="robot-badges">${monitor?.simulation ? `<span class="demo-tag">SIMULACIÓN</span>` : ""}<span class="robot-connection ${connected ? "is-online" : "is-offline"}"><i></i>${connected ? "CONECTADO" : "SIN CONEXIÓN"}</span></div></div>
+    <div class="robot-monitor-top"><div><span class="eyebrow">Centro de operaciones</span><h2>Recepción AGIBOT</h2><p>Vista del robot, voz transcrita, identificación y decisión de cada llegada.</p></div><div class="robot-badges">${monitor?.simulation ? `<span class="demo-tag">Simulación</span>` : ""}<span class="robot-connection ${connected ? "is-online" : "is-offline"}"><i></i>${connected ? "Conectado" : "Sin conexión"}</span></div></div>
     ${monitor?.error ? `<div class="notice robot-monitor-notice"><p>${e(monitor.error)}</p></div>` : ""}
     ${monitor?.persistence && !monitor.persistence.ok ? `<div class="notice robot-monitor-notice">${icon("alert-circle")}<p>Persistencia degradada: ${e(Object.keys(monitor.persistence.degraded).join(", "))}. Ejecute supabase/recepcion_robot.sql; mientras tanto el historial vive solo en memoria.</p></div>` : ""}
     <div class="robot-status-strip">
@@ -915,13 +921,13 @@ export function adminRobotMonitor(monitor) {
       <span class="${mic.ok ? "ok" : "off"}">${icon("mic")}Micrófono<strong>${e(mic.ok ? mic.state || "activo" : "Sin señal")}</strong></span>
       <span>${icon("radio")}Sesiones activas<strong>${active.length}</strong></span>
     </div>
-    <div class="robot-monitor-grid"><section class="robot-camera panel"><div class="monitor-section-heading"><div><span class="eyebrow">CÁMARA EN VIVO</span><strong>${e(monitor?.robot_name || "AGIBOT recepción")}</strong></div><span>${cameraUrl ? "STREAM PRIVADO" : "ESPERANDO SEÑAL"}</span></div>${cameraUrl ? `<img data-robot-stream src="${e(cameraUrl)}" alt="Transmisión de cámara del robot" />` : `<div class="camera-placeholder">${icon("camera")}<strong>${connected ? "Cámara sin señal" : "La transmisión aparecerá cuando el agente del robot se conecte"}</strong><span>Stream MJPEG privado con token de corta duración; no se graba video.</span></div>`}</section>
-      <section class="robot-listening panel"><div class="monitor-section-heading"><div><span class="eyebrow">ESCUCHA Y VOZ · EN VIVO</span><strong>Transcripción</strong></div>${icon("audio-lines")}</div>${monitor?.last_heard ? `<p class="heard-text" data-live-transcript>“${e(monitor.last_heard.transcript || "Audio recibido; sin transcripción")}”</p><div class="heard-meta">${e(monitor.last_heard.language || "Idioma no indicado")} · ${e(monitor.last_heard.intent || "")} · ${e(time(monitor.last_heard.created_at))}</div>${monitor.last_heard.audio_url ? `<audio controls preload="none" src="${e(monitor.last_heard.audio_url)}">El navegador no admite reproducción de audio.</audio>` : ""}` : `<div class="listening-empty">${icon("mic")}<span data-live-transcript>${connected ? "Esperando una interacción de voz…" : "La transcripción aparecerá al conectar el robot."}</span></div>`}
+    <div class="robot-monitor-grid"><section class="robot-camera panel"><div class="monitor-section-heading"><div><span class="eyebrow">Cámara en vivo</span><strong>${e(monitor?.robot_name || "AGIBOT recepción")}</strong></div><span>${cameraUrl ? "Stream privado" : "Esperando señal"}</span></div>${cameraUrl ? `<img data-robot-stream src="${e(cameraUrl)}" alt="Transmisión de cámara del robot" />` : `<div class="camera-placeholder">${icon("camera")}<strong>${connected ? "Cámara sin señal" : "La transmisión aparecerá cuando el agente del robot se conecte"}</strong><span>Stream MJPEG privado con token de corta duración; no se graba video.</span></div>`}</section>
+      <section class="robot-listening panel"><div class="monitor-section-heading"><div><span class="eyebrow">Voz en vivo</span><strong>Transcripción</strong></div>${icon("audio-lines")}</div>${monitor?.last_heard ? `<p class="heard-text" data-live-transcript>“${e(monitor.last_heard.transcript || "Audio recibido; sin transcripción")}”</p><div class="heard-meta">${e(monitor.last_heard.language || "Idioma no indicado")} · ${e(monitor.last_heard.intent || "")} · ${e(time(monitor.last_heard.created_at))}</div>${monitor.last_heard.audio_url ? `<audio controls preload="none" src="${e(monitor.last_heard.audio_url)}">El navegador no admite reproducción de audio.</audio>` : ""}` : `<div class="listening-empty">${icon("mic")}<span data-live-transcript>${connected ? "Esperando una interacción de voz…" : "La transcripción aparecerá al conectar el robot."}</span></div>`}
         ${transcripts.length > 1 ? `<ul class="transcript-list">${transcripts.slice(1).map((t) => `<li><span>${e(time(t.created_at))}</span>${e(t.texto)}</li>`).join("")}</ul>` : ""}
         <p class="monitor-privacy">La voz solo orienta el diálogo: nunca confirma identidad. Los clips se guardan únicamente con consentimiento y política del club.</p></section></div>
     ${
       current
-        ? `<section class="panel monitor-current"><div class="monitor-section-heading"><div><span class="eyebrow">ÚLTIMA ATENCIÓN · ${e(time(current.created_at))}</span><strong>${e(current.display_name || "Visitante")}</strong></div><span class="status status-${decisionClass(current.decision)}"><span></span>${e(decisionNames[current.decision] || current.decision || "Sin decisión")}</span></div>
+        ? `<section class="panel monitor-current"><div class="monitor-section-heading"><div><span class="eyebrow">Última atención, ${e(time(current.created_at))}</span><strong>${e(current.display_name || "Visitante")}</strong></div><span class="status status-${decisionClass(current.decision)}"><span></span>${e(decisionNames[current.decision] || current.decision || "Sin decisión")}</span></div>
       <div class="details-list monitor-details">
         <div><span>Categoría detectada</span><strong>${e(categoryNames[current.category_detected] || "—")}</strong></div>
         <div><span>Categoría confirmada</span><strong>${e(roleNames[current.role] || "No confirmada")}</strong></div>
@@ -934,7 +940,7 @@ export function adminRobotMonitor(monitor) {
       </section>`
         : ""
     }
-    <section class="classification-panel panel"><div class="monitor-section-heading"><div><span class="eyebrow">HISTORIAL Y EVIDENCIAS</span><strong>Interacciones</strong></div><span>Tiempo real · respaldo cada 3 s</span></div>${latest.length ? `<div class="table-scroll"><table><thead><tr><th>Hora</th><th>Persona</th><th>Detectada</th><th>Confirmada</th><th>Método</th><th>Decisión</th><th>Voz</th><th>Robot</th></tr></thead><tbody>${latest.map((item) => `<tr><td>${e(time(item.created_at))}</td><td>${e(item.display_name || "Visitante")}${item.simulation ? "<small>simulación</small>" : ""}</td><td>${e(categoryNames[item.category_detected] || "—")}</td><td>${e(roleNames[item.role] || "—")}</td><td>${e(item.method || "—")}</td><td>${e(decisionNames[item.decision] || accessNames[item.access] || "Sin decisión")}</td><td>${e((item.transcripts || []).join(" · ") || "—")}</td><td>${e(item.robot_name || item.robot_target || "AGIBOT")}</td></tr>`).join("")}</tbody></table></div>` : Array.isArray(monitor?.stored_sessions) && monitor.stored_sessions.length ? `<div class="table-scroll"><table><thead><tr><th>Inicio</th><th>Robot</th><th>Detectada</th><th>Confirmada</th><th>Método</th><th>Decisión</th></tr></thead><tbody>${monitor.stored_sessions.map((s) => `<tr><td>${e(time(s.iniciada_en))}</td><td>${e(s.robot_id)}</td><td>${e(categoryNames[s.categoria_detectada] || "—")}</td><td>${e(categoryNames[s.categoria_confirmada] || "—")}</td><td>${e((s.metodo_verificacion || []).join(" + ") || "—")}</td><td>${e(decisionNames[s.decision] || s.estado)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="monitor-no-events">${icon("scan-eye")}<span>${connected ? "Todavía no hay interacciones reportadas." : "Los eventos se cargarán cuando /robot/monitor esté disponible."}</span></div>`}</section>
+    <section class="classification-panel panel"><div class="monitor-section-heading"><div><span class="eyebrow">Historial</span><strong>Interacciones</strong></div><span>Tiempo real · respaldo cada 3 s</span></div>${latest.length ? `<div class="table-scroll"><table><thead><tr><th>Hora</th><th>Persona</th><th>Detectada</th><th>Confirmada</th><th>Método</th><th>Decisión</th><th>Voz</th><th>Robot</th></tr></thead><tbody>${latest.map((item) => `<tr><td>${e(time(item.created_at))}</td><td>${e(item.display_name || "Visitante")}${item.simulation ? "<small>simulación</small>" : ""}</td><td>${e(categoryNames[item.category_detected] || "—")}</td><td>${e(roleNames[item.role] || "—")}</td><td>${e(item.method || "—")}</td><td>${e(decisionNames[item.decision] || accessNames[item.access] || "Sin decisión")}</td><td>${e((item.transcripts || []).join(" · ") || "—")}</td><td>${e(item.robot_name || item.robot_target || "AGIBOT")}</td></tr>`).join("")}</tbody></table></div>` : Array.isArray(monitor?.stored_sessions) && monitor.stored_sessions.length ? `<div class="table-scroll"><table><thead><tr><th>Inicio</th><th>Robot</th><th>Detectada</th><th>Confirmada</th><th>Método</th><th>Decisión</th></tr></thead><tbody>${monitor.stored_sessions.map((s) => `<tr><td>${e(time(s.iniciada_en))}</td><td>${e(s.robot_id)}</td><td>${e(categoryNames[s.categoria_detectada] || "—")}</td><td>${e(categoryNames[s.categoria_confirmada] || "—")}</td><td>${e((s.metodo_verificacion || []).join(" + ") || "—")}</td><td>${e(decisionNames[s.decision] || s.estado)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="monitor-no-events">${icon("scan-eye")}<span>${connected ? "Todavía no hay interacciones reportadas." : "Los eventos se cargarán cuando /robot/monitor esté disponible."}</span></div>`}</section>
     <p class="monitor-updated">${monitor?.updated_at ? `Última actualización: ${e(new Date(monitor.updated_at).toLocaleTimeString("es-CO"))}` : "El monitor requiere una sesión ADMIN real y el backend de robots."}</p>
   </div>`;
 }
@@ -944,15 +950,11 @@ export function reception(data, flow) {
   const p = data.profiles.find((p) => p.id === f.visitor_id);
   return /* HTML */ `<div class="page-heading reception-heading">
       <div>
-        <span class="eyebrow">INTELLIGENT HOSPITALITY</span>
-        <h1>
-          N CLUB <span class="heading-divider">/</span>
-          <span class="sans-heading">SMART RECEPTION</span>
-        </h1>
-        <p>Una experiencia diferente para cada persona.</p>
+        <h1>Recepción inteligente</h1>
+        <p>AGIBOT 01 identifica y verifica; AGIBOT 02 acompaña a los miembros VIP. Cada categoría recibe su propio recorrido.</p>
       </div>
       <span class="demo-tag"
-        >${f.simulation !== false ? "MODO DEMO" : "EVALUACIÓN BACKEND"}</span
+        >${f.simulation !== false ? "Simulación" : "Evaluación real"}</span
       >
     </div>
     <div class="reception-grid">
@@ -981,7 +983,7 @@ export function reception(data, flow) {
       </section>
       <section class="reception-visitor panel">
         <div class="mini-heading">
-          <span class="eyebrow">VISITANTE ACTUAL</span
+          <span class="eyebrow">Visitante actual</span
           >${f.access ? status(f.access) : '<span class="status status-pending"><span></span>En espera</span>'}
         </div>
         <div class="visitor-avatar ${f.role === "VIP" ? "vip-avatar" : ""}">
@@ -1057,7 +1059,7 @@ export function reception(data, flow) {
     <section class="panel simulation-panel">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">FIVE GUESTS. FIVE EXPERIENCES.</span>
+          <span class="eyebrow">Banco de pruebas</span>
           <h2>Elige una bienvenida.</h2>
           <p>
             Simulación exclusiva de administración. Nunca autoriza accesos
@@ -1126,7 +1128,7 @@ export function reception(data, flow) {
       </p>
     </section>
     <section class="panel real-validation">
-      <span class="eyebrow">VERIFICACIÓN REAL · SOLO CON BACKEND</span>
+      <span class="eyebrow">Verificación real con FastAPI</span>
       <h2>Verificar una credencial.</h2>
       <p>
         Pega el token escaneado por recepción. FastAPI verificará la credencial
@@ -1153,7 +1155,7 @@ export function reception(data, flow) {
       </form>
     </section>
     <section class="panel">
-      ${sectionHead("RECEPTION JOURNAL", "Últimos eventos")}${eventTable(data.access_events.slice(0, 8), data)}
+      ${sectionHead("Bitácora", "Últimos eventos")}${eventTable(data.access_events.slice(0, 8), data)}
     </section>`;
 }
 function robotIllustration(vip) {
@@ -1260,6 +1262,6 @@ export function publicPage(content) {
 }
 export function memberships() {
   return publicPage(
-    `<div class="page-heading"><div><span class="eyebrow">A PLACE TO BELONG</span><h1>Elige vivir lo extraordinario.</h1><p>Dos formas de pertenecer. La misma pasión por lo excepcional.</p></div></div><div class="membership-options">${["REGULAR", "VIP"].map((role) => `<section class="panel ${role === "VIP" ? "premium-option" : ""}">${icon(role === "VIP" ? "crown" : "flag")}<span class="eyebrow">${role === "VIP" ? "BLACK VIP" : "SIGNATURE"} MEMBERSHIP</span><h2>${role === "VIP" ? "Una experiencia sin igual." : "Tu lugar en el club."}</h2><p>${role === "VIP" ? "Atención personalizada, lounge privado y recepción prioritaria, además de todos los servicios de tu club." : "Golf, gastronomía y momentos que merecen formar parte de tu día."}</p><ul><li>Reservas de golf y restaurante</li><li>Credencial digital segura</li><li>Historial y asistencia del club</li>${role === "VIP" ? "<li>Asistente y recepción VIP</li><li>Acceso al Lounge VIP</li>" : ""}</ul><a href="#/login" class="button ${role === "VIP" ? "gold" : "primary"}">Acceder a mi membresía ${icon("arrow-up-right")}</a></section>`).join("")}</div>`,
+    `<div class="page-heading"><div><span class="eyebrow"></span><h1>Elige vivir lo extraordinario.</h1><p>Dos formas de pertenecer. La misma pasión por lo excepcional.</p></div></div><div class="membership-options">${["REGULAR", "VIP"].map((role) => `<section class="panel ${role === "VIP" ? "premium-option" : ""}">${icon(role === "VIP" ? "crown" : "flag")}<span class="eyebrow">${role === "VIP" ? "BLACK VIP" : "SIGNATURE"} MEMBERSHIP</span><h2>${role === "VIP" ? "Una experiencia sin igual." : "Tu lugar en el club."}</h2><p>${role === "VIP" ? "Atención personalizada, lounge privado y recepción prioritaria, además de todos los servicios de tu club." : "Golf, gastronomía y momentos que merecen formar parte de tu día."}</p><ul><li>Reservas de golf y restaurante</li><li>Credencial digital segura</li><li>Historial y asistencia del club</li>${role === "VIP" ? "<li>Asistente y recepción VIP</li><li>Acceso al Lounge VIP</li>" : ""}</ul><a href="#/login" class="button ${role === "VIP" ? "gold" : "primary"}">Acceder a mi membresía ${icon("arrow-up-right")}</a></section>`).join("")}</div>`,
   );
 }

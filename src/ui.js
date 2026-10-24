@@ -196,7 +196,7 @@ export function modal(title, content, wide = false) {
   el.className = wide ? "modal-wide" : "";
   el.setAttribute("aria-labelledby", "modal-title");
   document.querySelector("#modal-content").innerHTML =
-    `<div class="modal-heading"><div><span class="eyebrow">N CLUB WORLD</span><h2 id="modal-title">${escape(title)}</h2></div><button class="icon-button" data-action="close-modal" aria-label="Cerrar">${icon("x")}</button></div>${content}`;
+    `<div class="modal-heading"><div><span class="eyebrow">N Club</span><h2 id="modal-title">${escape(title)}</h2></div><button class="icon-button" data-action="close-modal" aria-label="Cerrar">${icon("x")}</button></div>${content}`;
   if (!el.open) el.showModal();
   hydrate();
 }
@@ -239,7 +239,7 @@ export function membershipCard(p, compact = false) {
     </div>
     <div class="card-rings" aria-hidden="true"></div>
     <div class="card-type">
-      ${p.role === "VIP" ? "BLACK VIP" : "SIGNATURE"}<span>MEMBERSHIP</span>
+      ${p.role === "VIP" ? "BLACK VIP" : "SIGNATURE"}<span>MEMBRESÍA</span>
     </div>
     <div class="card-bottom">
       <div>
@@ -247,7 +247,7 @@ export function membershipCard(p, compact = false) {
         ><small>${escape(p.public_id || p.id.slice(0, 8))}</small>
       </div>
       <span class="card-valid"
-        >${p.membership_status === "active" ? "ACTIVE MEMBER" : "MEMBERSHIP INACTIVE"}</span
+        >${p.membership_status === "active" ? "MIEMBRO ACTIVO" : "MEMBRESÍA INACTIVA"}</span
       >
     </div>
   </div>`;

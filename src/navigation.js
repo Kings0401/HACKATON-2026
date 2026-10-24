@@ -25,7 +25,8 @@ const notes = {
   INVITADO:
     "Ruta limitada a las áreas de su invitación. Su anfitrión ha sido notificado.",
   PERSONAL_INTERNO: "Ruta por corredores de personal hacia su zona autorizada.",
-  TRABAJADOR_EXTERNO: "Ruta exclusiva de servicio. No ingrese a áreas sociales.",
+  TRABAJADOR_EXTERNO:
+    "Ruta exclusiva de servicio. No ingrese a áreas sociales.",
 };
 const turnText = {
   straight: "Continúe recto",
@@ -59,6 +60,10 @@ const neighbours = (() => {
 export const nodeFor = (destination) =>
   nodes[destination] ? destination : clubMap.destinations[destination?.trim()];
 
+// Nombre legible de un destino (códigos DEMO como RESTAURANT incluidos).
+export const destinationLabel = (destination) =>
+  nodes[nodeFor(destination)]?.label || destination;
+
 function turn(prev, here, next) {
   const v1 = [here.x - prev.x, here.y - prev.y];
   const v2 = [next.x - here.x, next.y - here.y];
@@ -75,7 +80,8 @@ function turn(prev, here, next) {
 export function computeRoute(category, destination, { escort = false } = {}) {
   const start = clubMap.start;
   const target = nodeFor(destination);
-  if (!target) throw new Error(`Destino sin ubicación en el mapa: ${destination}`);
+  if (!target)
+    throw new Error(`Destino sin ubicación en el mapa: ${destination}`);
   const allowed = new Set(clubMap.access[category] || []);
   if (!allowed.has(nodes[target].zone))
     throw new Error("El destino está fuera de las zonas permitidas.");
@@ -154,7 +160,10 @@ export function computeRoute(category, destination, { escort = false } = {}) {
     path,
     points: path.map((n) => [nodes[n].x, nodes[n].y]),
     distance_m: Math.round(meters),
-    minutes: Math.max(1, Math.round(meters / clubMap.units.walking_speed_m_s / 60)),
+    minutes: Math.max(
+      1,
+      Math.round(meters / clubMap.units.walking_speed_m_s / 60),
+    ),
     steps,
     escort_point: escortPoint,
     note: notes[category] || "",
@@ -178,10 +187,10 @@ export function mapSvg(route, { compact = false, uid = "nav" } = {}) {
     <title id="${uid}-title">${e(clubMap.title)}</title>
     <desc id="${uid}-desc">${route ? `Ruta desde ${e(nodes[route.start].label)} hasta ${e(route.destination_label)}: ${e(route.path.map((n) => nodes[n].label).join(", "))}.` : "Mapa del club"} ${e(clubMap.notice)}</desc>
     <defs>
-      <pattern id="${uid}-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#5eead4" stroke-opacity=".07"/></pattern>
-      <pattern id="${uid}-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V12" stroke="#fc8181" stroke-opacity=".35" stroke-width="3"/></pattern>
+      <pattern id="${uid}-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#1b7556" stroke-opacity=".06"/></pattern>
+      <pattern id="${uid}-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V12" stroke="#c2513d" stroke-opacity=".22" stroke-width="3"/></pattern>
       <filter id="${uid}-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <linearGradient id="${uid}-route" x1="0" x2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#e9c46a"/></linearGradient>
+      <linearGradient id="${uid}-route" x1="0" x2="1"><stop offset="0" stop-color="#1b7556"/><stop offset="1" stop-color="#b8955a"/></linearGradient>
     </defs>
     <rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="24" class="nav-ground"/>
     <rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="24" fill="url(#${uid}-grid)"/>
@@ -189,7 +198,7 @@ export function mapSvg(route, { compact = false, uid = "nav" } = {}) {
       .map((a) => {
         const [ax, ay, aw, ah] = a.rect;
         const locked = route && !allowed.has(a.zone);
-        return `<g class="nav-area ${locked ? "is-locked" : ""}"><rect x="${ax}" y="${ay}" width="${aw}" height="${ah}" rx="18" fill="${zoneColor(a.zone)}" fill-opacity="${locked ? 0.05 : 0.09}" stroke="${zoneColor(a.zone)}" stroke-opacity="${locked ? 0.25 : 0.4}"/>${locked ? `<rect x="${ax}" y="${ay}" width="${aw}" height="${ah}" rx="18" fill="url(#${uid}-hatch)"/>` : ""}<text x="${ax + 14}" y="${ay + 24}" class="nav-area-label">${e(a.label.toUpperCase())}${locked ? " · RESTRINGIDO" : ""}</text></g>`;
+        return `<g class="nav-area ${locked ? "is-locked" : ""}"><rect x="${ax}" y="${ay}" width="${aw}" height="${ah}" rx="18" fill="${zoneColor(a.zone)}" fill-opacity="${locked ? 0.04 : 0.1}" stroke="${zoneColor(a.zone)}" stroke-opacity="${locked ? 0.3 : 0.45}"/>${locked ? `<rect x="${ax}" y="${ay}" width="${aw}" height="${ah}" rx="18" fill="url(#${uid}-hatch)"/>` : ""}<text x="${ax + 14}" y="${ay + 24}" class="nav-area-label">${e(a.label.toUpperCase())}${locked ? " · RESTRINGIDO" : ""}</text></g>`;
       })
       .join("")}
     <g class="nav-edges">${clubMap.edges
@@ -241,13 +250,16 @@ function stepsList(route) {
 }
 
 // Tarjeta completa: mapa, pasos y QR temporal para continuar en el celular.
-export function routeCard(route, { qrId = "", title = "Su recorrido", compact = false } = {}) {
+export function routeCard(
+  route,
+  { qrId = "", title = "Su recorrido", compact = false } = {},
+) {
   if (!route) return "";
   if (route.error)
     return `<section class="nav-card nav-error panel">${icon("alert-circle")}<p>No hay un recorrido permitido hasta ${e(route.destination || "el destino")}. Recepción le orientará.</p></section>`;
   return `<section class="nav-card" aria-label="Recorrido hasta ${e(route.destination_label)}">
     <header class="nav-card-head">
-      <div><span class="eyebrow light">${icon("navigation")} ${e(title.toUpperCase())}</span><h2>${e(route.destination_label)}</h2>
+      <div><span class="eyebrow light">${icon("navigation")} ${e(title)}</span><h2>${e(route.destination_label)}</h2>
       <p>${e(route.note || "")}</p></div>
       <div class="nav-metrics"><span>${icon("footprints")}<strong>${route.distance_m} m</strong></span><span>${icon("clock-3")}<strong>${route.minutes} min</strong></span><span class="nav-cat">${e(categoryLabel[route.category] || route.category)}</span></div>
     </header>
@@ -273,11 +285,13 @@ export function revealRoutes(root = document) {
     if (!route || canvas.scrollWidth <= canvas.clientWidth + 4) return;
     const frame = canvas.getBoundingClientRect();
     const box = route.getBoundingClientRect();
-    canvas.scrollLeft += box.left + box.width / 2 - (frame.left + frame.width / 2);
+    canvas.scrollLeft +=
+      box.left + box.width / 2 - (frame.left + frame.width / 2);
   });
 }
 
-export const shareUrlFor = (route) => route?.share_url || (route ? demoShareUrl(route) : "");
+export const shareUrlFor = (route) =>
+  route?.share_url || (route ? demoShareUrl(route) : "");
 
 // Página pública #/ruta (celular del visitante). No requiere sesión.
 export async function routePage(params, backendUrl) {
@@ -291,7 +305,8 @@ export async function routePage(params, backendUrl) {
         { cache: "no-store", signal: AbortSignal.timeout(10000) },
       );
       const json = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(json.detail || "La ruta no está disponible.");
+      if (!response.ok)
+        throw new Error(json.detail || "La ruta no está disponible.");
       route = json.route;
       route.share_expires_at = json.expires_at;
     } else if (params.get("demo")) {
@@ -303,7 +318,7 @@ export async function routePage(params, backendUrl) {
     error = err.message;
   }
   return `<main id="main" class="nav-page">
-    <header class="nav-page-head"><span class="brand-mark">N<span>✦</span></span><div><span class="eyebrow light">N CLUB · RUTA PERSONAL</span><h1>Su camino, <em>trazado.</em></h1></div></header>
+    <header class="nav-page-head"><span class="brand-mark">N<span>✦</span></span><div><span class="eyebrow light">Ruta personal</span><h1>Su camino, <em>trazado.</em></h1></div></header>
     ${route ? routeCard(route, { title: params.get("demo") ? "Recorrido DEMO" : "Su recorrido" }) : `<section class="nav-card nav-error">${icon("alert-circle")}<p>${e(error)}</p><p>Pida una nueva ruta en recepción.</p></section>`}
     <p class="nav-page-foot">${icon("shield-check")} Esta página solo muestra un recorrido. No es una credencial y no autoriza el ingreso.</p>
   </main>`;

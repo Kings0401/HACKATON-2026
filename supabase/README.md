@@ -12,6 +12,9 @@ El bloque `CREATE TABLE personas` estaba repetido en el SQL original. No hace fa
 
 ## Acceso y datos existentes
 
+- Las altas de miembros, invitados, personal y proveedores piden tipo y numero de documento. El numero se normaliza y es unico en `personas`; una persona invitada con invitacion vigente no puede recibir una segunda invitacion activa. Las autorizaciones anteriores se conservan y el panel muestra la mas reciente por persona.
+- Personas permite editar correo, telefono, documento, empresa/cargo y, para miembros, la vigencia. Los registros antiguos sin documento deben completarse desde Editar para que el sistema pueda reconocerlos como la misma persona.
+
 - Solo VIP, REGULAR y ADMIN pueden tener sesión de aplicación. Invitados, personal y externos se gestionan desde administración. Incluso una cuenta de Auth vinculada por error a un visitante queda sin acceso a los datos ni a la emisión propia de QR.
 - La membresía se comprueba por categoría, estado, actividad de la persona y `vigencia_hasta`. Activar una persona no renueva su membresía.
 - Los códigos de prueba `NFC-VIP-001`, `QR-INV-001`, etc. se conservan como referencias. **No son los tokens seguros de la nueva app**. El QR de la app utiliza `emitir_credencial`: devuelve un token aleatorio una vez y guarda únicamente su hash en `credenciales`.

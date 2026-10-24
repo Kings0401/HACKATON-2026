@@ -18,6 +18,7 @@ class Repository(Protocol):
     simulated: bool
 
     def persona(self, persona_id: str) -> dict | None: ...
+    def persona_by_document(self, document_type: str, document_number: str) -> dict | None: ...
     def persona_by_code(self, code: str) -> dict | None: ...
     def persona_by_auth(self, auth_user_id: str) -> dict | None: ...
     def credential_by_hash(self, token_hash: str) -> dict | None: ...
@@ -66,6 +67,10 @@ class SupabaseRepository:
 
     def persona(self, persona_id: str) -> dict | None:
         return self.one("personas", "id", persona_id)
+
+    def persona_by_document(self, document_type: str, document_number: str) -> dict | None:
+        data = self.client.table("personas").select("*").eq("tipo_documento", document_type).eq("numero_documento", document_number).limit(1).execute().data
+        return data[0] if data else None
 
     def persona_by_code(self, code: str) -> dict | None:
         return self.one("personas", "codigo_credencial", code)

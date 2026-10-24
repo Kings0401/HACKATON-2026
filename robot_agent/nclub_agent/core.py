@@ -84,6 +84,7 @@ class ReceptionAgent:
         self.last_audio_at = 0.0
         self.last_matches: list = []
         self.last_readings: list = []
+        self.on_session_start: Callable[[], None] | None = None  # p. ej. gesto de saludo
 
     # ---------- estado para el latido ----------
 
@@ -108,6 +109,8 @@ class ReceptionAgent:
         try:
             self.state.session_id = self.client.start_session(self.config.simulated)["id"]
             self._say("Bienvenido a N Club. Será un placer atenderle.")
+            if self.on_session_start:
+                self.on_session_start()
         except BackendError:
             self._say(OFFLINE_MESSAGE)
             return None

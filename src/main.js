@@ -1,5 +1,6 @@
 import "./styles.css";
 import "./responsive.css";
+import "./theme.css";
 import * as pages from "./pages.js";
 import {
   sessionState,
@@ -176,7 +177,7 @@ function startRobotMonitor(path) {
 function paintSync() {
   const el = document.querySelector("#sync-status");
   if (el)
-    el.innerHTML = `<span></span>${{ demo: "DEMO LOCAL", live: "EN TIEMPO REAL", polling: "ACTUALIZACIÓN · 8 S", offline: "SIN CONEXIÓN" }[syncStatus] || "CONECTANDO"}`;
+    el.innerHTML = `<span></span>${{ demo: "Demo local", live: "En tiempo real", polling: "Actualización cada 8 s", offline: "Sin conexión" }[syncStatus] || "Conectando"}`;
 }
 function startSync() {
   const key = `${sessionState.mode}:${sessionState.profile?.id}`;
@@ -240,7 +241,7 @@ async function refresh() {
     }
   } catch (err) {
     const el = document.querySelector("#sync-status");
-    if (el) el.innerHTML = "<span></span>SIN CONEXIÓN";
+    if (el) el.innerHTML = "<span></span>Sin conexión";
   } finally {
     refreshBusy = false;
   }
@@ -341,7 +342,7 @@ async function render(scroll = true) {
       await drawLinkQR(shareUrlFor(flow.route), "route-qr");
     revealRoutes();
   } catch (err) {
-    app.innerHTML = `<main id="main" class="page-error">${icon("alert-circle")}<span class="eyebrow">N CLUB WORLD</span><h1>No pudimos preparar tu experiencia.</h1><p>${e(readableError(err))}</p><button class="button primary" data-action="retry">Intentar de nuevo</button><a href="#/login" class="button outline">Volver</a></main>`;
+    app.innerHTML = `<main id="main" class="page-error">${icon("alert-circle")}<span class="eyebrow">N Club</span><h1>No pudimos preparar tu experiencia.</h1><p>${e(readableError(err))}</p><button class="button primary" data-action="retry">Intentar de nuevo</button><a href="#/login" class="button outline">Volver</a></main>`;
     hydrate();
   }
 }
@@ -518,6 +519,14 @@ async function updateSlots() {
 }
 const photoFields = (required) =>
   `<label>Foto del rostro<input name="photo" type="file" accept="image/*" capture="user" ${required ? "required" : ""} /></label><p class="form-hint">Rostro de frente, bien iluminado y una sola persona. Se recodifica sin metadatos y se guarda en Storage privado.</p><label class="consent-check"><input name="consent" type="checkbox" required /> El titular autorizó el uso de su foto para reconocimiento facial en la recepción del club.</label>`;
+function appendPersonFields(form, profile = {}, required = false) {
+  const container = form.querySelector(".form-grid") || form;
+  const type = profile.document_type || "";
+  container.insertAdjacentHTML(
+    "beforeend",
+    `<label>Tipo de documento<select name="tipo_documento" ${required ? "required" : ""}><option value="" ${!type ? "selected" : ""}>Selecciona</option>${[["CC", "Cédula de ciudadanía"], ["CE", "Cédula de extranjería"], ["PASAPORTE", "Pasaporte"], ["OTRO", "Otro"]].map(([v, label]) => `<option value="${v}" ${type === v ? "selected" : ""}>${label}</option>`).join("")}</select></label><label>Número de documento<input name="numero_documento" value="${e(profile.document_number || "")}" minlength="5" maxlength="30" ${required ? "required" : ""} autocomplete="off" /></label><label>Teléfono<input name="telefono" type="tel" value="${e(profile.phone || "")}" maxlength="30" autocomplete="tel" /></label><label>Correo<input name="email" type="email" value="${e(profile.email || "")}" maxlength="120" autocomplete="email" /></label><label>Empresa o cargo<input name="cargo" value="${e(profile.position || "")}" maxlength="100" /></label>${["VIP", "REGULAR"].includes(profile.role) ? `<label>Vigente hasta<input name="vigencia_hasta" type="date" value="${e(profile.membership_expires_at?.slice(0, 10) || "")}" /></label>` : ""}`,
+  );
+}
 function backendNotice() {
   if (!backendUrl)
     return `<div class="notice">${icon("alert-circle")}<p>Configure VITE_BACKEND_URL: la foto y el reconocimiento facial los procesa FastAPI.</p></div>`;
@@ -529,7 +538,7 @@ function openMember() {
   const until = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
   modal(
     "Nuevo miembro.",
-    `<form id="member-form">${backendNotice()}<label>Nombre completo<input name="nombre" minlength="3" maxlength="100" required autocomplete="off" /></label><label>Membresía<select name="categoria"><option value="REGULAR">Miembro regular</option><option value="VIP">VIP · Black</option></select></label><label>Vigente hasta<input name="vigencia_hasta" type="date" min="${today()}" value="${until}" required /></label><label>Correo (opcional)<input name="email" type="email" maxlength="120" /></label>${photoFields(false)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("check")} Crear miembro</button></form>`,
+    `<form id="member-form">${backendNotice()}<label>Nombre completo<input name="nombre" minlength="3" maxlength="100" required autocomplete="off" /></label><label>Membresía<select name="categoria"><option value="REGULAR">Miembro regular</option><option value="VIP">VIP · Black</option></select></label><label>Tipo de documento<select name="tipo_documento" required><option value="CC">Cédula de ciudadanía</option><option value="CE">Cédula de extranjería</option><option value="PASAPORTE">Pasaporte</option><option value="OTRO">Otro</option></select></label><label>Número de documento<input name="numero_documento" minlength="5" maxlength="30" required autocomplete="off" /></label><label>Teléfono<input name="telefono" type="tel" maxlength="30" autocomplete="tel" /></label><label>Correo (opcional)<input name="email" type="email" maxlength="120" autocomplete="email" /></label><label>Vigente hasta<input name="vigencia_hasta" type="date" min="${today()}" value="${until}" required /></label>${photoFields(false)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("check")} Crear miembro</button></form>`,
   );
   const photo = document.querySelector('#member-form [name="photo"]');
   const consent = document.querySelector('#member-form [name="consent"]');
@@ -549,6 +558,9 @@ async function submitMember(form, values) {
     categoria: values.categoria,
     vigencia_hasta: values.vigencia_hasta,
     email: values.email || null,
+    telefono: values.telefono || null,
+    tipo_documento: values.tipo_documento,
+    numero_documento: values.numero_documento,
   });
   let photoMessage = "";
   if (file) {
@@ -569,6 +581,11 @@ async function submitMember(form, values) {
       membership_status: "active",
       public_id: created.persona_id,
       created_at: new Date().toISOString(),
+      email: values.email || null,
+      phone: values.telefono || null,
+      document_type: values.tipo_documento,
+      document_number: values.numero_documento.replace(/[^a-z0-9]/gi, "").toUpperCase(),
+      membership_expires_at: `${values.vigencia_hasta}T23:59:59-05:00`,
       backend: true,
     });
     writeDemo(d);
@@ -594,6 +611,7 @@ function openVisitor(type) {
       )}</select></label><label class="span-full" id="company-field">Empresa<input name="company" maxlength="100" placeholder="Empresa o N Club World"/></label><label>Desde (Colombia)<input type="datetime-local" name="valid_from" value="${now}T08:00" required/></label><label>Hasta (Colombia)<input type="datetime-local" name="valid_until" value="${now}T18:00" required/></label><label class="span-full">Zona autorizada<select name="destination" id="visitor-zone"></select></label></div><p class="form-error" id="visitor-error" role="alert"></p><div class="notice">${icon("shield-check")}<p>El token será temporal. Una invitación u orden no concede acceso a otras zonas.</p></div><button class="button primary full">Crear y generar QR ${icon("qr-code")}</button></form>`,
     true,
   );
+  appendPersonFields(document.querySelector("#visitor-form"), {}, true);
   updateVisitorFields();
 }
 function updateVisitorFields() {
@@ -601,7 +619,7 @@ function updateVisitorFields() {
   if (!role) return;
   document
     .querySelector("#host-field")
-    .classList.toggle("hidden", role !== "GUEST");
+      .classList.toggle("hidden", role !== "GUEST");
   document
     .querySelector("#company-field")
     .classList.toggle("hidden", role === "GUEST");
@@ -629,7 +647,7 @@ function updateVisitorFields() {
 async function showQR(result, name) {
   modal(
     "Tu credencial está lista.",
-    `<div class="qr-modal"><span class="eyebrow">${sessionState.mode === "demo" ? "DEMO · SIN ACCESO REAL" : "TOKEN TEMPORAL DE VERIFICACIÓN"}</span><h3>${e(name)}</h3><canvas id="visitor-qr" aria-label="Credencial temporal QR"></canvas><p>Vence: ${e(new Date(result.expires_at).toLocaleString("es-CO", { timeZone: "America/Bogota" }))}</p><button class="button primary full" data-action="download-visitor-qr">${icon("download")} Descargar credencial</button><div class="notice">${icon("shield-check")}<p>Comparte el QR únicamente con su titular. Recepción verificará su vigencia y permisos.</p></div></div>`,
+    `<div class="qr-modal"><span class="eyebrow">${sessionState.mode === "demo" ? "Demo, sin acceso real" : "Token temporal de verificación"}</span><h3>${e(name)}</h3><canvas id="visitor-qr" aria-label="Credencial temporal QR"></canvas><p>Vence: ${e(new Date(result.expires_at).toLocaleString("es-CO", { timeZone: "America/Bogota" }))}</p><button class="button primary full" data-action="download-visitor-qr">${icon("download")} Descargar credencial</button><div class="notice">${icon("shield-check")}<p>Comparte el QR únicamente con su titular. Recepción verificará su vigencia y permisos.</p></div></div>`,
   );
   await drawQR(result.token, "visitor-qr");
 }
@@ -717,7 +735,7 @@ async function simulate(role) {
     await render(false);
   }
   let decision,
-    source = "DEMO LOCAL",
+    source = "Demo local",
     context = null;
   if (backendUrl && sessionState.mode !== "demo") {
     try {
@@ -801,7 +819,7 @@ async function simulate(role) {
     Object.assign(flow, {
       busy: false,
       stage: "Transferencia VIP completada",
-      message: `Bienvenida a su experiencia exclusiva. ${context?.message || "Tiene una reserva en la cancha 2 a las 4:00 p. m. ¿Desea consultar nuestros servicios premium?"}${source === "DEMO LOCAL" ? " · Contexto simulado" : ""}`,
+      message: `Bienvenida a su experiencia exclusiva. ${context?.message || "Tiene una reserva en la cancha 2 a las 4:00 p. m. ¿Desea consultar nuestros servicios premium?"}${source === "Demo local" ? " · Contexto simulado" : ""}`,
     });
     await render(false);
   }
@@ -930,6 +948,7 @@ document.addEventListener("click", async (event) => {
         "Información del visitante.",
         `<form id="user-form" data-id="${e(p.id)}"><label>Nombre completo<input name="full_name" value="${e(p.full_name)}" minlength="3" maxlength="100" required/></label><label>Estado<select name="membership_status">${["active", "inactive", "suspended"].map((v) => `<option value="${v}" ${p.membership_status === v ? "selected" : ""}>${{ active: "Activo", inactive: "Inactivo", suspended: "Suspendido" }[v]}</option>`).join("")}</select></label><div class="notice">${icon("shield-check")}<p>Categoría: ${roles[p.role]}. Los cambios de rol requieren una operación privilegiada en el servidor.</p></div><button class="button primary full">Guardar cambios ${icon("check")}</button></form>`,
       );
+      appendPersonFields(document.querySelector("#user-form"), p);
     }
     if (action === "new-visitor") openVisitor(button.dataset.type);
     if (action === "new-member") openMember();
@@ -959,7 +978,7 @@ document.addEventListener("click", async (event) => {
     if (action === "health") {
       const health = await api.health();
       const el = document.querySelector("#backend-status");
-      if (el) el.innerHTML = "<span></span>BACKEND DISPONIBLE";
+      if (el) el.innerHTML = "<span></span>Backend disponible";
       toast(`FastAPI responde: ${health.status || "OK"}.`);
     }
   });
@@ -1165,10 +1184,17 @@ if (supabase)
       go("login");
     }
   });
-try {
-  if (!demoEnabled) sessionStorage.removeItem("nclub-demo-profile");
-  await restoreSession();
-} catch (err) {
-  toast(readableError(err), "error");
+const initialPath = routeInfo().path;
+const publicPaths = new Set(["", "login", "demo", "memberships", "experiences", "ruta"]);
+if (!publicPaths.has(initialPath)) {
+  app.innerHTML = `<main id="main" class="page-loading">${icon("loader-circle")}Restaurando tu sesión…</main>`;
+  try {
+    if (!demoEnabled) sessionStorage.removeItem("nclub-demo-profile");
+    await restoreSession();
+  } catch (err) {
+    toast(readableError(err), "error");
+  }
+} else if (!demoEnabled) {
+  sessionStorage.removeItem("nclub-demo-profile");
 }
 await render();

@@ -94,3 +94,6 @@ class MemberRequest(BaseModel):
     categoria: Literal["VIP", "REGULAR"]
     vigencia_hasta: str = Field(min_length=10, max_length=40)
     email: str | None = Field(default=None, max_length=120)
+    telefono: str | None = Field(default=None, max_length=30)
+    tipo_documento: Literal["CC", "CE", "PASAPORTE", "OTRO"]
+    numero_documento: str = Field(min_length=5, max_length=30)

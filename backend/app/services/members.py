@@ -19,12 +19,18 @@ class MemberError(ValueError):
 
 
 def create_member(repo: Repository, nombre: str, categoria: str, vigencia_hasta: str,
-                  email: str | None = None) -> dict:
+                  email: str | None, telefono: str | None, tipo_documento: str,
+                  numero_documento: str) -> dict:
     nombre = " ".join(nombre.split())
     if not 3 <= len(nombre) <= 100:
         raise MemberError("Escriba un nombre válido (3 a 100 caracteres).")
     if categoria not in ("VIP", "REGULAR"):
         raise MemberError("La categoría debe ser VIP o REGULAR.")
+    numero_documento = "".join(c for c in numero_documento.upper() if c.isalnum())
+    if tipo_documento not in ("CC", "CE", "PASAPORTE", "OTRO") or not 5 <= len(numero_documento) <= 30:
+        raise MemberError("Tipo o nÃºmero de documento no vÃ¡lido.")
+    if repo.persona_by_document(tipo_documento, numero_documento):
+        raise MemberError("Ya existe una persona registrada con ese documento.")
     vence = parse_time(vigencia_hasta if "T" in vigencia_hasta else f"{vigencia_hasta}T23:59:59-05:00")
     now = datetime.now(timezone.utc)
     if not now < vence <= now + timedelta(days=3 * 366):
@@ -39,9 +45,17 @@ def create_member(repo: Repository, nombre: str, categoria: str, vigencia_hasta:
         "tipo_credencial": tipo,
         "codigo_credencial": f"{tipo}-{secrets.token_hex(6).upper()}",
         "activo": True,
-        "email": (email or "").strip() or None,
+        "email": (email or "").strip().lower() or None,
+        "telefono": (telefono or "").strip() or None,
+        "tipo_documento": tipo_documento,
+        "numero_documento": numero_documento,
     }
-    repo.insert("personas", persona)
+    try:
+        repo.insert("personas", persona)
+    except Exception as error:
+        if getattr(error, "code", None) == "23505" or "personas_documento_unico" in str(error):
+            raise MemberError("Ya existe una persona registrada con ese documento.") from error
+        raise
     try:
         repo.insert("membresias", {
             "persona_id": persona_id, "nivel": categoria, "estado": "ACTIVA",

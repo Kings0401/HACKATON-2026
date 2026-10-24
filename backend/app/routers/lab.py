@@ -75,7 +75,10 @@ def lab_reload(admin: dict = Depends(require_admin), c: Context = Depends(ctx)):
 @router.post("/members")
 def new_member(body: MemberRequest, admin: dict = Depends(require_admin), c: Context = Depends(ctx)):
     try:
-        persona = create_member(c.repo, body.nombre, body.categoria, body.vigencia_hasta, body.email)
+        persona = create_member(
+            c.repo, body.nombre, body.categoria, body.vigencia_hasta, body.email,
+            body.telefono, body.tipo_documento, body.numero_documento,
+        )
         credential = issue_credential(c.repo, c.repo.persona(persona["id"]))
     except MemberError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error

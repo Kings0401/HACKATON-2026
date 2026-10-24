@@ -103,6 +103,10 @@ class MemoryRepository:
     def persona(self, persona_id):
         return self.one("personas", "id", persona_id)
 
+    def persona_by_document(self, document_type, document_number):
+        return next((copy.deepcopy(r) for r in self._rows("personas")
+                     if r.get("tipo_documento") == document_type and r.get("numero_documento") == document_number), None)
+
     def persona_by_code(self, code):
         return self.one("personas", "codigo_credencial", code)
 

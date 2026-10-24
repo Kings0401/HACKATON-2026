@@ -63,7 +63,8 @@ def test_new_member_photo_enables_recognition_and_access(lab_client, admin):
 
     client, repo = lab_client
     created = client.post("/admin/members", json={"nombre": "Ana Prueba", "categoria": "VIP",
-                                                  "vigencia_hasta": "2027-12-31"}, headers=admin)
+                                                  "vigencia_hasta": "2027-12-31", "tipo_documento": "CC",
+                                                  "numero_documento": "10000001"}, headers=admin)
     assert created.status_code == 200, created.text
     member = created.json()
     pid = member["persona_id"]
@@ -106,5 +107,6 @@ def test_failed_membership_insert_rolls_back_person(client, admin, repo):
     repo.fail_tables.add("membresias")
     before = len(repo.tables["personas"])
     r = client.post("/admin/members", json={"nombre": "Ana Prueba", "categoria": "REGULAR",
-                                            "vigencia_hasta": "2027-12-31"}, headers=admin)
+                                            "vigencia_hasta": "2027-12-31", "tipo_documento": "CC",
+                                            "numero_documento": "10000002"}, headers=admin)
     assert r.status_code == 503 and len(repo.tables["personas"]) == before

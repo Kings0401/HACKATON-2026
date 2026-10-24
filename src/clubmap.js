@@ -258,23 +258,23 @@ function mapSvg(p, active, compact = false) {
     <desc id="${descId}" data-map-desc>Plano del club con la entrada principal, recepción, casa club, restaurante, lounge VIP, lago y cinco canchas. La ruta activa lleva a ${e(route.label)}.</desc>
     <defs>
       <linearGradient id="cm-paper" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#f2f0e5" />
-        <stop offset=".58" stop-color="#edecdf" />
-        <stop offset="1" stop-color="#e7eadc" />
+        <stop offset="0" stop-color="#f6f9f6" />
+        <stop offset=".58" stop-color="#f1f6f2" />
+        <stop offset="1" stop-color="#ecf3ee" />
       </linearGradient>
       <linearGradient id="cm-water" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#cbdcd8" />
-        <stop offset="1" stop-color="#aec9c4" />
+        <stop offset="0" stop-color="#cfe6ec" />
+        <stop offset="1" stop-color="#b3d6df" />
       </linearGradient>
       <linearGradient id="cm-roof" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#466353" />
-        <stop offset="1" stop-color="#2f4c3e" />
+        <stop offset="0" stop-color="#2a6a52" />
+        <stop offset="1" stop-color="#1d5641" />
       </linearGradient>
       <pattern id="cm-dots" width="22" height="22" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="2" r="1" fill="#284538" opacity=".12" />
+        <circle cx="2" cy="2" r="1" fill="#1b7556" opacity=".06" />
       </pattern>
       <filter id="cm-soft" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#102c24" flood-opacity=".13" />
+        <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#13201b" flood-opacity=".1" />
       </filter>
     </defs>
     <rect width="960" height="640" rx="20" fill="url(#cm-paper)" />
@@ -292,7 +292,7 @@ function mapSvg(p, active, compact = false) {
       ${fairway("M355 190 C 388 165 414 138 430 115")}
       ${fairway("M375 345 C 418 330 452 304 477 276")}
     </g>
-    <text class="map-label map-label--tiny map-label--detail" x="70" y="56">THE GOLF COURSE</text>
+    <text class="map-label map-label--tiny map-label--detail" x="70" y="56">CAMPO DE GOLF</text>
     <text class="map-label map-label--field" x="68" y="90">Campo de golf</text>
     <g class="map-water" aria-hidden="true">
       <path class="map-lake" d="M300 302 C 315 278 350 272 382 285 C 410 297 423 325 410 350 C 396 378 360 392 328 382 C 298 372 282 342 300 302 Z" />
@@ -326,14 +326,14 @@ function mapSvg(p, active, compact = false) {
         <rect class="map-window" x="638" y="356" width="42" height="48" rx="4" />
         <rect class="map-window" x="690" y="356" width="30" height="48" rx="4" />
         <text class="map-label map-label--serif" x="642" y="376" text-anchor="middle">Casa club</text>
-        <text class="map-label map-label--tiny map-label--detail" x="642" y="393" text-anchor="middle">HOSPITALIDAD · MEMBERS ONLY</text>
+        <text class="map-label map-label--tiny map-label--detail" x="642" y="393" text-anchor="middle">SOLO SOCIOS</text>
       </g>
       <g class="map-zone map-zone--restaurant" filter="url(#cm-soft)">
         <rect class="map-building" x="760" y="330" width="145" height="98" rx="10" />
         <path class="map-roof" d="M760 342 L 905 330 V 348 L 760 360 Z" />
         <rect class="map-window" x="778" y="370" width="109" height="32" rx="4" />
         <text class="map-label map-label--serif" x="832" y="383" text-anchor="middle">Restaurante</text>
-        <text class="map-label map-label--tiny map-label--detail" x="832" y="397" text-anchor="middle">FINE DINING</text>
+        <text class="map-label map-label--tiny map-label--detail" x="832" y="397" text-anchor="middle">TERRAZA</text>
       </g>
       <g class="map-zone map-zone--lounge" filter="url(#cm-soft)">
         <rect class="map-building map-building--vip" x="720" y="200" width="150" height="78" rx="10" />
@@ -341,7 +341,7 @@ function mapSvg(p, active, compact = false) {
         <rect class="map-window" x="738" y="238" width="114" height="22" rx="4" />
         <circle class="map-vip-mark" cx="852" cy="211" r="4" />
         <text class="map-label map-label--serif" x="795" y="240" text-anchor="middle">Lounge VIP</text>
-        <text class="map-label map-label--tiny map-label--detail" x="795" y="254" text-anchor="middle">BLACK MEMBERS</text>
+        <text class="map-label map-label--tiny map-label--detail" x="795" y="254" text-anchor="middle">SOCIOS BLACK</text>
         <g class="map-terrace" aria-hidden="true">
           <path d="M730 278 V 298 M750 278 V 298 M770 278 V 298 M790 278 V 298" />
           <path d="M726 306 H 812" />
@@ -417,7 +417,7 @@ function routePanel(p, data, key, active, upcoming, upcomingKey) {
   const isNext = key === upcomingKey;
   return `<div class="map-route-panel" data-map-panel="${key}" ${key === active ? "" : "hidden"}>
     <div class="map-route-top">
-      <span class="eyebrow">TU RUTA</span>
+      <span class="eyebrow">Tu ruta</span>
       <span class="map-route-badge">${icon("clock-3")} Aprox. ${route.minutes}</span>
     </div>
     <h2>${e(route.label)}</h2>
@@ -474,7 +474,7 @@ export function clubMapPage(p, data, params) {
   return `<div class="club-map-page" data-club-map>
     <div class="page-heading map-page-heading">
       <div>
-        <span class="eyebrow">MAPA DEL CLUB</span>
+        <span class="eyebrow">Mapa del club</span>
         <h1>Tu camino, <em>trazado.</em></h1>
         <p>Del acceso principal a tu próxima experiencia. Una guía serena para moverte por el club.</p>
       </div>
@@ -484,7 +484,7 @@ export function clubMapPage(p, data, params) {
       <section class="map-card">
         <div class="map-card-head">
           <div>
-            <span class="eyebrow">N CLUB WORLD · SITE PLAN</span>
+            <span class="eyebrow">Plano ilustrativo</span>
             <h2>El club, de un vistazo.</h2>
           </div>
           <span class="map-active-pill">${icon("map-pin")} Ruta a <strong data-map-pill-name>${e(route.label)}</strong><small data-map-pill-time>${e(route.minutes)} · ${e(route.distance)}</small></span>
@@ -511,7 +511,7 @@ export function clubMapPage(p, data, params) {
         <section class="map-destinations-card">
           <div class="map-destinations-head">
             <div>
-              <span class="eyebrow">ELIGE TU DESTINO</span>
+              <span class="eyebrow"></span>
               <h2>¿A dónde vamos?</h2>
             </div>
           </div>
@@ -541,7 +541,7 @@ export function clubMapBanner(p, data) {
   const route = ROUTES[active];
   return `<a class="map-banner" href="#/map" aria-label="Abrir el mapa del club${upcoming ? `, ruta a ${route.label}` : ""}">
     <span class="map-banner-copy">
-      <span class="eyebrow light">MAPA DEL CLUB</span>
+      <span class="eyebrow light">Mapa del club</span>
       <span class="map-banner-title">Tu camino, <em>trazado.</em></span>
       <span class="map-banner-text">${upcoming ? `Ruta a ${e(route.label)} · ${e(route.minutes)} a pie desde la entrada principal.` : "Explora el club y traza tu ruta desde la entrada principal."}</span>
       <span class="map-banner-link">Abrir el mapa ${icon("arrow-up-right")}</span>
