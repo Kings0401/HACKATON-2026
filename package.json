@@ -1,0 +1,26 @@
+{
+  "name": "n-club-world",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/*.test.js",
+    "format": "prettier --write src tests docs index.html README.md package.json"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "lucide": "^0.468.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "prettier": "^3.9.10",
+    "vite": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

@@ -1,0 +1,2735 @@
+@media (min-width: 1600px) {
+  .page-content {
+    padding-top: 50px;
+  }
+  .dashboard-hero {
+    min-height: 390px;
+  }
+  .dashboard-hero-copy {
+    padding: 45px;
+  }
+  .dashboard-hero-copy h2 {
+    font-size: 57px;
+  }
+  .experience-image {
+    height: 220px;
+  }
+}
+@media (max-width: 1180px) {
+  .sidebar {
+    width: 195px;
+    padding: 30px 12px;
+  }
+  .app-body {
+    margin-left: 195px;
+  }
+  .page-content {
+    padding: 30px 26px 50px;
+  }
+  .app-header {
+    padding: 0 26px;
+  }
+  .demo-bar {
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+  .member-grid {
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+  }
+  .dashboard-hero-copy {
+    padding: 28px;
+  }
+  .dashboard-hero-copy h2 {
+    font-size: 42px;
+  }
+  .membership-panel {
+    padding: 20px 16px;
+  }
+  .compact {
+    padding: 20px 16px;
+  }
+  .quick-actions {
+    gap: 9px;
+  }
+  .quick-actions > a,
+  .quick-actions > button {
+    padding: 17px 12px;
+    gap: 9px;
+  }
+  .quick-actions > * > span {
+    font-size: 9px;
+  }
+  .quick-actions > * > svg:last-child {
+    display: none;
+  }
+  .reception-grid {
+    gap: 12px;
+    grid-template-columns: 1fr 1.2fr 1fr;
+  }
+  .robot-card {
+    padding: 20px 15px 0;
+  }
+  .robot-status {
+    display: none;
+  }
+  .robot-title h2 {
+    font-size: 23px;
+  }
+  .robot-svg {
+    width: 165px;
+    height: 215px;
+  }
+  .robot-visual {
+    min-height: 220px;
+  }
+  .robot-orbit {
+    width: 140px;
+    height: 140px;
+  }
+  .reception-visitor {
+    padding: 18px 15px;
+  }
+  .reception-heading h1 {
+    font-size: 28px;
+  }
+  .sans-heading {
+    font-size: 15px;
+  }
+  .scenario-button {
+    padding: 18px 12px;
+  }
+  .scenario-button strong {
+    font-size: 9px;
+  }
+  .experience-copy {
+    padding: 18px;
+  }
+  .experience-copy h3 {
+    font-size: 23px;
+  }
+  .auth-main {
+    padding-left: 8%;
+    padding-right: 8%;
+  }
+  .auth-photo {
+    padding: 40px;
+  }
+  .landing-nav nav {
+    gap: 22px;
+  }
+  .brand {
+    font-size: 11px;
+  }
+  .brand small {
+    font-size: 6px;
+  }
+  .brand-mark {
+    font-size: 41px;
+  }
+  .landing-hero {
+    min-height: 720px;
+  }
+}
+@media (max-width: 960px) {
+  .sidebar {
+    display: none;
+  }
+  .app-body {
+    margin-left: 0;
+  }
+  .app-header {
+    min-height: 68px;
+    padding: 0 25px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #fcfcf8f2;
+    backdrop-filter: blur(15px);
+  }
+  .mobile-wordmark {
+    display: flex;
+    align-items: center;
+    font-family: var(--serif);
+    font-size: 37px;
+    line-height: 1;
+    color: var(--forest);
+    gap: 12px;
+  }
+  .mobile-wordmark > span {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 2px;
+    font-weight: 800;
+  }
+  .header-breadcrumb {
+    display: none;
+  }
+  .header-tools {
+    gap: 16px;
+  }
+  .page-content {
+    padding: 30px 25px 45px;
+  }
+  .app-footer {
+    padding: 20px 25px 100px;
+  }
+  .bottom-nav {
+    position: fixed;
+    z-index: 30;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    background: #fcfcf8f7;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid #e2e7d8;
+    padding: 7px 12px max(10px, env(safe-area-inset-bottom));
+    box-shadow: 0 -5px 20px #16372106;
+  }
+  .bottom-nav > a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px 2px;
+    min-height: 52px;
+    min-width: 62px;
+    font-size: 8px;
+    font-weight: 600;
+    color: #9aa68b;
+    position: relative;
+  }
+  .bottom-nav > a svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 1.5;
+  }
+  .bottom-nav > a.active {
+    color: var(--forest);
+  }
+  .bottom-nav > a.active:before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: calc(50% - 15px);
+    width: 30px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 4px;
+  }
+  .bottom-nav > a.active svg {
+    stroke-width: 2;
+  }
+  .landing-nav {
+    padding: 24px 5%;
+  }
+  .landing-nav nav {
+    display: none;
+  }
+  .hero-copy {
+    left: 7%;
+    top: 29%;
+  }
+  .hero-copy h1 {
+    font-size: 90px;
+  }
+  .landing-hero {
+    height: 90svh;
+    max-height: 1000px;
+  }
+  .landing-intro {
+    padding: 65px 6%;
+  }
+  .landing-intro h2 {
+    font-size: 43px;
+  }
+  .intro-features {
+    grid-template-columns: 1fr;
+    margin-top: 35px;
+    padding-top: 10px;
+  }
+  .intro-features a {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 24px 5px;
+  }
+  .intro-features a:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .landing-bottom .brand {
+    display: none;
+  }
+  .reception-grid {
+    grid-template-columns: 1fr 1.3fr 1fr;
+  }
+  .robot-visual {
+    min-height: 210px;
+  }
+  .robot-svg {
+    width: 145px;
+    height: 200px;
+  }
+  .robot-title h2 {
+    font-size: 24px;
+  }
+  .robot-title p {
+    font-size: 7px;
+  }
+  .robot-footer {
+    font-size: 7px;
+  }
+  .robot-footer > span:last-child {
+    display: none;
+  }
+  .auth-photo h1 {
+    font-size: 64px;
+  }
+  .auth-box h1 {
+    font-size: 40px;
+  }
+  .auth-main {
+    padding: 35px 7% 25px;
+  }
+  .auth-photo {
+    padding: 35px;
+  }
+  .auth-photo p {
+    font-size: 10px;
+  }
+  .header-tools .connection {
+    font-size: 7px;
+  }
+  .toasts {
+    bottom: 92px;
+    right: 20px;
+    left: 20px;
+    max-width: 420px;
+    margin-left: auto;
+  }
+}
+@media (max-width: 700px) {
+  body {
+    font-size: 13px;
+  }
+  .mobile-only {
+    display: block;
+  }
+  .button {
+    min-height: 50px;
+    padding: 15px 18px;
+    font-size: 11px;
+  }
+  .brand {
+    font-size: 10px;
+    gap: 11px;
+    letter-spacing: 1.7px;
+  }
+  .brand small {
+    font-size: 5px;
+    letter-spacing: 1.5px;
+  }
+  .brand-mark {
+    font-size: 40px;
+  }
+  .landing-nav {
+    padding: 22px 23px;
+    border: 0;
+  }
+  .nav-access {
+    border: 1px solid #ffffff4a;
+    padding: 10px 12px;
+    gap: 8px;
+    font-size: 10px;
+    min-height: 42px;
+  }
+  .nav-access > svg:first-child {
+    display: none;
+  }
+  .nav-access > svg:last-child {
+    width: 14px;
+    height: 14px;
+  }
+  .landing-hero {
+    min-height: 740px;
+    height: 100svh;
+    max-height: 1000px;
+  }
+  .hero-image {
+    object-position: 61% 50%;
+  }
+  .hero-shade {
+    background:
+      linear-gradient(90deg, #082317af, #0a231b30),
+      linear-gradient(0deg, #071e17e8, transparent 65%, #102c2470);
+  }
+  .hero-copy {
+    left: 25px;
+    right: 23px;
+    top: 28%;
+    max-width: none;
+  }
+  .hero-copy > .eyebrow {
+    font-size: 7px;
+    gap: 9px;
+    letter-spacing: 2.2px;
+  }
+  .hero-copy > .eyebrow > span {
+    width: 20px;
+  }
+  .hero-copy h1 {
+    font-size: clamp(55px, 13.8vw, 94px);
+    letter-spacing: -1.8px;
+    margin: 25px 0;
+    line-height: 1.02;
+  }
+  .hero-copy p {
+    font-size: 11px;
+    line-height: 1.9;
+    max-width: 310px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 11px;
+    margin-top: 30px;
+    max-width: 330px;
+  }
+  .hero-actions .button {
+    font-size: 11px;
+    min-height: 52px;
+    justify-content: space-between;
+    padding: 15px 19px;
+  }
+  .hero-actions .button.glass {
+    background: #ffffff08;
+  }
+  .hero-note {
+    font-size: 8px;
+    gap: 8px;
+    margin-top: 23px;
+  }
+  .hero-note svg {
+    width: 13px;
+    height: 13px;
+  }
+  .hero-footer {
+    left: 25px;
+    right: 25px;
+    bottom: 24px;
+    padding-top: 19px;
+    font-size: 6px;
+    letter-spacing: 1px;
+  }
+  .hero-footer > a {
+    display: none;
+  }
+  .hero-footer > span:first-child {
+    gap: 12px;
+    font-size: 8px;
+  }
+  .hero-line {
+    width: 55px;
+  }
+  .vertical-note {
+    right: 14px;
+    top: 26%;
+    font-size: 6px;
+    letter-spacing: 3px;
+  }
+  .landing-intro {
+    padding: 54px 25px;
+  }
+  .landing-intro > .eyebrow {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+  .landing-intro h2 {
+    font-size: 35px;
+    margin: 17px 0 22px;
+  }
+  .landing-intro > p {
+    font-size: 11px;
+    line-height: 1.9;
+  }
+  .intro-features {
+    margin-top: 30px;
+  }
+  .intro-features a {
+    gap: 17px;
+    padding: 23px 3px;
+  }
+  .intro-features span {
+    font-size: 24px;
+  }
+  .intro-features small {
+    font-size: 8px;
+  }
+  .landing-bottom {
+    padding: 25px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  .landing-bottom p,
+  .landing-bottom > span {
+    font-size: 8px;
+  }
+  .auth-layout {
+    display: block;
+    min-height: 100svh;
+    background: var(--ivory);
+  }
+  .auth-photo {
+    display: none;
+  }
+  .auth-main {
+    min-height: 100svh;
+    padding: 24px 26px 25px;
+  }
+  .auth-box {
+    padding: 45px 0 25px;
+    max-width: 400px;
+  }
+  .mobile-brand {
+    display: block;
+    margin-bottom: 55px;
+  }
+  .mobile-brand .brand {
+    font-size: 11px;
+  }
+  .mobile-brand .brand-mark {
+    font-size: 46px;
+  }
+  .auth-box > .eyebrow {
+    font-size: 8px;
+  }
+  .auth-box h1 {
+    font-size: 43px;
+    margin-top: 13px;
+  }
+  .auth-box > p {
+    font-size: 11px;
+    line-height: 1.8;
+    margin-top: 15px;
+  }
+  .auth-tabs {
+    margin-top: 28px;
+  }
+  .auth-box label {
+    font-size: 11px;
+  }
+  .auth-box input {
+    font-size: 16px;
+    min-height: 54px;
+  }
+  .auth-box input::placeholder {
+    font-size: 11px;
+  }
+  .auth-help {
+    font-size: 10px !important;
+  }
+  .auth-copyright {
+    font-size: 8px;
+  }
+  .demo-profiles {
+    gap: 9px;
+  }
+  .demo-profile {
+    min-height: 67px;
+    padding: 12px 15px;
+  }
+  .demo-profile strong {
+    font-size: 12px;
+  }
+  .demo-profile small {
+    font-size: 10px;
+  }
+  .demo-disclaimer {
+    font-size: 10px;
+    line-height: 1.7;
+  }
+  .secure-note {
+    font-size: 8px;
+  }
+  .page-content {
+    padding: 27px 20px 35px;
+  }
+  .app-header {
+    min-height: 65px;
+    padding: 0 22px;
+  }
+  .header-tools {
+    gap: 12px;
+  }
+  .header-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .mobile-wordmark {
+    font-size: 36px;
+  }
+  .mobile-wordmark > span {
+    font-size: 8px;
+    letter-spacing: 1.6px;
+  }
+  .header-tools .connection {
+    font-size: 6px;
+  }
+  .demo-bar {
+    padding: 7px 20px;
+    font-size: 6px;
+    gap: 6px;
+    letter-spacing: 0;
+    line-height: 1.6;
+  }
+  .demo-bar > span {
+    font-size: 6px;
+    padding: 0 4px;
+  }
+  .demo-bar > a {
+    font-size: 6px;
+    gap: 2px;
+    white-space: nowrap;
+  }
+  .demo-bar > a svg {
+    width: 10px;
+    height: 10px;
+  }
+  .page-heading {
+    margin-bottom: 24px;
+    gap: 12px;
+    position: relative;
+  }
+  .page-heading > .badge {
+    font-size: 8px;
+    position: absolute;
+    top: 2px;
+    right: 0;
+    margin: 0;
+    padding: 4px 8px;
+  }
+  .page-heading > .badge > svg {
+    width: 10px;
+    height: 10px;
+  }
+  .page-heading > .badge.role-regular {
+    top: 0;
+  }
+  .page-heading > .badge.role-staff,
+  .page-heading > .badge.role-external {
+    position: static;
+    margin-top: 20px;
+    max-width: 120px;
+    white-space: normal;
+  }
+  .page-heading .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.8px;
+  }
+  .page-heading h1 {
+    font-size: 40px;
+    letter-spacing: -0.9px;
+    margin-top: 12px;
+    line-height: 1.07;
+  }
+  .page-heading p {
+    font-size: 10px;
+    line-height: 1.9;
+    max-width: 300px;
+    margin-top: 12px;
+  }
+  .member-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .dashboard-hero {
+    min-height: 300px;
+    border-radius: 10px;
+  }
+  .dashboard-hero > img {
+    object-position: 50% 65%;
+  }
+  .dashboard-hero-copy {
+    padding: 29px 25px;
+  }
+  .dashboard-hero-copy > .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.8px;
+  }
+  .dashboard-hero-copy h2 {
+    font-size: 44px;
+    margin: 19px 0 13px;
+  }
+  .dashboard-hero-copy p {
+    font-size: 9px;
+    max-width: 235px;
+  }
+  .dashboard-hero-copy .button {
+    font-size: 10px;
+    padding: 12px 17px;
+    min-height: 44px;
+    margin-top: 24px;
+  }
+  .hero-mini-note {
+    font-size: 5px;
+    bottom: 12px;
+    right: 16px;
+  }
+  .membership-panel {
+    padding: 20px;
+    border-radius: 10px;
+  }
+  .membership-panel .mini-heading {
+    margin-bottom: 16px;
+  }
+  .membership-panel .mini-heading h3 {
+    font-size: 11px;
+  }
+  .membership-card.compact {
+    padding: 25px;
+    aspect-ratio: 1.78;
+  }
+  .compact .card-wordmark {
+    font-size: 9px;
+    letter-spacing: 2.2px;
+  }
+  .compact .card-type {
+    font-size: 32px;
+    margin: 19px 0;
+  }
+  .compact .card-type > span {
+    font-size: 6px;
+    letter-spacing: 4.8px;
+  }
+  .compact .card-name {
+    font-size: 9px;
+  }
+  .compact .card-bottom small {
+    font-size: 6px;
+  }
+  .compact .card-valid {
+    font-size: 4px;
+  }
+  .card-link {
+    font-size: 10px;
+    margin-top: 19px;
+    min-height: 25px;
+  }
+  .quick-actions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 24px 0 12px;
+  }
+  .quick-actions > a,
+  .quick-actions > button {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 11px;
+    padding: 16px 5px 13px;
+    border-radius: 8px;
+    text-align: center;
+    min-height: 86px;
+  }
+  .quick-actions > * > svg:first-child {
+    width: 22px;
+    height: 22px;
+  }
+  .quick-actions > * > span {
+    font-size: 8px;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+  .dashboard-lower {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .section-heading {
+    margin: 28px 0 18px;
+    gap: 10px;
+  }
+  .section-heading .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.6px;
+  }
+  .section-heading h2 {
+    font-size: 29px;
+    margin-top: 6px;
+  }
+  .section-heading > .text-link {
+    font-size: 8px;
+    white-space: nowrap;
+    margin-top: 18px;
+    gap: 5px;
+  }
+  .section-heading > .text-link > svg {
+    width: 12px;
+    height: 12px;
+  }
+  .reservation-card {
+    padding: 19px 15px;
+    gap: 14px;
+  }
+  .reservation-date {
+    min-width: 50px;
+    min-height: 59px;
+  }
+  .reservation-date > strong {
+    font-size: 29px;
+  }
+  .reservation-date > span {
+    font-size: 7px;
+  }
+  .reservation-details > .eyebrow {
+    font-size: 6px;
+  }
+  .reservation-details h3 {
+    font-size: 24px;
+    line-height: 1.13;
+    margin: 5px 0 8px;
+  }
+  .reservation-details p {
+    font-size: 8px;
+    gap: 5px;
+  }
+  .reservation-details p > .status {
+    font-size: 8px;
+  }
+  .reservation-card > svg {
+    width: 12px;
+    height: 12px;
+  }
+  .concierge-card {
+    margin-top: 8px;
+    padding: 24px;
+    border-radius: 9px;
+  }
+  .concierge-card h3 {
+    font-size: 32px;
+  }
+  .concierge-card p {
+    font-size: 10px;
+    max-width: none;
+  }
+  .concierge-card > .text-link {
+    font-size: 9px;
+  }
+  .experience-grid {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 0 20px 12px;
+  }
+  .experience-card {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    max-width: 350px;
+  }
+  .experience-image {
+    height: 180px;
+  }
+  .experience-copy {
+    padding: 22px;
+  }
+  .experience-copy h3 {
+    font-size: 28px;
+  }
+  .experience-copy p {
+    font-size: 10px;
+  }
+  .experience-copy .text-link,
+  .experience-copy .locked-link {
+    font-size: 9px;
+  }
+  .benefits-block {
+    margin: 28px 0 0;
+    padding: 28px 23px;
+    border-radius: 10px;
+  }
+  .benefits-block > .eyebrow {
+    font-size: 8px;
+  }
+  .benefits-block > h2 {
+    font-size: 35px;
+  }
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin: 30px 0;
+  }
+  .benefits-grid > div {
+    position: relative;
+    padding-left: 40px;
+  }
+  .benefits-grid svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 23px;
+    height: 23px;
+  }
+  .benefits-grid h3 {
+    font-size: 26px;
+  }
+  .benefits-grid p {
+    font-size: 10px;
+    line-height: 1.9;
+  }
+  .benefits-block > .button {
+    width: 100%;
+  }
+  .benefit-note {
+    font-size: 9px;
+  }
+  .tabs {
+    gap: 25px;
+    margin-bottom: 20px;
+  }
+  .tabs > a {
+    font-size: 10px;
+    min-height: 48px;
+    white-space: nowrap;
+  }
+  .tabs span {
+    font-size: 7px;
+  }
+  .filter-pills {
+    gap: 7px;
+    margin-bottom: 20px;
+  }
+  .filter-pills > a {
+    padding: 8px 16px;
+    font-size: 9px;
+    min-height: 37px;
+    display: grid;
+    place-items: center;
+  }
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .service-image {
+    height: 190px;
+  }
+  .service-copy {
+    padding: 22px;
+  }
+  .service-copy h3 {
+    font-size: 29px;
+  }
+  .service-copy p {
+    font-size: 10px;
+    line-height: 1.9;
+  }
+  .service-bottom {
+    margin-top: 20px;
+  }
+  .service-bottom > .button.small {
+    font-size: 10px;
+    min-height: 44px;
+  }
+  .service-bottom > span {
+    font-size: 8px;
+  }
+  .credential-card {
+    margin: auto;
+    max-width: 460px;
+  }
+  .qr-section {
+    padding: 30px 28px 26px;
+  }
+  .qr-stage {
+    width: min(300px, 100%);
+  }
+  .qr-section > .button {
+    font-size: 11px;
+  }
+  .qr-expiry {
+    font-size: 11px;
+  }
+  .notice {
+    padding: 19px;
+    gap: 11px;
+  }
+  .notice p {
+    font-size: 10px;
+  }
+  .notice > svg {
+    width: 19px;
+    height: 19px;
+  }
+  .details-list > div {
+    padding: 13px 0;
+  }
+  .details-list strong {
+    font-size: 10px;
+  }
+  .details-list > div > span:first-child {
+    font-size: 10px;
+  }
+  .panel {
+    padding: 22px 20px;
+    border-radius: 10px;
+  }
+  .operational-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 5px;
+  }
+  .stat-card {
+    min-height: 120px;
+    padding: 20px;
+  }
+  .stat-card > strong {
+    font-size: 42px;
+  }
+  .stat-card > span {
+    font-size: 9px;
+    margin-top: 12px;
+  }
+  .stat-card > svg {
+    width: 18px;
+    height: 18px;
+    top: 19px;
+    right: 17px;
+  }
+  .page-heading:has(> .button) {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .page-heading > .button {
+    margin-top: 10px;
+    font-size: 10px;
+    min-height: 44px;
+  }
+  .admin-reception-banner {
+    padding: 26px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+  .admin-reception-banner h2 {
+    font-size: 36px;
+  }
+  .admin-reception-banner .eyebrow {
+    font-size: 7px;
+  }
+  .admin-reception-banner p {
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  .admin-reception-banner .button {
+    width: 100%;
+    font-size: 10px;
+  }
+  .admin-links {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .admin-links > a {
+    padding: 21px;
+  }
+  .admin-links h3 {
+    font-size: 26px;
+  }
+  .admin-panel {
+    padding: 16px 12px;
+  }
+  .admin-panel .search-bar {
+    margin: 0 5px 12px;
+  }
+  .admin-mobile-tabs {
+    gap: 7px;
+  }
+  .admin-mobile-tabs a {
+    font-size: 9px;
+    padding: 9px 13px;
+  }
+  td,
+  th {
+    padding: 14px 12px;
+  }
+  .admin-panel table {
+    min-width: 620px;
+  }
+  .reception-heading {
+    display: block;
+  }
+  .reception-heading h1 {
+    font-size: 27px;
+    gap: 10px;
+    flex-wrap: wrap;
+    line-height: 1.3;
+    margin-top: 10px;
+    letter-spacing: -0.5px;
+  }
+  .sans-heading {
+    font-size: 13px;
+    letter-spacing: 1.1px;
+  }
+  .reception-heading p {
+    font-size: 10px;
+    margin: 8px 0 15px;
+  }
+  .reception-heading > .demo-tag {
+    display: inline-block;
+    margin: 0;
+    font-size: 6px;
+  }
+  .reception-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .reception-visitor {
+    grid-column: 1/-1;
+    grid-row: 1;
+    padding: 24px 22px;
+  }
+  .reception-visitor > .mini-heading {
+    margin-bottom: 15px;
+  }
+  .reception-visitor .mini-heading > .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+  .reception-visitor .visitor-avatar {
+    width: 60px;
+    height: 60px;
+  }
+  .reception-visitor h2 {
+    font-size: 31px;
+  }
+  .reception-visitor .details-list {
+    margin: 18px 0 0;
+  }
+  .reception-visitor .details-list > div {
+    padding: 12px 0;
+  }
+  .reception-visitor .details-list > div > span:first-child {
+    font-size: 9px;
+  }
+  .reception-visitor .details-list strong {
+    font-size: 9px;
+  }
+  .reception-message {
+    padding: 15px;
+    margin-top: 15px;
+  }
+  .reception-message p {
+    font-size: 10px;
+    line-height: 1.85;
+  }
+  .robot-card {
+    padding: 18px 14px 0;
+    min-height: 300px;
+  }
+  .robot-head {
+    gap: 4px;
+  }
+  .robot-head > .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.5px;
+  }
+  .vip-small {
+    font-size: 5px;
+    letter-spacing: 0.3px;
+  }
+  .vip-small svg {
+    width: 8px;
+    height: 8px;
+  }
+  .robot-visual {
+    min-height: 175px;
+    margin-top: 10px;
+  }
+  .robot-svg {
+    width: 140px;
+    max-width: 100%;
+    height: 175px;
+  }
+  .robot-orbit {
+    width: 100px;
+    height: 100px;
+    top: 20px;
+    box-shadow:
+      0 0 0 15px #94ac7f0b,
+      0 0 0 30px #94ac7f0b;
+  }
+  .vip-robot .robot-orbit {
+    box-shadow:
+      0 0 0 15px #ccad5307,
+      0 0 0 30px #ccad5307;
+  }
+  .robot-title {
+    margin: 0 -4px 15px;
+  }
+  .robot-title h2 {
+    font-size: 23px;
+  }
+  .robot-title p {
+    font-size: 6px;
+    margin-top: 7px;
+  }
+  .robot-footer {
+    font-size: 6px;
+    padding: 13px 0;
+    gap: 6px;
+  }
+  .robot-footer > .pulse-dot {
+    width: 4px;
+    height: 4px;
+    flex-shrink: 0;
+  }
+  .simulation-panel {
+    padding: 23px 18px;
+  }
+  .simulation-panel > .section-heading {
+    display: block;
+    margin-bottom: 20px;
+  }
+  .simulation-panel .section-heading h2 {
+    font-size: 31px;
+  }
+  .simulation-panel .section-heading p {
+    font-size: 9px;
+    line-height: 1.9;
+  }
+  .simulation-panel .section-heading .connection {
+    display: flex;
+    margin-top: 16px;
+    font-size: 8px;
+  }
+  .simulation-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .simulation-controls label {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 9px;
+  }
+  .simulation-controls select {
+    font-size: 11px;
+    min-height: 44px;
+    max-width: 60%;
+  }
+  .simulation-controls > .text-button {
+    margin-left: 0;
+    font-size: 9px;
+  }
+  .scenario-buttons {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .scenario-button {
+    padding: 16px 40px 16px 55px;
+    min-height: 72px;
+    display: block;
+  }
+  .scenario-button > svg:first-child {
+    position: absolute;
+    left: 17px;
+    top: 23px;
+    width: 23px;
+    height: 23px;
+    margin: 0;
+  }
+  .scenario-button > strong {
+    font-size: 11px;
+    display: block;
+  }
+  .scenario-button > small {
+    font-size: 8px;
+    display: block;
+    margin-top: 4px;
+  }
+  .scenario-button > svg:last-child {
+    top: 28px;
+    right: 17px;
+  }
+  .flow-steps {
+    gap: 5px;
+    margin: 27px 0 22px;
+  }
+  .flow-steps > div {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 6px;
+    text-align: center;
+  }
+  .flow-steps > div:not(:last-child):after {
+    position: absolute;
+    top: 11px;
+    left: 70%;
+    width: 65%;
+    margin: 0;
+  }
+  .flow-steps > div > span {
+    min-width: 24px;
+    height: 24px;
+    font-size: 8px;
+  }
+  .simulation-note {
+    font-size: 8px;
+    align-items: flex-start;
+    line-height: 1.9;
+    gap: 7px;
+  }
+  .simulation-note > svg {
+    margin-top: 2px;
+  }
+  .real-validation h2 {
+    font-size: 30px;
+  }
+  .real-validation > .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.3px;
+  }
+  .real-validation > p {
+    font-size: 10px;
+    line-height: 1.9;
+  }
+  .real-validation form {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .real-validation input {
+    font-size: 16px;
+  }
+  .real-validation .button {
+    font-size: 10px;
+  }
+  .reception-visitor .flow-reason {
+    font-size: 10px;
+    margin-top: 14px;
+  }
+  .public-header {
+    padding: 20px;
+  }
+  .public-header > .button {
+    font-size: 9px;
+    padding: 10px 12px;
+    min-height: 40px;
+    gap: 7px;
+  }
+  .public-header > .button svg {
+    width: 14px;
+    height: 14px;
+  }
+  .public-content {
+    padding: 35px 20px;
+  }
+  .public-content .page-heading h1 {
+    font-size: 42px;
+    max-width: 330px;
+  }
+  .membership-options {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .membership-options > .panel {
+    padding: 30px 25px;
+  }
+  .membership-options h2 {
+    font-size: 36px;
+  }
+  .membership-options p {
+    font-size: 11px;
+  }
+  .membership-options .button {
+    font-size: 10px;
+    min-width: 100%;
+  }
+  .public-page > .landing-bottom {
+    margin-top: 15px;
+  }
+  .app-footer {
+    padding: 20px 20px 105px;
+    font-size: 7px;
+    gap: 12px;
+  }
+  .app-footer > span {
+    font-size: 6px;
+  }
+  .bottom-nav {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .bottom-nav > a {
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: 64px;
+    font-size: 8px;
+  }
+  .bottom-nav > a > svg {
+    width: 22px;
+    height: 22px;
+  }
+  .toasts {
+    left: 16px;
+    right: 16px;
+    bottom: 95px;
+    max-width: none;
+  }
+  .toast {
+    font-size: 11px;
+    line-height: 1.7;
+    padding: 14px 16px;
+  }
+  dialog {
+    max-height: 92svh;
+    padding: 25px 22px;
+    border-radius: 13px;
+    width: calc(100% - 24px);
+  }
+  .modal-heading {
+    margin-bottom: 23px;
+  }
+  .modal-heading h2 {
+    font-size: 32px;
+  }
+  .modal-heading .eyebrow {
+    font-size: 7px;
+  }
+  .modal-heading > .icon-button {
+    margin: -8px -9px 0 0;
+  }
+  .modal-service {
+    gap: 12px;
+    padding: 12px;
+  }
+  .modal-service img {
+    width: 58px;
+    height: 58px;
+  }
+  .modal-service h3 {
+    font-size: 24px;
+  }
+  .modal-service p {
+    font-size: 9px;
+  }
+  .modal-date {
+    gap: 10px;
+  }
+  .modal-date input {
+    font-size: 16px;
+    padding: 12px 10px;
+  }
+  .modal-date label {
+    font-size: 10px;
+  }
+  .time-slots {
+    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .time-slot span {
+    min-height: 45px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    padding: 10px 3px;
+  }
+  .slot-label {
+    font-size: 10px;
+  }
+  .booking-summary {
+    font-size: 9px;
+    padding: 18px 0;
+  }
+  .booking-summary strong {
+    font-size: 9px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .form-grid label {
+    font-size: 10px;
+    margin-bottom: 17px;
+  }
+  .form-grid input,
+  .form-grid select {
+    font-size: 16px;
+    min-height: 50px;
+  }
+  .form-grid select {
+    font-size: 12px;
+  }
+  .form-grid input[type="datetime-local"] {
+    font-size: 14px;
+  }
+  .modal-actions > .button {
+    font-size: 10px;
+    flex: 1;
+    padding: 13px 12px;
+  }
+  .profile-panel .details-list strong {
+    max-width: 65%;
+    font-size: 9px;
+  }
+  .page-loading {
+    min-height: 70svh;
+    font-size: 11px;
+  }
+  .page-error {
+    margin: 30px auto;
+    padding: 40px 20px;
+  }
+  .page-error h1 {
+    font-size: 36px;
+  }
+}
+@media (max-width: 359px) {
+  .hero-copy h1 {
+    font-size: 51px;
+  }
+  .hero-copy {
+    left: 22px;
+    right: 20px;
+  }
+  .page-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .page-heading h1 {
+    font-size: 35px;
+  }
+  .page-heading > .badge {
+    font-size: 7px;
+    padding: 3px 6px;
+  }
+  .quick-actions > * > span {
+    font-size: 7px;
+  }
+  .compact .card-type {
+    font-size: 28px;
+  }
+  .membership-card.compact {
+    padding: 23px;
+  }
+  .hero-copy > .eyebrow {
+    font-size: 6px;
+    letter-spacing: 1.7px;
+  }
+  .hero-copy p {
+    font-size: 10px;
+  }
+  .demo-bar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .demo-bar > a {
+    font-size: 0;
+  }
+  .demo-bar > a > svg {
+    width: 13px;
+    height: 13px;
+  }
+  .hero-note {
+    font-size: 7px;
+  }
+  .reservation-details h3 {
+    font-size: 21px;
+  }
+  .reception-heading h1 {
+    font-size: 25px;
+  }
+  .sans-heading {
+    font-size: 11px;
+  }
+  .robot-title h2 {
+    font-size: 20px;
+  }
+  .vip-small {
+    font-size: 4px;
+  }
+  .stats-grid {
+    gap: 9px;
+  }
+  .stat-card {
+    padding: 17px;
+  }
+  .stat-card > span {
+    font-size: 8px;
+  }
+  .qr-section {
+    padding: 24px 20px;
+  }
+  .qr-card-top {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 7px;
+  }
+  .qr-live {
+    white-space: nowrap;
+  }
+  .hero-actions .button {
+    font-size: 10px;
+  }
+}
+@media (max-width: 700px) {
+  .page-heading p {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .page-heading .eyebrow {
+    font-size: 8px;
+  }
+  .header-tools .connection {
+    font-size: 8px;
+  }
+  .demo-bar {
+    font-size: 7.5px;
+  }
+  .demo-bar > a {
+    font-size: 7px;
+  }
+  .quick-actions > * > span {
+    font-size: 9px;
+  }
+  .bottom-nav > a {
+    font-size: 10px;
+  }
+  .dashboard-hero-copy p {
+    font-size: 11px;
+  }
+  .dashboard-hero-copy > .eyebrow {
+    font-size: 8px;
+  }
+  .membership-panel .mini-heading h3 {
+    font-size: 12px;
+  }
+  .section-heading .eyebrow {
+    font-size: 8px;
+  }
+  .concierge-card p,
+  .experience-copy p,
+  .service-copy p {
+    font-size: 12px;
+  }
+  .reservation-details p {
+    font-size: 10px;
+  }
+  .reservation-details p > .status {
+    font-size: 9px;
+  }
+  .experience-copy .text-link,
+  .experience-copy .locked-link {
+    font-size: 10px;
+  }
+  .auth-box > p {
+    font-size: 12px;
+  }
+  .auth-help {
+    font-size: 11px !important;
+  }
+  .qr-expiry {
+    font-size: 11px;
+  }
+  .secure-note {
+    font-size: 9px;
+  }
+  .real-validation > p {
+    font-size: 12px;
+  }
+  .simulation-panel .section-heading p {
+    font-size: 11px;
+  }
+  .simulation-note {
+    font-size: 10px;
+  }
+  .scenario-button strong {
+    font-size: 12px;
+  }
+  .scenario-button small {
+    font-size: 10px;
+  }
+  .reception-message p {
+    font-size: 12px;
+  }
+  .robot-title p {
+    font-size: 8px;
+    line-height: 1.7;
+  }
+  .flow-steps > div {
+    font-size: 8px;
+  }
+  .details-list > div > span:first-child {
+    font-size: 11px;
+  }
+  .details-list strong {
+    font-size: 11px;
+  }
+  .reception-visitor .details-list > div > span:first-child,
+  .reception-visitor .details-list strong {
+    font-size: 10px;
+  }
+}
+/* Comfortable tablet navigation and safe areas on modern phones. */
+@media (max-width: 960px) {
+  :root {
+    --mobile-nav-height: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+  html {
+    scroll-padding-top: 88px;
+    scroll-padding-bottom: var(--mobile-nav-height);
+  }
+  .app-layout {
+    padding-bottom: var(--mobile-nav-height);
+  }
+  .app-header {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .app-footer {
+    padding-bottom: 24px;
+  }
+  .header-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 12px;
+  }
+  .bottom-nav {
+    padding: 10px max(12px, env(safe-area-inset-right, 0px))
+      calc(10px + env(safe-area-inset-bottom, 0px))
+      max(12px, env(safe-area-inset-left, 0px));
+    gap: 4px;
+    background: #fcfcf8f5;
+    box-shadow: 0 -4px 24px #102c2409;
+  }
+  .bottom-nav > a {
+    flex: 1;
+    min-width: 0;
+    min-height: 58px;
+    padding: 8px 4px;
+    gap: 5px;
+    font-size: 11px;
+    border-radius: 14px;
+    color: #667365;
+  }
+  .bottom-nav > a.active {
+    background: #eaf0e6;
+    color: var(--forest);
+    font-weight: 800;
+  }
+  .bottom-nav > a.active:before {
+    display: none;
+  }
+  .bottom-nav > a svg {
+    width: 23px;
+    height: 23px;
+  }
+  .toasts {
+    bottom: calc(var(--mobile-nav-height) + 12px);
+  }
+  .landing-nav {
+    gap: 14px;
+  }
+  .landing-nav > .nav-access {
+    margin-left: auto;
+  }
+  .mobile-menu {
+    display: block;
+    position: relative;
+    color: white;
+  }
+  .mobile-menu summary {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #ffffff55;
+    border-radius: 12px;
+    cursor: pointer;
+    list-style: none;
+    background: #ffffff0d;
+  }
+  .mobile-menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .mobile-menu summary svg:last-child,
+  .mobile-menu[open] summary svg:first-child {
+    display: none;
+  }
+  .mobile-menu[open] summary svg:last-child {
+    display: block;
+  }
+  .landing-nav .mobile-menu nav {
+    position: absolute;
+    right: 0;
+    top: 58px;
+    width: min(340px, calc(100vw - 40px));
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid #e2e6da;
+    border-radius: 18px;
+    background: var(--ivory);
+    color: var(--forest);
+    box-shadow: 0 16px 48px #08201940;
+  }
+  .mobile-menu nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 52px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .mobile-menu nav a:first-child {
+    color: var(--forest);
+  }
+  .mobile-menu nav a:focus-visible,
+  .mobile-menu nav a:hover {
+    background: #e8eddf;
+  }
+  .reception-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .reception-visitor {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .scenario-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .member-grid,
+  .dashboard-lower {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .dashboard-hero-copy .button {
+    width: 100%;
+  }
+  .experience-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile reading sizes, stacked content and thumb-friendly controls. */
+@media (max-width: 700px) {
+  body {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+  .page-content {
+    padding: 28px max(20px, env(safe-area-inset-right, 0px)) 32px
+      max(20px, env(safe-area-inset-left, 0px));
+  }
+  .page-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-heading > div {
+    flex: 1 1 100%;
+  }
+  .page-heading h1 {
+    font-size: clamp(34px, 9vw, 44px);
+    line-height: 1.08;
+  }
+  .page-heading > .badge {
+    position: static;
+    margin: 0;
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+  .page-heading p,
+  .auth-box > p,
+  .landing-intro > p,
+  .membership-options p,
+  .notice p,
+  .benefits-grid p,
+  .experience-copy p,
+  .service-copy p,
+  .concierge-card p,
+  .real-validation > p,
+  .simulation-panel .section-heading p,
+  .reception-message p {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+  .page-heading :is(.eyebrow),
+  .section-heading .eyebrow,
+  .eyebrow,
+  .auth-box > .eyebrow,
+  .service-copy > .eyebrow,
+  .dashboard-hero-copy > .eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+  }
+  .button,
+  .button.small,
+  .page-heading > .button,
+  .dashboard-hero-copy .button,
+  .hero-actions .button,
+  .service-bottom > .button.small,
+  .qr-section > .button,
+  .real-validation .button,
+  .membership-options .button,
+  .admin-reception-banner .button,
+  .modal-actions > .button {
+    font-size: 13px;
+    min-height: 50px;
+    padding: 14px 18px;
+  }
+  .text-link,
+  .text-button,
+  .card-link,
+  .back-link,
+  .reservation-actions button,
+  .concierge-card > .text-link,
+  .experience-copy .text-link,
+  .experience-copy .locked-link {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  input,
+  select,
+  textarea,
+  .form-grid input,
+  .form-grid select,
+  .form-grid input[type="datetime-local"],
+  .simulation-controls select,
+  .search-bar input {
+    min-height: 50px;
+    font-size: 16px;
+  }
+  input::placeholder,
+  .auth-box input::placeholder {
+    font-size: 13px;
+  }
+  label,
+  .form-grid label,
+  .auth-box label,
+  .modal-date label,
+  .slot-label {
+    font-size: 13px;
+  }
+  .form-error,
+  .toast,
+  .confirm-copy,
+  .demo-disclaimer {
+    font-size: 13px;
+  }
+  .landing-nav {
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
+    gap: 10px;
+    z-index: 40;
+  }
+  .landing-nav .brand {
+    font-size: 9px;
+    gap: 8px;
+    letter-spacing: 1px;
+  }
+  .landing-nav .brand-mark {
+    font-size: 35px;
+  }
+  .landing-nav .brand small {
+    font-size: 5px;
+    letter-spacing: 0.7px;
+  }
+  .nav-access {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 11px;
+    border-radius: 12px;
+  }
+  .nav-access > svg {
+    display: none;
+  }
+  .landing-hero {
+    display: flex;
+    align-items: center;
+    min-height: max(650px, 100svh);
+    height: auto;
+    max-height: none;
+    padding: 140px 24px 110px;
+  }
+  .hero-copy {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: 520px;
+  }
+  .hero-copy h1 {
+    font-size: clamp(64px, 17vw, 104px);
+    margin: 22px 0;
+    line-height: 0.96;
+  }
+  .hero-copy > .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+  .hero-copy p {
+    font-size: 14px;
+    max-width: 330px;
+  }
+  .hero-actions {
+    max-width: 380px;
+    margin-top: 26px;
+  }
+  .hero-note {
+    font-size: 10px;
+    line-height: 1.7;
+  }
+  .hero-footer {
+    font-size: 9px;
+    bottom: 28px;
+  }
+  .hero-footer > span:first-child {
+    font-size: 10px;
+  }
+  .vertical-note {
+    display: none;
+  }
+  .landing-intro {
+    padding: 52px 24px;
+  }
+  .intro-features a {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    padding: 22px 18px;
+  }
+  .intro-features {
+    gap: 12px;
+  }
+  .intro-features small {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .landing-bottom p,
+  .landing-bottom > span,
+  .landing-bottom > a,
+  .auth-copyright {
+    font-size: 10px;
+  }
+  .auth-main {
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 24px 24px;
+  }
+  .auth-box {
+    padding: 28px 0;
+  }
+  .mobile-brand {
+    margin-bottom: 32px;
+  }
+  .auth-box h1 {
+    font-size: clamp(36px, 10vw, 46px);
+  }
+  .auth-tabs {
+    gap: 20px;
+    font-size: 13px;
+  }
+  .auth-tabs > a {
+    min-height: 48px;
+  }
+  .auth-tabs a span {
+    font-size: 9px;
+  }
+  .demo-profile {
+    padding: 16px;
+    min-height: 80px;
+    border-radius: 14px;
+  }
+  .demo-profile strong {
+    font-size: 14px;
+  }
+  .demo-profile small,
+  .auth-help {
+    font-size: 12px !important;
+  }
+  .secure-note {
+    font-size: 11px;
+    align-items: flex-start;
+    margin-top: 24px;
+  }
+  .app-header {
+    padding-left: 20px;
+    padding-right: 20px;
+    min-height: 72px;
+  }
+  .header-tools {
+    gap: 10px;
+  }
+  .header-tools .connection {
+    font-size: 9px;
+    max-width: 88px;
+    white-space: normal;
+    line-height: 1.4;
+  }
+  .demo-bar {
+    padding: 10px 20px;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    font-size: 10px;
+  }
+  .demo-bar > span:first-child {
+    font-size: 9px;
+  }
+  .demo-bar > a {
+    font-size: 10px;
+    min-height: 32px;
+  }
+  .member-grid,
+  .dashboard-lower,
+  .experience-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .dashboard-hero,
+  .membership-panel,
+  .panel,
+  .concierge-card,
+  .benefits-block,
+  .experience-card,
+  .service-card {
+    border-radius: 18px;
+  }
+  .dashboard-hero {
+    min-height: 330px;
+  }
+  .dashboard-hero-copy {
+    padding: 28px 24px 36px;
+  }
+  .dashboard-hero-copy h2 {
+    font-size: clamp(38px, 11vw, 48px);
+  }
+  .dashboard-hero-copy p {
+    font-size: 13px;
+    max-width: 290px;
+  }
+  .hero-mini-note {
+    display: none;
+  }
+  .membership-panel {
+    padding: 22px;
+  }
+  .membership-panel .mini-heading h3 {
+    font-size: 14px;
+  }
+  .status,
+  .reservation-details p > .status {
+    font-size: 11px;
+  }
+  .membership-card.compact {
+    padding: 24px;
+    aspect-ratio: auto;
+    min-height: 190px;
+  }
+  .compact .card-type {
+    font-size: clamp(29px, 8vw, 38px);
+    margin: 18px 0;
+  }
+  .compact .card-name {
+    font-size: 11px;
+  }
+  .compact .card-bottom small {
+    font-size: 9px;
+  }
+  .compact .card-valid {
+    display: none;
+  }
+  .card-link {
+    margin-top: 14px;
+  }
+  .quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 24px 0 12px;
+  }
+  .quick-actions > a,
+  .quick-actions > button {
+    align-items: flex-start;
+    min-height: 100px;
+    padding: 18px;
+    border-radius: 16px;
+    text-align: left;
+    background: #fff;
+  }
+  .quick-actions > * > span {
+    font-size: 12px;
+  }
+  .quick-actions > * > svg:first-child {
+    width: 24px;
+    height: 24px;
+  }
+  .section-heading {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    margin: 28px 0 16px;
+  }
+  .section-heading h2 {
+    font-size: 31px;
+  }
+  .section-heading > .text-link {
+    margin: 0;
+    font-size: 12px;
+  }
+  .reservation-card {
+    padding: 18px 16px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+  .reservation-date {
+    min-width: 48px;
+  }
+  .reservation-date > span,
+  .reservation-details > .eyebrow {
+    font-size: 10px;
+  }
+  .reservation-details h3 {
+    font-size: 26px;
+  }
+  .reservation-details p {
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 6px;
+  }
+  .reservation-actions {
+    flex-wrap: wrap;
+    gap: 4px 20px;
+  }
+  .experience-grid {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .experience-card {
+    max-width: none;
+  }
+  .experience-image,
+  .service-image {
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+  .experience-image > span,
+  .service-image > span {
+    font-size: 10px;
+  }
+  .service-bottom {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .service-bottom > span,
+  .locked-link {
+    font-size: 12px;
+  }
+  .tabs {
+    gap: 24px;
+  }
+  .tabs > a {
+    font-size: 13px;
+    min-height: 50px;
+  }
+  .tabs span {
+    font-size: 11px;
+  }
+  .filter-pills {
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+  .filter-pills > a {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 10px 16px;
+    flex-shrink: 0;
+  }
+  .credential-card {
+    width: 100%;
+  }
+  .qr-section > canvas {
+    height: auto !important;
+  }
+  .qr-expiry,
+  .qr-placeholder p {
+    font-size: 12px;
+  }
+  .qr-note {
+    font-size: 11px;
+  }
+  .details-list > div {
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .details-list > div > span:first-child,
+  .details-list strong,
+  .profile-panel .details-list strong,
+  .reception-visitor .details-list > div > span:first-child,
+  .reception-visitor .details-list strong {
+    font-size: 12px;
+  }
+  .stat-card > span {
+    font-size: 12px;
+  }
+  .admin-reception-banner p {
+    font-size: 13px;
+  }
+  .admin-mobile-tabs a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .table-scroll {
+    border-radius: 12px;
+    border: 1px solid var(--line);
+  }
+  .table-scroll::before {
+    content: "Desliza para ver toda la información →";
+    display: block;
+    position: sticky;
+    left: 0;
+    width: fit-content;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  table {
+    min-width: 620px;
+    font-size: 12px;
+  }
+  td,
+  td strong {
+    font-size: 12px;
+  }
+  th,
+  td small {
+    font-size: 11px;
+  }
+  .reception-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reception-visitor {
+    grid-column: auto;
+  }
+  .robot-card {
+    min-height: 300px;
+  }
+  .robot-title p,
+  .robot-footer,
+  .robot-head > .eyebrow {
+    font-size: 11px;
+  }
+  .vip-small {
+    font-size: 10px;
+  }
+  .scenario-buttons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .scenario-button strong {
+    font-size: 14px;
+  }
+  .scenario-button small,
+  .simulation-note {
+    font-size: 12px;
+  }
+  .simulation-controls label {
+    display: block;
+    font-size: 13px;
+  }
+  .simulation-controls select {
+    max-width: none;
+    margin: 8px 0 0;
+  }
+  .simulation-controls > .text-button {
+    font-size: 12px;
+  }
+  .flow-steps {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .flow-steps > div {
+    flex-direction: row;
+    font-size: 12px;
+    gap: 12px;
+  }
+  .flow-steps > div:not(:last-child):after {
+    display: none;
+  }
+  .flow-steps > div > span {
+    min-width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+  dialog,
+  dialog.modal-wide {
+    width: 100%;
+    max-width: none;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    border-radius: 24px 24px 0 0;
+    padding: 28px 22px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .modal-heading h2 {
+    font-size: 32px;
+  }
+  .modal-heading .eyebrow {
+    font-size: 10px;
+  }
+  .modal-service {
+    border-radius: 14px;
+  }
+  .modal-service p {
+    font-size: 12px;
+  }
+  .modal-actions,
+  .booking-summary {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .modal-actions > .button {
+    flex-basis: 100%;
+  }
+  .booking-summary,
+  .booking-summary strong {
+    font-size: 12px;
+  }
+  .time-slot span {
+    min-height: 50px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .public-header > .button {
+    font-size: 11px;
+    min-height: 44px;
+  }
+  .membership-options ul {
+    padding-left: 20px;
+    font-size: 13px;
+  }
+  .app-footer {
+    font-size: 10px;
+    flex-wrap: wrap;
+  }
+  .app-footer > span {
+    font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Desktop legibility refinement */
+@media (min-width: 961px) {
+  .sidebar .nav-item {
+    font-size: 12px;
+  }
+  .sidebar-section {
+    font-size: 8px;
+    letter-spacing: 1.8px;
+  }
+  .header-breadcrumb {
+    font-size: 10px;
+  }
+  .page-heading p {
+    font-size: 12px;
+  }
+  .quick-actions > * > span {
+    font-size: 12px;
+  }
+  .dashboard-hero-copy p {
+    font-size: 12px;
+    line-height: 1.85;
+    max-width: 300px;
+  }
+  .dashboard-hero-copy .button {
+    min-height: 42px;
+    font-size: 11px;
+  }
+  .card-link {
+    font-size: 10px;
+  }
+  .mini-heading h3 {
+    font-size: 12px;
+  }
+  .concierge-card p {
+    font-size: 12px;
+  }
+  .concierge-card .text-link {
+    font-size: 10px;
+  }
+  .reservation-details h3 {
+    font-size: 24px;
+  }
+  .reservation-details p {
+    font-size: 10px;
+  }
+  .experience-copy p,
+  .service-copy p {
+    font-size: 11px;
+  }
+  .experience-copy .text-link,
+  .experience-copy .locked-link {
+    font-size: 10px;
+  }
+  .section-heading p {
+    font-size: 11px;
+  }
+}
+
+/* Club map responsive */
+@media (max-width: 1180px) {
+  .map-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .map-side {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: start;
+    gap: 16px;
+  }
+  .map-route-panel h2 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 960px) {
+  .map-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .map-banner {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .map-banner-copy {
+    padding: 28px;
+  }
+  .map-banner-visual {
+    height: 230px;
+    min-height: 0;
+  }
+  .map-banner-visual .club-map-svg {
+    min-height: 0;
+  }
+  .map-banner-title {
+    font-size: 38px;
+  }
+}
+@media (max-width: 700px) {
+  .map-page-heading {
+    margin-bottom: 18px;
+  }
+  .map-layout {
+    gap: 14px;
+  }
+  .map-card {
+    padding: 14px;
+    border-radius: 18px;
+  }
+  .map-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 0 1px 12px;
+    margin-bottom: 12px;
+  }
+  .map-card-head h2 {
+    font-size: 24px;
+  }
+  .map-card-head .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.9px;
+  }
+  .map-active-pill {
+    width: 100%;
+    border-radius: 12px;
+    padding: 9px 11px;
+    font-size: 10px;
+    white-space: normal;
+  }
+  .map-active-pill small {
+    font-size: 9px;
+  }
+  .map-canvas {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #b9c4ae transparent;
+    overscroll-behavior: auto;
+  }
+  .map-canvas .club-map-svg {
+    width: 660px;
+    min-width: 660px;
+    height: auto;
+  }
+  .map-canvas .map-label--serif {
+    font-size: 16px;
+  }
+  .map-canvas .map-label--zone {
+    font-size: 14px;
+  }
+  .map-canvas .map-label--field {
+    font-size: 26px;
+  }
+  .map-canvas .map-label--tiny {
+    font-size: 9px;
+  }
+  .map-canvas .map-label--detail {
+    font-size: 8px;
+  }
+  .map-legend {
+    gap: 7px 14px;
+    font-size: 9px;
+  }
+  .map-legend:after {
+    content: "Desliza el mapa para explorar →";
+    flex-basis: 100%;
+    font-size: 9px;
+    letter-spacing: 0.2px;
+    color: #99a18f;
+  }
+  .map-caption {
+    font-size: 10px;
+    line-height: 1.7;
+  }
+  .map-side {
+    gap: 14px;
+  }
+  .map-route-card,
+  .map-destinations-card {
+    border-radius: 16px;
+  }
+  .map-route-card {
+    padding: 20px 18px;
+  }
+  .map-route-panel h2 {
+    font-size: 34px;
+  }
+  .map-route-place {
+    font-size: 11px;
+  }
+  .map-route-reservation {
+    font-size: 10px;
+  }
+  .map-route-stats span {
+    font-size: 10px;
+  }
+  .map-steps strong {
+    font-size: 12px;
+  }
+  .map-steps small {
+    font-size: 11px;
+  }
+  .map-route-actions .button {
+    font-size: 12px;
+    min-height: 48px;
+  }
+  .map-route-actions .text-link {
+    font-size: 10px;
+  }
+  .map-destinations-card {
+    padding: 18px;
+  }
+  .map-destinations-head h2 {
+    font-size: 25px;
+  }
+  .map-destination {
+    min-height: 58px;
+    padding: 8px 9px;
+  }
+  .map-destination-copy strong {
+    font-size: 11px;
+  }
+  .map-destination-copy small {
+    font-size: 9px;
+  }
+  .map-destination-note {
+    font-size: 9px;
+  }
+  .map-banner {
+    margin: 4px 0 24px;
+    border-radius: 16px;
+  }
+  .map-banner-copy {
+    gap: 8px;
+    padding: 24px 22px 20px;
+  }
+  .map-banner .eyebrow.light {
+    font-size: 8px;
+  }
+  .map-banner-title {
+    font-size: 33px;
+  }
+  .map-banner-text {
+    font-size: 11px;
+    line-height: 1.75;
+    max-width: none;
+  }
+  .map-banner-link {
+    margin-top: 3px;
+    font-size: 9px;
+    letter-spacing: 1.2px;
+  }
+  .map-banner-visual {
+    height: 205px;
+  }
+  .map-banner-pin {
+    left: 14px;
+    bottom: 14px;
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+}
+@media (max-width: 359px) {
+  .map-card {
+    padding: 11px;
+  }
+  .map-canvas .club-map-svg {
+    width: 600px;
+    min-width: 600px;
+  }
+  .map-destination {
+    gap: 7px;
+    padding: 7px;
+  }
+  .map-destination-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .map-destination-copy strong {
+    font-size: 10px;
+  }
+  .map-destination-copy small {
+    font-size: 8px;
+  }
+  .map-banner-copy {
+    padding: 20px 18px;
+  }
+  .map-banner-title {
+    font-size: 30px;
+  }
+}
