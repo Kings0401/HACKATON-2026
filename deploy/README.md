@@ -8,7 +8,7 @@ Todo se ejecuta en **PowerShell**, desde la carpeta del proyecto (`C:\Proyectos\
 | --- | --- |
 | `robot_agent/` (agente ROS 2: cámara, micrófono, voz, gestos opcionales) | `backend/` FastAPI conectado a Supabase |
 | `vision/` (rostro + QR) y los modelos ONNX | App web (`npm run dev`) |
-| `install.sh`, `start.sh`, `stop.sh`, `status.sh`, `voice_mode.sh` | |
+| `install.sh`, `start.sh`, `stop.sh`, `status.sh`, `voice_mode.sh`, `camaras.py` | |
 | `robot.env` con la clave del robot (permisos 600) | |
 
 Las fotos de reconocimiento **no se copian desde el PC**: el robot consulta cada 5 segundos la versión de la galería (`/robot/gallery`). Si cambia, descarga solo lo nuevo y actualiza esas personas en caliente. Un miembro con foto subida desde *Admin → Personas* queda reconocible en segundos, sin reiniciar; si se borra su foto, sale de la galería.
@@ -29,26 +29,48 @@ Las fotos de reconocimiento **no se copian desde el PC**: el robot consulta cada
    icacls "$env:USERPROFILE\.ssh\id_ed25519" /inheritance:r /grant:r "$($env:USERNAME):F" "SYSTEM:F"
    ```
 
-## Cada vez (3 ventanas)
+## Cada vez: un solo comando
+
+Encienda el robot, conecte el cable y ejecute:
 
 ```powershell
-# Ventana 1 · backend (déjela abierta)
-.\deploy\iniciar_backend.ps1
-
-# Ventana 2 · app web (déjela abierta)
-npm run dev
-
-# Ventana 3 · subir e iniciar el agente en el robot
-.\deploy\desplegar_robot.ps1
+.\deploy\iniciar_todo.ps1
 ```
 
-La primera instalación tarda unos minutos (OpenCV y modelo de voz en español). Las siguientes solo suben el código y reinician.
+El script hace todo en orden y se detiene con un mensaje claro si algo falla:
+
+1. Revisa el cable y asigna la IP `10.0.1.2` si falta (Windows pide permiso).
+2. Abre el backend en una ventana nueva y espera a que responda.
+3. Abre la app web en otra ventana (`npm run dev`).
+4. Sube el código al robot e inicia el agente con la cámara de la frente.
+5. Abre el navegador en **Admin → Robots**.
+
+Si PowerShell bloquea scripts: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
+La primera instalación en el robot tarda unos minutos (OpenCV y modelo de voz en español). Las siguientes solo suben el código y reinician.
+
+Para hacerlo por partes (tres ventanas): `.\deploy\iniciar_backend.ps1`, `npm run dev` y `.\deploy\desplegar_robot.ps1`.
+
+## Cámara
+
+El robot usa por defecto la cámara **de la frente** (`-Camara frente`). Al arrancar revisa qué cámaras publica el robot y elige en este orden: la RGB frontal de interacción (si el firmware la publica), la estéreo frontal izquierda y por último la RGB-D. El registro muestra cuál eligió (`status.sh`: «Cámara elegida»).
+
+Con el firmware que tenía el robot el 24-10-2026 no aparecía una cámara de interacción aparte, así que "frente" eligió la **estéreo frontal**. Para confirmar con sus propios ojos cuál es cuál:
+
+```powershell
+.\deploy\desplegar_robot.ps1 -ProbarCamaras     # trae una foto de cada cámara a deploy\capturas
+.\deploy\desplegar_robot.ps1 -Camara rgbd       # usar otra: frente | estereo | rgbd | trasera | /topic/exacto
+.\deploy\desplegar_robot.ps1 -SoloReiniciar -Camara estereo   # cambiar de cámara sin volver a subir
+```
+
+Las cámaras de 2048 px se reducen a 1280 px antes de analizar, para que el reconocimiento siga siendo rápido.
 
 Abra la app, inicie sesión con la cuenta ADMIN (*Mi membresía*, no *Explorar demo*) y entre a **Admin → Robots**: robot en línea, cámara en vivo, micrófono, transcripción, decisión y ruta. Sin sesión ADMIN la página muestra al menos si el robot está conectado.
 
 ## Opciones
 
 ```powershell
+.\deploy\iniciar_todo.ps1 -Camara estereo -Gestos   # las mismas opciones sirven en iniciar_todo
 .\deploy\desplegar_robot.ps1 -Gestos         # saluda con el brazo y da la mano al VIP autorizado
 .\deploy\desplegar_robot.ps1 -SoloReiniciar  # reinicia sin volver a subir
 .\deploy\desplegar_robot.ps1 -Reinstalar     # repite la instalación de dependencias

@@ -36,6 +36,41 @@ try:  # Mensajes del SDK AimDK (compilados desde aimdk_msgs del SDK del robot).
 except ImportError:  # el agente sigue funcionando sin audio, TTS ni gestos
     AIMDK = False
 
+# Cámaras con nombre. "frente" prioriza la cámara RGB frontal de interacción
+# (la de la frente, pensada para reconocer personas); si este firmware no la
+# publica, usa la estéreo frontal y por último la RGB-D. Ver camera_candidates().
+SENSOR = "/aima/hal/sensor"
+CAMERA_PRESETS = {
+    "frente": ("interaction", "rgb_head_front", "stereo_head_front_left", "rgbd_head_front"),
+    "interaccion": ("interaction", "rgb_head_front"),
+    "estereo": ("stereo_head_front_left",),
+    "rgbd": ("rgbd_head_front",),
+    "trasera": ("rgb_head_rear",),
+}
+# Si no se puede consultar la lista de topics, se usa el primero documentado.
+CAMERA_FALLBACK = {
+    "frente": f"{SENSOR}/stereo_head_front_left/rgb_image/compressed",
+    "interaccion": f"{SENSOR}/stereo_head_front_left/rgb_image/compressed",
+    "estereo": f"{SENSOR}/stereo_head_front_left/rgb_image/compressed",
+    "rgbd": f"{SENSOR}/rgbd_head_front/rgb_image/compressed",
+    "trasera": f"{SENSOR}/rgb_head_rear/rgb_image/compressed",
+}
+MAX_ANALYSIS_WIDTH = 1280  # las cámaras de 2048 px se reducen para analizar más rápido
+
+
+def camera_candidates(available: list[str], choice: str) -> str:
+    """Topic de cámara para un nombre ("frente", "rgbd"…) o un topic explícito."""
+    if choice.startswith("/"):
+        return choice
+    keys = CAMERA_PRESETS.get(choice, CAMERA_PRESETS["frente"])
+    compressed = sorted(t for t in available if t.endswith("/compressed") and "depth" not in t)
+    for key in keys:
+        for topic in compressed:
+            if key in topic and "h265" not in topic:
+                return topic
+    return CAMERA_FALLBACK.get(choice, CAMERA_FALLBACK["frente"])
+
+
 # Gestos de brazo del SDK (McPresetMotion / McControlArea).
 WAVE_HAND, SHAKE_HAND, RIGHT_HAND = 1002, 1003, 2
 
@@ -175,7 +210,8 @@ class ReceptionAgentNode(Node):
         p = self.declare_parameter
         backend_url = p("backend_url", "http://10.0.1.2:8000").value
         robot_id = p("robot_id", "robot1").value
-        camera_topic = p("camera_topic", "/aima/hal/sensor/rgbd_head_front/rgb_image/compressed").value
+        camera_choice = p("camera", "frente").value  # frente | estereo | rgbd | trasera | topic
+        camera_topic = self._pick_camera(camera_choice)
         audio_topic = p("audio_topic", "/agent/process_audio_output").value
         registro = p("registro_dir", "/data/nclub/dataset/registro").value
         tts_enabled = p("tts_enabled", False).value
@@ -230,6 +266,21 @@ class ReceptionAgentNode(Node):
         else:
             self.get_logger().warning("aimdk_msgs no está disponible: voz y TTS deshabilitados.")
         self.get_logger().info(f"Cámara: {camera_topic} · Audio: {audio_topic} · Backend: {backend_url}")
+
+    def _pick_camera(self, choice: str) -> str:
+        """Elige la cámara entre los topics que el robot publica de verdad."""
+        available: list[str] = []
+        deadline = time.time() + 6.0
+        while time.time() < deadline:  # el descubrimiento DDS tarda unos segundos
+            available = [name for name, _ in self.get_topic_names_and_types() if name.startswith(SENSOR)]
+            if any(t.endswith("/compressed") for t in available):
+                break
+            time.sleep(0.5)
+        cameras = sorted(t for t in available if t.endswith("/rgb_image/compressed"))
+        topic = camera_candidates(available, choice)
+        self.get_logger().info(f"Cámaras disponibles: {cameras or 'ninguna detectada aún'}")
+        self.get_logger().info(f"Cámara elegida ({choice}): {topic}")
+        return topic
 
     def _mic_status(self) -> dict:
         status = self.agent.status()
@@ -319,10 +370,13 @@ class ReceptionAgentNode(Node):
 
     def _push(self, frame) -> None:
         if frame is not None:
-            if self.rotate:
-                import cv2
+            import cv2
 
+            if self.rotate:
                 frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+            if frame.shape[1] > MAX_ANALYSIS_WIDTH:
+                scale = MAX_ANALYSIS_WIDTH / frame.shape[1]
+                frame = cv2.resize(frame, (MAX_ANALYSIS_WIDTH, int(frame.shape[0] * scale)))
             self.frames.push(frame)
 
     def _on_compressed(self, msg: CompressedImage) -> None:

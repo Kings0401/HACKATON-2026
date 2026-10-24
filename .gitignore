@@ -17,3 +17,6 @@ vision/models/*.onnx
 # Entregas originales: contienen claves, entorno de macOS y fotografías
 nclub-backend.zip
 nclub-vision.zip
+
+# Fotos de prueba de las cámaras del robot
+deploy/capturas/

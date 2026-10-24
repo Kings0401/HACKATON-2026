@@ -2,13 +2,14 @@
   Sube el agente N Club al AGIBOT X2 y lo inicia, conectado al backend de este PC.
 
   Uso (PowerShell, desde la carpeta del proyecto):
-    .\deploy\desplegar_robot.ps1                 # sube, instala (primera vez) e inicia
-    .\deploy\desplegar_robot.ps1 -Gestos         # además saluda con el brazo
-    .\deploy\desplegar_robot.ps1 -Reinstalar     # fuerza reinstalar dependencias
-    .\deploy\desplegar_robot.ps1 -SoloReiniciar  # no sube nada; reinicia el agente
+    .\deploy\desplegar_robot.ps1                    # sube, instala (1.ª vez) e inicia con la cámara de la frente
+    .\deploy\desplegar_robot.ps1 -Camara rgbd       # otra cámara: frente | estereo | rgbd | trasera | /topic
+    .\deploy\desplegar_robot.ps1 -ProbarCamaras     # trae una foto de cada cámara a deploy\capturas
+    .\deploy\desplegar_robot.ps1 -Gestos            # además saluda con el brazo
+    .\deploy\desplegar_robot.ps1 -Reinstalar        # fuerza reinstalar dependencias
+    .\deploy\desplegar_robot.ps1 -SoloReiniciar     # no sube nada; reinicia el agente
 
-  Requisitos: cable al puerto SDK, este PC con IP 10.0.1.2, acceso SSH por llave
-  (ver deploy\README.md) y el backend corriendo (.\deploy\iniciar_backend.ps1).
+  Para levantar todo (backend + web + robot) de una vez: .\deploy\iniciar_todo.ps1
 #>
 param(
   [string]$Robot = "10.0.1.41",
@@ -16,15 +17,18 @@ param(
   [string]$PcIp = "10.0.1.2",
   [int]$Puerto = 8000,
   [string]$RobotId = "robot1",
+  [string]$Camara = "frente",
   [switch]$Gestos,
   [switch]$SinVoz,
   [switch]$Reinstalar,
-  [switch]$SoloReiniciar
+  [switch]$SoloReiniciar,
+  [switch]$ProbarCamaras
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $destino = "$Usuario@$Robot"
 $ssh = @("-o", "BatchMode=yes", "-o", "ConnectTimeout=10")
+$tar = Join-Path $env:SystemRoot "System32\tar.exe"  # el tar de Windows (no el de Git)
 
 function Paso($texto) { Write-Host "`n== $texto" -ForegroundColor Cyan }
 function Remoto($comando) {
@@ -46,7 +50,7 @@ try {
 }
 
 if (-not $SoloReiniciar) {
-  Paso "3. Empaquetando el agente"
+  Paso "3. Empaquetando el agente (cámara: $Camara)"
   $envFile = Join-Path $root "backend\.env"
   $clave = (Get-Content $envFile | Where-Object { $_ -match '^ROBOT_API_KEY=' }) -replace '^ROBOT_API_KEY=', ''
   if (-not $clave) { throw "No hay ROBOT_API_KEY en backend\.env" }
@@ -62,6 +66,7 @@ if (-not $SoloReiniciar) {
     "NCLUB_ROBOT_KEY=$clave",
     "NCLUB_API_URL=http://${PcIp}:$Puerto",
     "NCLUB_ROBOT_ID=$RobotId",
+    "NCLUB_CAMERA=$Camara",
     "NCLUB_GESTURES=$(if ($Gestos) { 'true' } else { 'false' })",
     "NCLUB_ASR=$(if ($SinVoz) { 'none' } else { 'faster-whisper' })",
     "NCLUB_ASR_MODEL=small"
@@ -69,15 +74,30 @@ if (-not $SoloReiniciar) {
   [IO.File]::WriteAllText("$stage\robot.env", "$robotEnv`n")  # LF y sin BOM
   $tgz = Join-Path $env:TEMP "nclub_deploy.tgz"
   if (Test-Path $tgz) { Remove-Item $tgz -Force }
-  & "$env:SystemRoot\System32\tar.exe" -czf $tgz -C $stage .  # tar de Windows (no el de Git)
+  & $tar -czf $tgz -C $stage .
+  if ($LASTEXITCODE -ne 0) { throw "No se pudo empaquetar" }
   Write-Host ("OK · {0:N1} MB" -f ((Get-Item $tgz).Length / 1MB))
 
   Paso "4. Subiendo al robot"
   & scp -q @ssh $tgz "${destino}:/tmp/nclub_deploy.tgz"
   if ($LASTEXITCODE -ne 0) { throw "No se pudo copiar el paquete" }
-  Remoto "mkdir -p ~/nclub && tar -xzf /tmp/nclub_deploy.tgz -C ~/nclub && cd ~/nclub && sed -i 's/\r$//' *.sh robot.env && chmod 600 robot.env && chmod +x *.sh && rm /tmp/nclub_deploy.tgz"
+  Remoto "mkdir -p ~/nclub && tar -xzf /tmp/nclub_deploy.tgz -C ~/nclub && cd ~/nclub && sed -i 's/\r$//' *.sh *.py robot.env && chmod 600 robot.env && chmod +x *.sh && rm /tmp/nclub_deploy.tgz"
   Write-Host "OK · ~/nclub"
+}
 
+if ($ProbarCamaras) {
+  Paso "Fotos de cada cámara (no mueve el robot)"
+  Remoto "source /opt/ros/humble/setup.bash && python3 ~/nclub/camaras.py 2>&1 | grep -v 'Warning\]'"
+  $capturas = Join-Path $PSScriptRoot "capturas"
+  New-Item -ItemType Directory -Force $capturas | Out-Null
+  Get-ChildItem $capturas -Filter *.jpg | Remove-Item -Force
+  & scp -q @ssh "${destino}:~/nclub/capturas/*.jpg" $capturas
+  Write-Host "Fotos en $capturas. Elija la cámara con: .\deploy\desplegar_robot.ps1 -Camara <nombre o /topic>"
+  Start-Process explorer.exe $capturas
+  return
+}
+
+if (-not $SoloReiniciar) {
   Paso "5. Instalando dependencias en el robot (la primera vez tarda varios minutos)"
   $instalado = (& ssh @ssh $destino "test -f ~/nclub/.instalado && echo si") -eq "si"
   if ($Reinstalar -or -not $instalado) {
@@ -87,10 +107,15 @@ if (-not $SoloReiniciar) {
   }
 }
 
-Paso "6. Iniciando el agente de recepción"
+if ($SoloReiniciar -and $PSBoundParameters.ContainsKey("Camara")) {
+  # Sin volver a subir: solo cambia la cámara elegida en robot.env.
+  Remoto "grep -q '^NCLUB_CAMERA=' ~/nclub/robot.env && sed -i 's#^NCLUB_CAMERA=.*#NCLUB_CAMERA=$Camara#' ~/nclub/robot.env || echo 'NCLUB_CAMERA=$Camara' >> ~/nclub/robot.env"
+}
+
+Paso "6. Iniciando el agente de recepción (cámara: $Camara)"
 Remoto "bash ~/nclub/start.sh"
 
 Paso "Listo"
-Write-Host "Abra la app web: Admin -> Robots (sesión ADMIN). El robot debe aparecer en línea."
+Write-Host "Abra la app web: Admin -> Robots (sesión ADMIN real). El robot debe aparecer en línea."
 Write-Host "Estado:   ssh $destino 'bash ~/nclub/status.sh'"
 Write-Host "Detener:  ssh $destino 'bash ~/nclub/stop.sh'"

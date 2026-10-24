@@ -16,6 +16,7 @@ nohup "$PY" -m nclub_agent.ros_node --ros-args \
   --params-file "$NCLUB/robot_agent/config/x2_ultra.yaml" \
   -p backend_url:="$NCLUB_API_URL" \
   -p robot_id:="${NCLUB_ROBOT_ID:-robot1}" \
+  -p camera:="${NCLUB_CAMERA:-frente}" \
   -p registro_dir:="$NCLUB/dataset/registro" \
   -p gestures_enabled:="${NCLUB_GESTURES:-false}" \
   -p asr_engine:="${NCLUB_ASR:-faster-whisper}" \
