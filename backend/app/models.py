@@ -83,3 +83,14 @@ class RouteRequest(BaseModel):
     category: Literal["VIP", "REGULAR", "INVITADO", "PERSONAL_INTERNO", "TRABAJADOR_EXTERNO"]
     destination: str = Field(min_length=1, max_length=80)
     escort: bool = False
+
+
+class TextRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+
+
+class MemberRequest(BaseModel):
+    nombre: str = Field(min_length=3, max_length=100)
+    categoria: Literal["VIP", "REGULAR"]
+    vigencia_hasta: str = Field(min_length=10, max_length=40)
+    email: str | None = Field(default=None, max_length=120)

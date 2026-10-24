@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import BACKEND_DIR, Settings, settings as default_settings
 from .deps import Context
 from .repository import Repository
-from .routers import admin, public, robot
+from .routers import admin, lab, public, robot
 from .services.reception import MonitorState, ReceptionService
 
 log = logging.getLogger("nclub")
@@ -42,16 +42,27 @@ def create_app(settings: Settings | None = None, repo: Repository | None = None)
         version="2.0.0",
     )
     state = MonitorState()
-    app.state.ctx = Context(settings, repo, state, ReceptionService(repo, settings, state))
+    reception = ReceptionService(repo, settings, state)
+    context = Context(settings, repo, state, reception)
+    try:  # Robot simulado con la cámara del dispositivo ADMIN (opcional).
+        from .services.device_lab import DeviceLab, FaceGallery
+
+        context.gallery = FaceGallery(repo, settings.face_threshold)
+        context.lab = DeviceLab(reception, context.gallery)
+    except ImportError as error:
+        context.lab_error = f"Reconocimiento facial no disponible en el backend: {error}"
+        log.warning(context.lab_error)
+    app.state.ctx = context
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST"],  # el robot usa PUT, pero no desde el navegador
         allow_headers=["Authorization", "Content-Type"],
     )
     app.include_router(public.router)
     app.include_router(robot.router)
     app.include_router(admin.router)
+    app.include_router(lab.router)
     return app
 
 

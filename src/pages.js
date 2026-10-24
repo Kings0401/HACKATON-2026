@@ -17,6 +17,7 @@ import { configured, demoEnabled, backendUrl } from "./config.js";
 import { demoPeople } from "./demo.js";
 import { clubMapBanner } from "./clubmap.js";
 import { routeCard } from "./navigation.js";
+import { deviceLabPanel } from "./devicelab.js";
 
 const link = (route, label, ico, active) =>
   `<a href="#/${route}" class="nav-item ${active === route ? "active" : ""}" ${active === route ? 'aria-current="page"' : ""}>${icon(ico)}<span>${label}</span>${icon("chevron-right", "nav-chevron")}</a>`;
@@ -840,7 +841,7 @@ export function adminPage(tab, data) {
   }
   let content = "";
   if (tab === "users")
-    content = `<div class="search-bar">${icon("search")}<input id="user-search" type="search" placeholder="Buscar por nombre o categoría" aria-label="Buscar usuarios"/></div><div class="table-scroll"><table id="users-table"><thead><tr><th>Persona</th><th>Categoría</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead><tbody>${data.profiles.map((p) => `<tr data-search="${e(`${p.full_name} ${roles[p.role]}`.toLowerCase())}"><td><strong>${e(p.full_name)}</strong><small>${e(p.email || p.public_id)}</small></td><td>${badge(p.role)}</td><td>${status(p.membership_status)}</td><td>${dateLabel(p.created_at)}</td><td><button class="icon-button" data-action="edit-user" data-id="${e(p.id)}" aria-label="Editar ${e(p.full_name)}">${icon("pencil")}</button><button class="icon-button" data-action="visitor-qr" data-id="${e(p.id)}" aria-label="Generar QR de ${e(p.full_name)}">${icon("qr-code")}</button></td></tr>`).join("")}</tbody></table></div>`;
+    content = `<div class="search-bar">${icon("search")}<input id="user-search" type="search" placeholder="Buscar por nombre o categoría" aria-label="Buscar usuarios"/></div><div class="table-scroll"><table id="users-table"><thead><tr><th>Persona</th><th>Categoría</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead><tbody>${data.profiles.map((p) => `<tr data-search="${e(`${p.full_name} ${roles[p.role]}`.toLowerCase())}"><td><strong>${e(p.full_name)}</strong><small>${e(p.email || p.public_id)}</small></td><td>${badge(p.role)}</td><td>${status(p.membership_status)}</td><td>${dateLabel(p.created_at)}</td><td><button class="icon-button" data-action="edit-user" data-id="${e(p.id)}" aria-label="Editar ${e(p.full_name)}">${icon("pencil")}</button><button class="icon-button" data-action="visitor-qr" data-id="${e(p.id)}" aria-label="Generar QR de ${e(p.full_name)}">${icon("qr-code")}</button>${p.role !== "ADMIN" ? `<button class="icon-button" data-action="upload-photo" data-id="${e(p.id)}" data-name="${e(p.full_name)}" aria-label="Foto de reconocimiento facial de ${e(p.full_name)}">${icon("camera")}</button>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
   if (tab === "reservations")
     content = `<div class="table-scroll"><table><thead><tr><th>Miembro</th><th>Servicio</th><th>Fecha</th><th>Horario</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${data.reservations.map((r) => `<tr><td>${e(data.profiles.find((p) => p.id === r.user_id)?.full_name)}</td><td>${e(data.services.find((s) => s.id === r.service_id)?.name)}</td><td>${dateLabel(r.reservation_date)}</td><td>${timeLabel(r.start_time)} – ${timeLabel(r.end_time)}</td><td>${status(r.status)}</td><td>${r.status === "confirmed" ? `<button class="text-button danger-text" data-action="cancel-reservation" data-id="${e(r.id)}">Cancelar</button>` : "—"}</td></tr>`).join("")}</tbody></table></div>`;
   if (tab === "invitations" || tab === "work") {
@@ -857,6 +858,7 @@ export function adminPage(tab, data) {
           ${["users", "invitations", "work"].includes(tab) ? "Invitados, personal y proveedores se gestionan aquí. No necesitan una cuenta en la app." : "Consulta y gestiona la actividad del club."}
         </p>
       </div>
+      ${tab === "users" ? `<button class="button primary" data-action="new-member">${icon("plus")} Nuevo miembro</button>` : ""}
       ${tab === "invitations" || tab === "work" ? `<button class="button primary" data-action="new-visitor" data-type="${tab === "invitations" ? "GUEST" : "EXTERNAL"}">${icon("plus")} ${tab === "invitations" ? "Nueva invitación" : "Nuevo turno u orden"}</button>` : ""}
     </div>
     <div class="admin-mobile-tabs">
@@ -875,7 +877,7 @@ export function adminPage(tab, data) {
         )
         .join("")}
     </div>
-      <section class="panel admin-panel">${tab === "robots" ? adminRobotMonitor(data.robot_monitor) : content}</section>`;
+      <section class="panel admin-panel">${tab === "robots" ? adminRobotMonitor(data.robot_monitor) : content}</section>${tab === "robots" ? deviceLabPanel() : ""}`;
 }
 
 export function adminRobotMonitor(monitor) {

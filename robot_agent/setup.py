@@ -22,6 +22,7 @@ setup(
         "console_scripts": [
             "reception_agent = nclub_agent.ros_node:main",
             "reception_sim = nclub_agent.sim:main",
+            "nclub_say = nclub_agent.ros_node:say_main",
         ],
     },
 )

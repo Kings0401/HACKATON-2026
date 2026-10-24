@@ -38,6 +38,10 @@ pytest
 | `GET /vip/context/{id}` | JWT ADMIN | Contexto mínimo para AGIBOT 02 |
 | `POST /events` | JWT miembro | Solo `assistance_requested` |
 | `POST /navigation/route` | JWT ADMIN | Calcular una ruta por categoría y destino |
+| `GET /admin/lab/status`, `POST /admin/lab/frame` (JPEG), `/admin/lab/text`, `/admin/lab/reset`, `/admin/lab/reload` | JWT ADMIN | Robot simulado con la cámara del dispositivo (mismo agente del robot) |
+| `POST /admin/members` | JWT ADMIN | Alta de miembro VIP/REGULAR con membresía; devuelve un QR seguro |
+| `POST /admin/personas/{id}/photos?consent=true` | JWT ADMIN | Foto de registro facial (1 rostro, sin EXIF) → Storage privado + galería |
+| `POST /admin/personas/{id}/credential` | JWT ADMIN | QR seguro temporal de un miembro |
 
 Respuesta de `resolve` (y de `access/check`): campos del contrato más `decision` (`AUTORIZADO`, `DENEGADO`, `REVISION`, `ACOMPANAMIENTO`), `category`, `methods`, `checks[]` (`name`, `ok`, `detail`), `escort_required`, `route` (ruta, pasos, `share_url`) y `speech`. Un proveedor con acompañamiento devuelve `access:"pending"`.
 

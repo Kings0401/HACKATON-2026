@@ -79,6 +79,7 @@ class MemoryRepository:
         self.tables: dict[str, list[dict]] = copy.deepcopy(tables) if tables else demo_tables()
         self.faces_dir = Path(faces_dir) if faces_dir else None
         self.files: dict[tuple[str, str], bytes] = {}
+        self.uploaded_faces: dict[tuple[str, str], bytes] = {}
         self.broadcasts: list[tuple[str, str, dict]] = []
         self.admin_token = admin_token
         self.fail_tables: set[str] = set()  # para probar persistencia fallida
@@ -162,21 +163,34 @@ class MemoryRepository:
     # ---------- Storage simulado ----------
 
     def face_folders(self):
-        if not self.faces_dir or not self.faces_dir.is_dir():
-            return []
-        return sorted(p.name for p in self.faces_dir.iterdir() if p.is_dir())
+        local = {p.name for p in self.faces_dir.iterdir() if p.is_dir()}             if self.faces_dir and self.faces_dir.is_dir() else set()
+        return sorted(local | {pid for pid, _ in self.uploaded_faces})
 
     def face_files(self, persona_id):
         folder = (self.faces_dir or Path("/nonexistent")) / persona_id
-        if not folder.is_dir():
-            return []
-        return sorted(p.name for p in folder.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
+        local = [p.name for p in folder.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png")]             if folder.is_dir() else []
+        uploaded = [n for (pid, n) in self.uploaded_faces if pid == persona_id]
+        return sorted(set(local) | set(uploaded))
 
     def download_face(self, persona_id, name):
+        if (persona_id, name) in self.uploaded_faces:
+            return self.uploaded_faces[(persona_id, name)]
         path = (self.faces_dir or Path("/nonexistent")) / persona_id / name
         if not path.is_file():
             raise StorageNotFound(name)
         return path.read_bytes()
+
+    def upload_face(self, persona_id, name, content, mime):
+        # Solo en memoria: nunca escribe en vision/dataset.
+        self.uploaded_faces[(persona_id, name)] = content
+
+    def delete(self, table, key, value):
+        self.tables[table] = [r for r in self._rows(table) if r.get(key) != value]
+
+    def revoke_credentials(self, persona_id, when):
+        for row in self._rows("credenciales"):
+            if row["persona_id"] == persona_id and not row.get("revocada_en"):
+                row["revocada_en"] = when
 
     def upload(self, bucket, path, content, mime):
         self.files[(bucket, path)] = content

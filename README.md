@@ -127,7 +127,11 @@ Con Supabase real: ejecutar `supabase/recepcion_robot.sql` después de `nclub_co
 
 **Mapa interactivo del recorrido (diferencial)**: cuando FastAPI autoriza a alguien (o aprueba su ingreso con acompañamiento), calcula con Dijkstra la ruta desde recepción hasta el destino autorizado, solo por las zonas permitidas para su categoría: VIP por el ala VIP; invitados únicamente por la casa club; personal por los corredores de servicio; proveedores solo por la vía de servicio, con parada de acompañamiento. Recepción, el monitor ADMIN y la página pública `#/ruta` dibujan el recorrido con inicio, destino, giros numerados, puntos de referencia, pasos y tiempo estimado. Un QR temporal (30 min, sin datos personales) abre la misma ruta en el celular y **no concede permisos**. En DEMO la ruta se calcula en el navegador con el mismo grafo, verificado contra la versión Python en 270 combinaciones. Para cargar el plano real, edite nodos, coordenadas, conexiones, zonas y alias de destino en `shared/club-map.json`.
 
-Documentación: [FASTAPI.md](docs/FASTAPI.md) · [ROBOT.md](docs/ROBOT.md) (AimDK) · [VISION.md](docs/VISION.md) (calibración y causa de los 404) · [SEGURIDAD.md](docs/SEGURIDAD.md) (rotación de claves) · [VALIDATION.md](docs/VALIDATION.md).
+**Sin robot conectado**: en `#/admin/robots`, "Probar con la cámara del dispositivo" convierte este equipo en el robot. La cámara envía fotogramas al backend, que ejecuta el mismo agente: reconocimiento facial con recuadros, lectura del QR, voz (Web Speech: micrófono y voz del navegador), decisión según la membresía y ruta. Solo se activa con un clic; se marca como simulación y no graba. En DEMO necesita el backend en modo memoria y su token (lo imprime uvicorn).
+
+**Fotos para reconocimiento**: en Admin → Personas, "Nuevo miembro" crea un miembro VIP o regular con su membresía, una foto opcional y un QR seguro. El icono de cámara de cada fila sube una foto (exige consentimiento y exactamente un rostro; se recodifica sin metadatos y se guarda en el bucket privado `rostros-nclub`). La foto queda disponible al instante para el reconocimiento; el acceso sigue exigiendo credencial y membresía vigente.
+
+Documentación: [FASTAPI.md](docs/FASTAPI.md) · [ROBOT_PASO_A_PASO.md](docs/ROBOT_PASO_A_PASO.md) (programar el robot físico) · [ROBOT.md](docs/ROBOT.md) (AimDK) · [VISION.md](docs/VISION.md) (calibración y causa de los 404) · [SEGURIDAD.md](docs/SEGURIDAD.md) (rotación de claves) · [VALIDATION.md](docs/VALIDATION.md).
 
 ## Estado del MVP
 

@@ -7,6 +7,7 @@ import hmac
 import secrets
 import time
 from dataclasses import dataclass
+from typing import Any
 
 from fastapi import Depends, Header, HTTPException, Request
 
@@ -21,6 +22,9 @@ class Context:
     repo: Repository
     state: MonitorState
     reception: ReceptionService
+    gallery: Any = None  # services.device_lab.FaceGallery (requiere OpenCV y modelos)
+    lab: Any = None  # services.device_lab.DeviceLab
+    lab_error: str | None = None
 
 
 def ctx(request: Request) -> Context:

@@ -24,7 +24,17 @@ import {
   selectMapDestination,
   revealMapRoute,
 } from "./clubmap.js";
-import { api, validateDecision } from "./api.js";
+import { api, validateDecision, memoryToken } from "./api.js";
+import {
+  deviceLabActive,
+  startDeviceLab,
+  stopDeviceLab,
+  sendLabText,
+  toggleLabMic,
+  setLabVoice,
+  markAgibot,
+  photoToJpeg,
+} from "./devicelab.js";
 import {
   routePage,
   computeRoute,
@@ -32,7 +42,7 @@ import {
   shareUrlFor,
   revealRoutes,
 } from "./navigation.js";
-import { evaluateDemo, readDemo, seed } from "./demo.js";
+import { evaluateDemo, readDemo, writeDemo, seed } from "./demo.js";
 import {
   icon,
   hydrate,
@@ -100,11 +110,12 @@ async function refreshRobotMonitor() {
   if (robotMonitorBusy || routeInfo().path !== "admin/robots") return;
   robotMonitorBusy = true;
   try {
-    if (sessionState.mode === "demo") {
-      data.robot_monitor = { connected: false, error: "El monitor requiere sesión administrativa real; DEMO no accede a cámaras ni micrófonos." };
+    if (sessionState.mode === "demo" && !(backendUrl && memoryToken.get())) {
+      data.robot_monitor = { connected: false, error: "DEMO sin backend: escriba abajo el token del backend en modo memoria para usar el robot simulado con la cámara de este dispositivo." };
     } else {
       data.robot_monitor = await api.robotMonitor();
     }
+    markAgibot(data.robot_monitor.agibot_connected === true);
   } catch (err) {
     data.robot_monitor = { connected: false, error: readableError(err) };
   } finally {
@@ -221,7 +232,8 @@ async function refresh() {
             : "Solicite asistencia en recepción.",
       };
     }
-    if (!["credential", "profile", "login", "demo", ""].includes(path)) {
+    // admin/robots tiene su propia actualización y puede tener la cámara activa.
+    if (!["credential", "profile", "login", "demo", "", "admin/robots"].includes(path)) {
       const y = scrollY;
       await render(false);
       scrollTo(0, y);
@@ -238,6 +250,7 @@ async function render(scroll = true) {
   const generation = ++renderId;
   stopQrRotation();
   const { path, params } = routeInfo();
+  if (path !== "admin/robots" && deviceLabActive()) stopDeviceLab();
   if (flow?.busy && path !== "reception") {
     flow = { ...flow, busy: false, cancelled: true };
   }
@@ -502,6 +515,67 @@ async function updateSlots() {
   } catch (err) {
     container.innerHTML = `<p class="form-error">${e(readableError(err))}</p>`;
   }
+}
+const photoFields = (required) =>
+  `<label>Foto del rostro<input name="photo" type="file" accept="image/*" capture="user" ${required ? "required" : ""} /></label><p class="form-hint">Rostro de frente, bien iluminado y una sola persona. Se recodifica sin metadatos y se guarda en Storage privado.</p><label class="consent-check"><input name="consent" type="checkbox" required /> El titular autorizó el uso de su foto para reconocimiento facial en la recepción del club.</label>`;
+function backendNotice() {
+  if (!backendUrl)
+    return `<div class="notice">${icon("alert-circle")}<p>Configure VITE_BACKEND_URL: la foto y el reconocimiento facial los procesa FastAPI.</p></div>`;
+  if (sessionState.mode === "demo" && !memoryToken.get())
+    return `<div class="notice">${icon("alert-circle")}<p>En DEMO, primero escriba el token del backend en modo memoria en Admin → Robots.</p></div>`;
+  return "";
+}
+function openMember() {
+  const until = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
+  modal(
+    "Nuevo miembro.",
+    `<form id="member-form">${backendNotice()}<label>Nombre completo<input name="nombre" minlength="3" maxlength="100" required autocomplete="off" /></label><label>Membresía<select name="categoria"><option value="REGULAR">Miembro regular</option><option value="VIP">VIP · Black</option></select></label><label>Vigente hasta<input name="vigencia_hasta" type="date" min="${today()}" value="${until}" required /></label><label>Correo (opcional)<input name="email" type="email" maxlength="120" /></label>${photoFields(false)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("check")} Crear miembro</button></form>`,
+  );
+  const photo = document.querySelector('#member-form [name="photo"]');
+  const consent = document.querySelector('#member-form [name="consent"]');
+  consent.required = false;
+  photo.addEventListener("change", () => (consent.required = Boolean(photo.files.length)));
+}
+function openPhoto(id, name) {
+  modal(
+    "Foto de reconocimiento.",
+    `<form id="photo-form" data-id="${e(id)}">${backendNotice()}<p class="confirm-copy">${e(name)}: la foto se usará para reconocer su rostro en recepción. El acceso seguirá dependiendo de su credencial y membresía.</p>${photoFields(true)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("camera")} Subir foto</button></form>`,
+  );
+}
+async function submitMember(form, values) {
+  const file = form.querySelector('[name="photo"]').files[0];
+  const created = await api.createMember({
+    nombre: values.nombre.trim(),
+    categoria: values.categoria,
+    vigencia_hasta: values.vigencia_hasta,
+    email: values.email || null,
+  });
+  let photoMessage = "";
+  if (file) {
+    try {
+      const result = await api.uploadPhoto(created.persona_id, await photoToJpeg(file));
+      photoMessage = result.enrolled ? " Rostro registrado." : " La foto no se pudo registrar.";
+    } catch (err) {
+      photoMessage = ` La foto no se registró: ${readableError(err)}`;
+    }
+  }
+  if (sessionState.mode === "demo") {
+    // Copia visible en la lista DEMO; la autoridad es el backend en memoria.
+    const d = readDemo();
+    d.profiles.push({
+      id: created.persona_id,
+      full_name: created.nombre,
+      role: created.categoria,
+      membership_status: "active",
+      public_id: created.persona_id,
+      created_at: new Date().toISOString(),
+      backend: true,
+    });
+    writeDemo(d);
+  }
+  await reload();
+  await showQR(created.credential, created.nombre);
+  toast(`Miembro ${created.persona_id} creado.${photoMessage}`, photoMessage.includes("no") ? "error" : "success");
 }
 function openVisitor(type) {
   const now = dateAfter();
@@ -773,6 +847,23 @@ document.addEventListener("click", async (event) => {
     selectMapDestination(button.dataset.destination);
     return;
   }
+  if (action === "lab-start") {
+    try {
+      await startDeviceLab();
+    } catch (err) {
+      stopDeviceLab();
+      toast(readableError(err), "error");
+    }
+    return;
+  }
+  if (action === "lab-stop") {
+    stopDeviceLab();
+    return;
+  }
+  if (action === "lab-mic") {
+    toggleLabMic(button);
+    return;
+  }
   if (action === "generate-qr") {
     await refreshQr({ manual: true });
     return;
@@ -841,8 +932,13 @@ document.addEventListener("click", async (event) => {
       );
     }
     if (action === "new-visitor") openVisitor(button.dataset.type);
+    if (action === "new-member") openMember();
+    if (action === "upload-photo") openPhoto(button.dataset.id, button.dataset.name);
     if (action === "visitor-qr") {
-      const result = await issueCredential(button.dataset.id);
+      const backendMember = data.profiles.find((p) => p.id === button.dataset.id)?.backend;
+      const result = backendMember
+        ? await api.memberCredential(button.dataset.id)
+        : await issueCredential(button.dataset.id);
       await showQR(
         result,
         data.profiles.find((p) => p.id === button.dataset.id)?.full_name,
@@ -878,6 +974,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  if (event.target.matches("[data-lab-voice]")) setLabVoice(event.target.checked);
   if (event.target.id === "booking-date") await updateSlots();
   if (event.target.id === "visitor-role") updateVisitorFields();
 });
@@ -899,6 +996,10 @@ document.addEventListener("submit", async (event) => {
       "visitor-form",
       "user-form",
       "access-form",
+      "member-form",
+      "photo-form",
+      "lab-text-form",
+      "lab-token-form",
     ].includes(form.id)
   )
     return;
@@ -950,6 +1051,23 @@ document.addEventListener("submit", async (event) => {
           await reload();
           await showQR(result, payload.name);
           toast("Registro creado y credencial temporal generada.");
+        }
+        if (form.id === "lab-token-form") {
+          memoryToken.set(values.token);
+          await api.labStatus();
+          toast("Backend en modo memoria conectado.");
+          await refreshRobotMonitor();
+        }
+        if (form.id === "lab-text-form") {
+          form.reset();
+          await sendLabText(values.text);
+        }
+        if (form.id === "member-form") await submitMember(form, values);
+        if (form.id === "photo-form") {
+          const blob = await photoToJpeg(form.querySelector('[name="photo"]').files[0]);
+          const result = await api.uploadPhoto(form.dataset.id, blob);
+          closeModal();
+          toast(result.enrolled ? "Foto registrada: ya se puede reconocer el rostro." : "Foto guardada, pero el rostro no se pudo registrar.");
         }
         if (form.id === "access-form") {
           if (

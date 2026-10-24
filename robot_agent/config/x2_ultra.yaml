@@ -5,16 +5,17 @@
 # variable de entorno NCLUB_ROBOT_KEY, nunca en este archivo.
 nclub_reception_agent:
   ros__parameters:
-    backend_url: "http://10.0.1.2:8000"   # PC host en la red SDK cableada (10.0.1.2/24)
+    backend_url: "http://10.0.1.2:8000" # PC host en la red SDK cableada (10.0.1.2/24)
     robot_id: "robot1"
     # Color RGB-D frontal, MJPEG 1280x720 a 30 Hz (CompressedImage).
     camera_topic: "/aima/hal/sensor/rgbd_head_front/rgb_image/compressed"
-    rotate_90: false                       # true solo para la cámara trasera del X2 Ultra (new version)
+    rotate_90: false # true solo para la cámara trasera del X2 Ultra (new version)
     # VAD de AimDK: PCM 16 kHz, 16 bits, mono; requiere palabra de activación en modo por defecto.
     audio_topic: "/agent/process_audio_output"
     registro_dir: "/data/nclub/dataset/registro"
-    # TTS desactivado por defecto: activarlo solo con autorización del responsable del robot.
-    tts_enabled: false
+    # Voz del robot (PlayTts). Requiere que el sistema de interacción integrado no ocupe
+    # el audio: ver docs/ROBOT_PASO_A_PASO.md (modo only_voice). Pruebe antes con nclub_say.
+    tts_enabled: true
     tts_service: "/aimdk_5Fmsgs/srv/PlayTts"
-    asr_engine: "faster-whisper"           # faster-whisper | vosk | none
+    asr_engine: "faster-whisper" # faster-whisper | vosk | none
     asr_model: "small"

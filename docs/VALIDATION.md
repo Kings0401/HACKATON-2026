@@ -68,3 +68,10 @@ Verificado además:
 - Recepción DEMO: escenario VIP con mapa, pasos y QR, y página `#/ruta` a 390 y 320 px sin desbordamiento horizontal.
 
 No verificado: robot físico, topics reales, TTS, ASR con audio real (faster-whisper/Vosk no se instalaron), imagen Docker (Docker Desktop detenido), `recepcion_robot.sql` en el proyecto remoto, Realtime privado remoto y JWT ADMIN real (no hay cuenta ADMIN vinculada).
+
+## Cámara del dispositivo, fotos de miembros y voz del robot (24-10-2026)
+
+- `backend: pytest` **52/52** (+6): el robot simulado reconoce a VIP001 con la cámara, saluda sin autorizar y decide con el QR; un miembro nuevo con foto pasa a ser reconocido y autorizado con su QR seguro; se rechazan fotos sin consentimiento o sin exactamente un rostro; si falla la membresía, se revierte la persona.
+- `robot_agent: pytest` **11/11** (+4): la petición `PlayTts` coincide con el ejemplo oficial `play_tts`; se manejan el error del servicio y la indisponibilidad; hablar no bloquea.
+- Navegador real (Edge sin interfaz controlado por DevTools, **no Playwright**) con una cámara falsa alimentada por un video del dataset: rostro reconocido VIP001 (0.75), luego QR, acceso autorizado, voz del robot, ruta y QR; 34 fotogramas procesados. Alta de un miembro con foto desde Admin: "Rostro registrado" y QR emitido.
+- No verificado: cámara y micrófono físicos de un teléfono real, reconocimiento de voz del navegador (Web Speech) y TTS en el robot físico.

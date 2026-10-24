@@ -37,24 +37,61 @@ except ImportError:  # el agente sigue funcionando sin audio ni TTS
 
 
 class AimdkTtsSpeaker:
-    """TTS por /aimdk_5Fmsgs/srv/PlayTts (campos según el ejemplo play_tts)."""
+    """TTS por /aimdk_5Fmsgs/srv/PlayTts, con los campos y la verificación del
+    ejemplo oficial play_tts (AimDK_X2 1.1.0, sección 6.1.20).
 
-    def __init__(self, node: Node, service: str):
+    Si el sistema de interacción integrado sigue en modo normal, puede ocupar
+    el audio: ver docs/ROBOT_PASO_A_PASO.md (modo only_voice).
+    """
+
+    def __init__(self, node: Node, service: str, attempts: int = 8, wait_s: float = 5.0):
         self.node = node
         self.client = node.create_client(PlayTts, service)
-        self.fallback = LogSpeaker()
+        self.attempts = attempts
+        self.results: list[tuple[str, bool, str]] = []  # (trace_id, éxito, detalle)
+        if not self.client.wait_for_service(timeout_sec=wait_s):
+            node.get_logger().warning(f"Servicio TTS {service} no disponible todavía; se reintentará al hablar.")
 
-    def speak(self, text: str) -> None:
-        if not self.client.service_is_ready():
-            self.node.get_logger().warning("Servicio TTS no disponible; texto: " + text)
-            return
+    def build_request(self, text: str, trace_id: str):
         request = PlayTts.Request()
         request.header.header.stamp = self.node.get_clock().now().to_msg()
         request.tts_req.text = text
-        request.tts_req.domain = "nclub_reception"
-        request.tts_req.is_interrupted = True
+        request.tts_req.domain = "nclub_reception"  # obligatorio: dominio del llamador
+        request.tts_req.trace_id = trace_id
+        request.tts_req.is_interrupted = True  # obligatorio: interrumpe la misma prioridad
+        request.tts_req.priority_weight = 0
         request.tts_req.priority_level.value = TtsPriorityLevel.INTERACTION_L6
-        self.client.call_async(request)  # no bloquear el hilo de percepción
+        return request
+
+    def speak(self, text: str) -> None:
+        trace_id = f"nclub-{int(time.time() * 1000) % 10**9}"
+        # No bloquea el hilo de percepción: los reintentos corren en otro hilo.
+        threading.Thread(target=self._speak, args=(text, trace_id), daemon=True).start()
+
+    def _speak(self, text: str, trace_id: str) -> None:
+        log = self.node.get_logger()
+        for attempt in range(1, self.attempts + 1):
+            if not self.client.service_is_ready() and not self.client.wait_for_service(timeout_sec=0.5):
+                continue
+            future = self.client.call_async(self.build_request(text, trace_id))
+            deadline = time.time() + 2.0
+            while not future.done() and time.time() < deadline:
+                time.sleep(0.05)  # el executor de rclpy.spin completa el future
+            if not future.done():
+                log.info(f"TTS sin respuesta, intento {attempt}/{self.attempts}")
+                continue
+            response = future.result()
+            ok = bool(response and response.tts_resp.is_success)
+            detail = "" if ok else f"{getattr(response.tts_resp, 'error_code', '?')}: " \
+                                   f"{getattr(response.tts_resp, 'error_message', '')}"
+            self.results.append((trace_id, ok, detail))
+            if ok:
+                log.info(f"TTS reproducido ({trace_id}): {text[:60]}")
+            else:
+                log.error(f"TTS rechazado ({trace_id}) {detail}")
+            return
+        self.results.append((trace_id, False, "servicio no disponible"))
+        log.error(f"TTS no disponible tras {self.attempts} intentos; texto: {text[:60]}")
 
 
 class ReceptionAgentNode(Node):
@@ -144,6 +181,27 @@ class ReceptionAgentNode(Node):
         self.frames.close()
         self.agent.end_session()
         return super().destroy_node()
+
+
+def say_main() -> None:
+    """Prueba de voz: ros2 run nclub_agent nclub_say "Bienvenido a N Club" """
+    import sys
+
+    if not AIMDK:
+        raise SystemExit("aimdk_msgs no está disponible: compile y cargue el SDK AimDK (source install/setup.bash).")
+    text = " ".join(sys.argv[1:]) or "Bienvenido a N Club. Será un placer atenderle."
+    rclpy.init()
+    node = Node("nclub_say")
+    speaker = AimdkTtsSpeaker(node, "/aimdk_5Fmsgs/srv/PlayTts")
+    speaker.speak(text)
+    deadline = time.time() + 20
+    while not speaker.results and time.time() < deadline:
+        rclpy.spin_once(node, timeout_sec=0.1)
+    ok = bool(speaker.results and speaker.results[0][1])
+    print("TTS OK" if ok else f"TTS FALLÓ: {speaker.results[0][2] if speaker.results else 'sin respuesta'}")
+    node.destroy_node()
+    rclpy.try_shutdown()
+    raise SystemExit(0 if ok else 1)
 
 
 def main() -> None:

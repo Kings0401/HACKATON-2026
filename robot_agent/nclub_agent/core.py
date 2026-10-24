@@ -82,6 +82,8 @@ class ReceptionAgent:
         self.mic_state = "desconocido"
         self.last_frame_at = 0.0
         self.last_audio_at = 0.0
+        self.last_matches: list = []
+        self.last_readings: list = []
 
     # ---------- estado para el latido ----------
 
@@ -155,6 +157,8 @@ class ReceptionAgent:
             self.tick()
             matches = self.face.identify(frame) if self.face else []
             readings = self.qr.read(frame) if self.qr else []
+            # Para superponer recuadros en la vista de cámara (robot simulado).
+            self.last_matches, self.last_readings = matches, readings
             if not matches and not readings:
                 return None
             self.state.last_presence = now

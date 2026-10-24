@@ -16,6 +16,7 @@ from ..services.access import TOKEN, Decision, parse_time
 from ..services.navigation import RouteError, compute_route
 
 router = APIRouter()
+DEVICE_ROBOT = "camara-dispositivo"  # mismo valor que services/device_lab.py
 ROBOT = r"^[A-Za-z0-9_-]{1,40}$"
 
 
@@ -31,7 +32,9 @@ def _recent(c: Context, table: str, limit: int = 20) -> list[dict] | None:
 def monitor(admin: dict = Depends(require_admin), c: Context = Depends(ctx)):
     robot_ids = sorted(set(c.state.robots) | set(c.state.frames)) or ["robot1"]
     robots = [c.reception.robot_status(r) for r in robot_ids]
-    primary = next((r for r in robots if r["connected"]), robots[0])
+    # Se prefiere un robot (real o simulador ROS) a la cámara del dispositivo ADMIN.
+    agibot = [r for r in robots if r["connected"] and r["robot_id"] != DEVICE_ROBOT]
+    primary = next(iter(agibot), None) or next((r for r in robots if r["connected"]), robots[0])
     rid = primary["robot_id"]
     frame = c.state.frames.get(rid)
     camera_live = bool(frame and time.time() - frame[1] < 10)
@@ -42,6 +45,9 @@ def monitor(admin: dict = Depends(require_admin), c: Context = Depends(ctx)):
     active = [c.reception.public(s) for s in c.state.sessions.values() if s["status"] == "ACTIVA"]
     return {
         "connected": primary["connected"],
+        "agibot_connected": bool(agibot),
+        "device_camera_active": primary["robot_id"] == DEVICE_ROBOT and primary["connected"],
+        "lab_available": c.lab is not None,
         "robot_name": primary["name"],
         "robot_id": rid,
         "updated_at": datetime.now(timezone.utc).isoformat(),
