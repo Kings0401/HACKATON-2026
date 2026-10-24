@@ -34,6 +34,12 @@ class Settings:
             "CORS_ORIGINS", "http://127.0.0.1:5173,http://localhost:5173"
         )
     )
+    cors_origin_regex: str = field(
+        default_factory=lambda: os.getenv(
+            "CORS_ORIGIN_REGEX",
+            r"^http://(localhost|127\.0\.0\.1|10\.0\.1\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})(:\d+)?$",
+        )
+    )
     public_app_url: str = field(
         default_factory=lambda: os.getenv("PUBLIC_APP_URL", "http://127.0.0.1:5173").rstrip("/")
     )

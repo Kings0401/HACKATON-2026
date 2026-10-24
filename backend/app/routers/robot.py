@@ -70,6 +70,15 @@ def descargar_rostro(persona_id: str = Path(pattern=PERSONA), nombre_archivo: st
     return Response(content=imagen, media_type=media, headers={"Cache-Control": "no-store"})
 
 
+@router.get("/robot/gallery")
+def gallery_manifest(c: Context = Depends(ctx)):
+    """El robot consulta esto cada pocos segundos: si cambia la versión, sincroniza."""
+    try:
+        return c.reception.gallery_manifest()
+    except Exception as error:
+        raise HTTPException(status_code=502, detail="No se pudo consultar Storage") from error
+
+
 # ---------- contrato original ----------
 
 @router.post("/resolve-access")

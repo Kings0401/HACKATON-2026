@@ -52,6 +52,7 @@ export async function request(
 export const api = {
   health: () => request("/health", { anonymous: true }),
   robotMonitor: () => request("/robot/monitor"),
+  robotStatus: () => request("/robot/status", { anonymous: true, timeout: 5000 }),
   recognition: (body) => request("/recognition", { method: "POST", body }),
   validate: (body) => request("/validate", { method: "POST", body }),
   check: (body) => request("/access/check", { method: "POST", body }),

@@ -24,6 +24,12 @@ def health(c: Context = Depends(ctx)):
     }
 
 
+@router.get("/robot/status")
+def robot_status(c: Context = Depends(ctx)):
+    """Conexión de los robots (sin cámara, voz ni personas): visible sin sesión."""
+    return c.reception.public_status()
+
+
 @router.get("/navigation/map")
 def club_map():
     """Mapa esquemático (simulado); no contiene personas ni permisos."""

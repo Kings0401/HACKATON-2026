@@ -11,7 +11,7 @@ Todo se ejecuta en **PowerShell**, desde la carpeta del proyecto (`C:\Proyectos\
 | `install.sh`, `start.sh`, `stop.sh`, `status.sh`, `voice_mode.sh` | |
 | `robot.env` con la clave del robot (permisos 600) | |
 
-Las fotos de reconocimiento **no se copian desde el PC**: el robot las descarga del bucket privado a través del backend al iniciar y luego cada 2 minutos. Un miembro con foto subida desde *Admin → Personas* queda reconocible sin reiniciar.
+Las fotos de reconocimiento **no se copian desde el PC**: el robot consulta cada 5 segundos la versión de la galería (`/robot/gallery`). Si cambia, descarga solo lo nuevo y actualiza esas personas en caliente. Un miembro con foto subida desde *Admin → Personas* queda reconocible en segundos, sin reiniciar; si se borra su foto, sale de la galería.
 
 ## Una sola vez
 
@@ -44,7 +44,7 @@ npm run dev
 
 La primera instalación tarda unos minutos (OpenCV y modelo de voz en español). Las siguientes solo suben el código y reinician.
 
-Abra la app, inicie sesión con la cuenta ADMIN y entre a **Admin → Robots**: robot en línea, cámara en vivo, micrófono, transcripción, decisión y ruta.
+Abra la app, inicie sesión con la cuenta ADMIN (*Mi membresía*, no *Explorar demo*) y entre a **Admin → Robots**: robot en línea, cámara en vivo, micrófono, transcripción, decisión y ruta. Sin sesión ADMIN la página muestra al menos si el robot está conectado.
 
 ## Opciones
 
@@ -66,6 +66,8 @@ Por defecto el sistema de voz del X2 solo entrega audio después de su palabra d
 ssh agi@10.0.1.41 "bash ~/nclub/voice_mode.sh only_voice"   # volver: ... voice_mode.sh normal
 ```
 
+El modo queda guardado y **se aplica al reiniciar el robot**: el asistente integrado corre en el computador de interacción interno (10.0.1.42), no en el de desarrollo, así que `aima em` no puede reiniciarlo desde aquí.
+
 ## Control y diagnóstico
 
 ```powershell
@@ -80,5 +82,12 @@ ssh agi@10.0.1.41 "bash ~/nclub/start.sh"         # iniciar de nuevo
 | `Sin acceso SSH sin contraseña` | Cable, `Get-NetAdapter -Name Ethernet` en *Up*, IP 10.0.1.2, paso de la llave |
 | El backend no responde | Ventana 1 abierta; `curl http://127.0.0.1:8000/health` |
 | Robot no aparece en línea | `status.sh`; el robot debe llegar a `http://10.0.1.2:8000/health` |
-| No reconoce a alguien | Subir su foto en *Admin → Personas* (icono cámara) y esperar 2 min |
+| No reconoce a alguien | Subir su foto en *Admin → Personas* (icono cámara); el robot la toma en unos segundos |
 | No transcribe la voz | Palabra de activación o `voice_mode.sh only_voice` |
+
+## Qué sabe decir el robot
+
+- **Bienvenida por categoría**: VIP (transferencia a AGIBOT 02), miembro (reserva), invitado (anfitrión y áreas de la invitación), personal (zona y carné visible) y proveedor (espera de acompañante en la recepción de proveedores).
+- **Indicaciones habladas** al autorizar: distancia, tiempo y los primeros giros del recorrido.
+- **Preguntas de orientación**: «¿dónde queda el restaurante?», «¿cómo llego a la cancha 2?», «¿qué espacios tiene el club?». A quien aún no mostró su credencial le describe el lugar y le pide la credencial; a quien ya está autorizado lo guía, pero solo por las zonas de su categoría.
+- Las distancias salen del mapa esquemático **simulado** (`shared/club-map.json`); al cargar el plano real se actualizan solas.

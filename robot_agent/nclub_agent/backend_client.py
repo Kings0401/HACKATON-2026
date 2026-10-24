@@ -74,6 +74,9 @@ class BackendClient:
     def heartbeat(self, **status) -> dict:
         return self.request("POST", f"/robot/{self.robot_id}/heartbeat", json=status, retries=0)
 
+    def gallery(self) -> dict:
+        return self.request("GET", "/robot/gallery", retries=0)
+
     def push_frame(self, jpeg: bytes) -> None:
         self.request("PUT", f"/robot/{self.robot_id}/frame", content=jpeg,
                      headers={"Content-Type": "image/jpeg"}, retries=0)

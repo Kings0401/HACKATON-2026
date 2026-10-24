@@ -38,8 +38,11 @@ for _ in range(8):  # el ejemplo oficial reintenta: el par remoto responde tarde
         response = future.result()
         break
     time.sleep(0.2)
-status = getattr(getattr(getattr(response, "header", None), "status", None), "value", None)
-print(f"MODO={mode} estado={status} mensaje={getattr(getattr(response, 'header', None), 'message', '')}")
+header = getattr(response, "header", None)
+status = getattr(getattr(header, "status", None), "value", None)
+code = getattr(getattr(header, "header", None), "code", None)
+print(f"MODO={mode} estado={status} codigo={code} respuesta={response}")
 node.destroy_node()
 rclpy.shutdown()
-raise SystemExit(0 if status == 1 else 1)
+# Éxito: estado SUCCESS (1) o código 0 en la cabecera común de AimDK.
+raise SystemExit(0 if response is not None and (status == 1 or code == 0) else 1)

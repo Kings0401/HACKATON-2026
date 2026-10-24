@@ -40,8 +40,10 @@ def test_device_camera_recognizes_face_then_qr_decides(lab_client, admin):
     from nclub_vision.qr import encode_qr
 
     client, repo = lab_client
-    face = client.post("/admin/lab/frame", content=jpeg(DATASET / "pruebas" / "VIP001" / "foto3.png"),
-                       headers={**admin, "Content-Type": "image/jpeg"}).json()
+    # La votación entre fotogramas confirma el rostro en el segundo fotograma coincidente.
+    for _ in range(2):
+        face = client.post("/admin/lab/frame", content=jpeg(DATASET / "pruebas" / "VIP001" / "foto3.png"),
+                           headers={**admin, "Content-Type": "image/jpeg"}).json()
     assert face["simulation"] is True
     assert face["faces"][0]["persona_id"] == "VIP001" and face["faces"][0]["similarity"] >= 0.62
     assert any("Valeria" in s for s in face["speech"])  # saludo personalizado; aún sin acceso
@@ -78,8 +80,9 @@ def test_new_member_photo_enables_recognition_and_access(lab_client, admin):
                      headers={**admin, "Content-Type": "image/jpeg"})
     assert up.status_code == 200 and up.json()["enrolled"] is True
     assert repo.face_files(pid) == [up.json()["file"]]
-    seen = client.post("/admin/lab/frame", content=jpeg(DATASET / "pruebas" / "EXT001" / "foto3.png"),
-                       headers={**admin, "Content-Type": "image/jpeg"}).json()
+    for _ in range(2):
+        seen = client.post("/admin/lab/frame", content=jpeg(DATASET / "pruebas" / "EXT001" / "foto3.png"),
+                           headers={**admin, "Content-Type": "image/jpeg"}).json()
     assert seen["faces"][0]["persona_id"] == pid
     decided = client.post("/admin/lab/frame", content=jpeg(encode_qr("nclub:v1:" + member["credential"]["token"])),
                           headers={**admin, "Content-Type": "image/jpeg"}).json()

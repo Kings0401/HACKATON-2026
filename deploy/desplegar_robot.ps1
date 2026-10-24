@@ -69,7 +69,7 @@ if (-not $SoloReiniciar) {
   [IO.File]::WriteAllText("$stage\robot.env", "$robotEnv`n")  # LF y sin BOM
   $tgz = Join-Path $env:TEMP "nclub_deploy.tgz"
   if (Test-Path $tgz) { Remove-Item $tgz -Force }
-  tar -czf $tgz -C $stage .
+  & "$env:SystemRoot\System32\tar.exe" -czf $tgz -C $stage .  # tar de Windows (no el de Git)
   Write-Host ("OK · {0:N1} MB" -f ((Get-Item $tgz).Length / 1MB))
 
   Paso "4. Subiendo al robot"

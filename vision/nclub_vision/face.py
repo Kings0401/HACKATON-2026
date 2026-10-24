@@ -27,7 +27,9 @@ IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png")
 # que la mejor identidad supere claramente a la segunda.
 DEFAULT_THRESHOLD = 0.62
 DEFAULT_MARGIN = 0.06
-DEFAULT_MIN_FACE = 60
+DEFAULT_MIN_FACE = 48  # ~2-3 m con la cámara RGB-D de 1280x720 del X2
+# Varianza del laplaciano bajo la cual el rostro está movido o desenfocado.
+DEFAULT_MIN_SHARPNESS = 18.0
 
 
 @dataclass
@@ -94,6 +96,7 @@ class FaceEngine:
         self.threshold = threshold
         self.margin = margin
         self.min_face = min_face
+        self.min_sharpness = DEFAULT_MIN_SHARPNESS
         self.gallery = Gallery()
 
     # ---------- detección y características ----------
@@ -115,6 +118,15 @@ class FaceEngine:
         aligned = self.recognizer.alignCrop(frame, face)
         return self.recognizer.feature(aligned)
 
+    def sharpness(self, frame: np.ndarray, face: np.ndarray) -> float:
+        """Nitidez del recorte del rostro (varianza del laplaciano)."""
+        x, y, w, h = (max(0, int(v)) for v in face[:4])
+        crop = frame[y:y + h, x:x + w]
+        if crop.size == 0:
+            return 0.0
+        gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+        return float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
     def similarity(self, a: np.ndarray, b: np.ndarray) -> float:
         return float(self.recognizer.match(a, b, cv2.FaceRecognizerSF_FR_COSINE))
 
@@ -126,7 +138,38 @@ class FaceEngine:
         if len(faces) != 1:
             return False
         self.gallery.add(persona_id, self.embed(image, faces[0]))
+        # La versión espejo tolera mejor perfiles y giros de cabeza.
+        flipped = cv2.flip(image, 1)
+        flipped_faces = self.detect(flipped)
+        if len(flipped_faces) == 1:
+            self.gallery.add(persona_id, self.embed(flipped, flipped_faces[0]))
         return True
+
+    def features_for(self, images: list[np.ndarray]) -> list[np.ndarray]:
+        """Plantillas de varias fotos sin tocar la galería (para altas en caliente)."""
+        temp, self.gallery = self.gallery, Gallery()
+        try:
+            for image in images:
+                self.enroll_image("_", image)
+            return self.gallery.features.get("_", [])
+        finally:
+            self.gallery = temp
+
+    def replace_identity(self, persona_id: str, images: list[np.ndarray]) -> bool:
+        """Alta o actualización de una persona sin reconstruir toda la galería."""
+        features = self.features_for(images)
+        updated = dict(self.gallery.features)  # copia: la identificación sigue sin bloqueo
+        if features:
+            updated[persona_id] = features
+        else:
+            updated.pop(persona_id, None)
+        self.gallery.features = updated
+        return bool(features)
+
+    def remove_identity(self, persona_id: str) -> None:
+        updated = dict(self.gallery.features)
+        updated.pop(persona_id, None)
+        self.gallery.features = updated
 
     def enroll_folder(self, root: str | Path) -> Gallery:
         """Registra dataset/registro/<PERSONA_ID>/*.jpg|png.
@@ -172,6 +215,8 @@ class FaceEngine:
 
     def identify_face(self, frame: np.ndarray, face: np.ndarray) -> FaceMatch:
         box = tuple(int(v) for v in face[:4])
+        if self.sharpness(frame, face) < self.min_sharpness:
+            return FaceMatch(None, -1.0, box, float(face[14]), reason="blurry")
         ranked = self.best_scores(self.embed(frame, face))
         if not ranked:
             return FaceMatch(None, -1.0, box, float(face[14]), reason="empty_gallery")

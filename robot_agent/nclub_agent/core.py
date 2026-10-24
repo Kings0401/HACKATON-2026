@@ -23,6 +23,13 @@ from .speech import NullTranscriber, Transcriber, pcm_to_wav
 log = logging.getLogger(__name__)
 
 OFFLINE_MESSAGE = "Disculpe, tengo un problema de conexión. Un miembro de recepción le atenderá enseguida."
+# Frases que Whisper suele "oír" en el ruido o en el silencio.
+PHANTOM = ("gracias", "subtitulos", "subtítulos", "amara.org", "suscribete", "suscríbete", "musica", "música")
+
+
+def is_phantom(text: str) -> bool:
+    clean = text.strip().lower().strip(".,¡!¿? ")
+    return len(clean) < 3 or any(clean.startswith(p) for p in PHANTOM) and len(clean.split()) <= 3
 
 
 class Speaker(Protocol):
@@ -48,6 +55,30 @@ class AgentConfig:
     store_audio: bool = False  # solo con consentimiento y política del club
 
 
+class FaceTracker:
+    """Votación entre fotogramas: una identidad se acepta solo si coincide en
+    `needed` de los últimos `window` fotogramas nítidos (y recientes)."""
+
+    def __init__(self, window: int = 3, needed: int = 2, max_age_s: float = 2.5):
+        self.window, self.needed, self.max_age_s = window, needed, max_age_s
+        self.votes: list[tuple[float, object]] = []
+
+    def add(self, match, now: float):
+        self.votes = [(t, m) for t, m in self.votes if now - t <= self.max_age_s][-(self.window - 1):]
+        self.votes.append((now, match))
+        recent = [m for _, m in self.votes]
+        counts: dict[str, list] = {}
+        for m in recent:
+            if m.persona_id:
+                counts.setdefault(m.persona_id, []).append(m)
+        for matches in counts.values():
+            if len(matches) >= self.needed:
+                return max(matches, key=lambda m: m.score)
+        if len(recent) >= self.window and not counts:
+            return recent[-1]  # varios fotogramas seguidos sin coincidencia: desconocido
+        return None  # todavía sin consenso
+
+
 @dataclass
 class AgentState:
     session_id: str | None = None
@@ -57,6 +88,7 @@ class AgentState:
     last_face_id: str | None = None
     credentials_sent: set = field(default_factory=set)
     resolved_at: float = 0.0
+    tracker: FaceTracker = field(default_factory=FaceTracker)
 
 
 class ReceptionAgent:
@@ -84,6 +116,7 @@ class ReceptionAgent:
         self.last_audio_at = 0.0
         self.last_matches: list = []
         self.last_readings: list = []
+        self.speaking_until = 0.0  # mientras el robot habla, no se escucha a sí mismo
         self.on_session_start: Callable[[], None] | None = None  # p. ej. gesto de saludo
 
     # ---------- estado para el latido ----------
@@ -99,6 +132,9 @@ class ReceptionAgent:
 
     def _say(self, text: str | None) -> None:
         if text:
+            # Duración estimada de la voz (~13 caracteres/s) más un margen de eco.
+            start = max(self.clock(), self.speaking_until)
+            self.speaking_until = start + 1.5 + len(text) * 0.075
             self.speaker.speak(text)
 
     # ---------- sesión ----------
@@ -169,8 +205,10 @@ class ReceptionAgent:
                 return None  # ya atendido; espera a que el visitante se retire
             if not self._ensure_session():
                 return None
-            if matches:
-                best = matches[0]
+            # Rostros movidos o desenfocados no votan (sí cuentan como presencia).
+            sharp = [m for m in matches if m.reason != "blurry"]
+            best = self.state.tracker.add(sharp[0], now) if sharp else None
+            if best is not None:
                 changed = best.persona_id != self.state.last_face_id
                 if changed or now - self.state.last_face_report >= self.config.face_report_every_s:
                     self.state.last_face_id = best.persona_id
@@ -198,7 +236,12 @@ class ReceptionAgent:
     def on_utterance(self, pcm: bytes, started_at: str | None = None, consent: bool = False) -> dict | None:
         self.last_audio_at = self.clock()
         self.mic_ok = True
+        if self.clock() < self.speaking_until:
+            log.info("Audio descartado: el robot estaba hablando (eco)")
+            return None
         text, confidence = self.transcriber.transcribe(pcm)
+        if is_phantom(text):
+            return None
         return self.on_text(text, confidence, self.transcriber.name, started_at,
                             audio=pcm if (consent and self.config.store_audio) else None)
 
@@ -221,7 +264,8 @@ class ReceptionAgent:
             except BackendError:
                 self._say(OFFLINE_MESSAGE)
                 return None
-            if not self.state.decision:
+            # Tras decidir, el robot sigue respondiendo preguntas de orientación.
+            if not self.state.decision or reply.get("intent") in ("UBICACION", "ESPACIOS"):
                 self._say(reply.get("speech"))
             return reply
 

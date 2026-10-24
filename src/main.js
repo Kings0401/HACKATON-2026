@@ -112,13 +112,17 @@ async function refreshRobotMonitor() {
   robotMonitorBusy = true;
   try {
     if (sessionState.mode === "demo" && !(backendUrl && memoryToken.get())) {
-      data.robot_monitor = { connected: false, error: "DEMO sin backend: escriba abajo el token del backend en modo memoria para usar el robot simulado con la cámara de este dispositivo." };
+      data.robot_monitor = await publicMonitor(
+        "Estás en DEMO: aquí ves solo si el robot está conectado. Para su cámara, voz y decisiones, cierra sesión y entra con tu cuenta ADMIN real (Mi membresía).",
+      );
     } else {
       data.robot_monitor = await api.robotMonitor();
     }
     markAgibot(data.robot_monitor.agibot_connected === true);
   } catch (err) {
-    data.robot_monitor = { connected: false, error: readableError(err) };
+    data.robot_monitor = await publicMonitor(
+      `No se pudo abrir el monitor completo: ${readableError(err)}`,
+    );
   } finally {
     robotMonitorBusy = false;
   }
@@ -132,10 +136,45 @@ async function refreshRobotMonitor() {
       (data.robot_monitor.robot_id || "");
     panel.innerHTML = pages.adminRobotMonitor(data.robot_monitor);
     const newStream = panel.querySelector("[data-robot-stream]");
-    if (oldStream && newStream && sameRobot && !oldStream.dataset.failed)
+    if (oldStream?.getAttribute("src") && newStream && sameRobot && !oldStream.dataset.failed)
       newStream.replaceWith(oldStream);
+    else if (newStream) newStream.src = newStream.dataset.src; // una sola conexión por stream
     hydrate();
     revealRoutes(panel);
+  }
+}
+// Estado público (sin sesión): solo conexión de los robots, sin cámara ni datos.
+async function publicMonitor(message) {
+  if (!backendUrl)
+    return {
+      connected: false,
+      error: "Configura VITE_BACKEND_URL y ejecuta el backend para ver el robot.",
+    };
+  try {
+    const status = await api.robotStatus();
+    const robot =
+      status.robots.find((r) => r.connected && r.robot_id !== "camara-dispositivo") ||
+      status.robots.find((r) => r.connected) ||
+      status.robots[0];
+    return {
+      connected: Boolean(robot?.connected),
+      agibot_connected: status.robots.some(
+        (r) => r.connected && r.robot_id !== "camara-dispositivo",
+      ),
+      robot_id: robot?.robot_id,
+      robot_name: robot?.name,
+      updated_at: status.updated_at,
+      camera: { ok: Boolean(robot?.camera_ok), live: false },
+      microphone: { ok: Boolean(robot?.mic_ok), state: robot?.mic_state },
+      robots: status.robots,
+      public_only: true,
+      error: message,
+    };
+  } catch (err) {
+    return {
+      connected: false,
+      error: `${message} El backend no responde: ${readableError(err)}`,
+    };
   }
 }
 function queueMonitorRefresh() {

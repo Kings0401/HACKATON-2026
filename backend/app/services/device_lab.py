@@ -46,6 +46,7 @@ class FaceGallery:
         self.engine = None
         self.loaded_at = 0.0
         self.skipped: list[str] = []
+        self.version: str | None = None  # versión del manifiesto de Storage cargada
 
     def get(self):
         with self.lock:
@@ -167,6 +168,7 @@ class DeviceLab:
     def __init__(self, reception: ReceptionService, gallery: FaceGallery):
         self.reception = reception
         self.gallery = gallery
+        self.checked_at = 0.0
         self.robots: dict[str, tuple[ReceptionAgent, CollectSpeaker]] = {}
         self.lock = threading.Lock()
 
@@ -184,10 +186,29 @@ class DeviceLab:
                 self.robots[admin_id] = (agent, speaker)
             return self.robots[admin_id]
 
+    def _refresh_gallery(self) -> None:
+        """Recarga la galería si cambió Storage (alta de miembro, foto nueva o borrada)."""
+        if time.time() - self.checked_at < 10:
+            return
+        self.checked_at = time.time()
+        try:
+            version = self.reception.gallery_manifest()["version"]
+        except Exception:
+            return
+        if self.gallery.version is None:
+            self.gallery.version = version
+        elif version != self.gallery.version:
+            self.gallery.reload()
+            self.gallery.version = version
+            with self.lock:
+                for agent, _ in self.robots.values():
+                    agent.face = self.gallery.get()
+
     def frame(self, admin_id: str, jpeg: bytes) -> dict:
         image = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
         if image is None:
             raise ValueError("El fotograma no es una imagen válida")
+        self._refresh_gallery()
         agent, speaker = self._robot(admin_id)
         with self.gallery.lock:  # FaceRecognizerSF no es seguro entre hilos
             decision = agent.on_frame(image)

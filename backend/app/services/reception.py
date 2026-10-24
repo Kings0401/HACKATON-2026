@@ -20,12 +20,20 @@ from datetime import datetime, timedelta, timezone
 
 from ..config import Settings
 from ..repository import Repository
-from . import dialogue
+from . import club_guide, dialogue
 from .access import ESTADO, DECISION, AccessEngine, Decision, FaceEvidence
 from .navigation import RouteError, compute_route
 
 log = logging.getLogger(__name__)
 MONITOR_TOPIC = "nclub:monitor"
+# Cierre hablado de cada uno de los cinco flujos.
+CATEGORY_CLOSING = {
+    ("VIP", "authorized"): "Mi compañero AGIBOT 02 le acompañará para una atención personalizada.",
+    ("REGULAR", "authorized"): "Que disfrute su visita en N Club.",
+    ("INVITADO", "authorized"): "Su anfitrión ya fue notificado; la ruta solo incluye las áreas de su invitación.",
+    ("PERSONAL_INTERNO", "authorized"): "Recuerde llevar su carné visible durante el turno.",
+    ("TRABAJADOR_EXTERNO", "pending_escort"): "Por seguridad, permanezca en la recepción de proveedores hasta que llegue su acompañante y no ingrese a áreas sociales.",
+}
 
 
 def now_iso() -> str:
@@ -53,6 +61,7 @@ class MonitorState:
         self.shared_routes: dict[str, dict] = {}
         self.validations: dict[str, dict] = {}
         self.degraded: dict[str, str] = {}
+        self.gallery_cache: tuple[float, dict] | None = None
 
 
 class ReceptionService:
@@ -81,6 +90,34 @@ class ReceptionService:
 
     def _publish(self, event: str, payload: dict) -> None:
         self.repo.broadcast(MONITOR_TOPIC, event, payload)
+
+    # ---------- galería facial (sincronización en vivo) ----------
+
+    def gallery_manifest(self, max_age_s: float = 4.0) -> dict:
+        """Listado de fotos por persona y una versión que cambia con cada alta o baja."""
+        cached = self.state.gallery_cache
+        if cached and time.time() - cached[0] < max_age_s:
+            return cached[1]
+        personas = {pid: self.repo.face_files(pid) for pid in self.repo.face_folders()}
+        personas = {pid: files for pid, files in personas.items() if files}
+        version = hashlib.sha1(repr(sorted(personas.items())).encode()).hexdigest()[:16]
+        manifest = {"version": version, "personas": personas, "generated_at": now_iso()}
+        self.state.gallery_cache = (time.time(), manifest)
+        return manifest
+
+    def invalidate_gallery(self) -> None:
+        self.state.gallery_cache = None
+        self._publish("gallery", {"changed": True})
+
+    def public_status(self) -> dict:
+        """Estado mínimo para mostrar la conexión sin sesión (sin cámara ni datos)."""
+        robots = [self.robot_status(r) for r in sorted(self.state.robots)]
+        return {
+            "updated_at": now_iso(),
+            "robots": [{k: r.get(k) for k in ("robot_id", "name", "connected", "camera_ok", "mic_ok",
+                                               "mic_state", "simulated", "seconds_since_heartbeat")}
+                       for r in robots],
+        }
 
     # ---------- robots ----------
 
@@ -202,10 +239,23 @@ class ReceptionService:
                       engine: str | None = None, started_at: str | None = None, ended_at: str | None = None,
                       audio_b64: str | None = None, consent: bool = False) -> dict:
         text = text.strip()[:1000]
-        understanding = dialogue.understand(text) if text else {"intent": "VACIO", "category_hint": None,
-                                                                    "reply": None, "handoff": False}
+        # Orientación en el club: solo se guía a quien ya tiene categoría confirmada.
+        decision = session.get("decision") or {}
+        confirmed = decision.get("category") if decision.get("access") in ("authorized", "pending") else None
+        guide = club_guide.answer(text, confirmed) if text else None
+        if guide:
+            understanding = {"intent": guide["intent"], "category_hint": None, "reply": guide["reply"],
+                             "handoff": False, "route": guide["route"]}
+        else:
+            understanding = dialogue.understand(text) if text else {"intent": "VACIO", "category_hint": None,
+                                                                        "reply": None, "handoff": False}
         if understanding["category_hint"] and not session["category_hint"]:
             session["category_hint"] = understanding["category_hint"]
+        if understanding["intent"] == "DESCONOCIDO":
+            # «¿Podría repetirlo?» como máximo una vez por visita (evita bucles de eco).
+            session["unknown_replies"] = session.get("unknown_replies", 0) + 1
+            if session["unknown_replies"] > 1:
+                understanding = {**understanding, "reply": None}
         evidence_id = None
         if audio_b64 and consent and self.settings.store_evidence:
             evidence_id = self.store_evidence(session, base64.b64decode(audio_b64, validate=True), "audio/wav", "AUDIO")
@@ -352,11 +402,18 @@ class ReceptionService:
 
     @staticmethod
     def speech(decision: Decision, route: dict | None) -> str:
+        """Lo que dice el robot al decidir: instrucción, indicaciones y cierre por categoría."""
         text = decision.instruction
         if route and "steps" in route:
             minutes = route["minutes"]
-            text += f" Su destino, {route['destination_label']}, está a unos {minutes} minuto{'s' if minutes != 1 else ''}."
-            text += " Le muestro la ruta en pantalla y puede llevarla en su celular con el código QR."
+            text += (f" Su destino, {route['destination_label']}, está a {route['distance_m']} metros, "
+                     f"unos {minutes} minuto{'s' if minutes != 1 else ''} caminando. "
+                     f"{club_guide.spoken_steps(route)}")
+        closing = CATEGORY_CLOSING.get((decision.category, decision.access))
+        if closing:
+            text += f" {closing}"
+        if route and "steps" in route:
+            text += " Puede llevar esta ruta en su celular con el código QR de la pantalla."
         return text
 
     def _history_item(self, session: dict, result: dict) -> dict:

@@ -60,8 +60,9 @@ def run(backend: str, robot_key: str, robot_id: str = "robot-sim", with_faces: b
         t[0] += 1
         face = probe_image(persona_id) if engine else None
         if face is not None:
-            agent.on_frame(face)
-            t[0] += 1
+            for _ in range(3):  # la votación necesita varios fotogramas coincidentes
+                agent.on_frame(face)
+                t[0] += 0.3
         agent.on_text(phrase, 0.9, "simulado")
         t[0] += 1
         decision = agent.on_frame(encode_qr(credential))

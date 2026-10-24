@@ -126,3 +126,23 @@ def test_same_qr_is_not_resolved_twice_while_visible(backend):
     t[0] += 1
     assert agent.on_frame(qr) is None
     assert len(repo.tables["eventos_acceso"]) == 1
+
+
+def test_face_tracker_needs_consensus_and_ignores_single_glitch():
+    from types import SimpleNamespace as M
+
+    from nclub_agent.core import FaceTracker
+
+    tracker = FaceTracker()
+    vip, other, unknown = (M(persona_id="VIP001", score=0.8), M(persona_id="REG001", score=0.7),
+                           M(persona_id=None, score=0.3))
+    assert tracker.add(vip, 0.0) is None          # un solo fotograma no basta
+    assert tracker.add(other, 0.2) is None        # fotograma erróneo aislado
+    assert tracker.add(vip, 0.4).persona_id == "VIP001"
+    fresh = FaceTracker()
+    for t in (0.0, 0.2):
+        assert fresh.add(unknown, t) is None
+    assert fresh.add(unknown, 0.4).persona_id is None  # tres sin coincidencia: desconocido
+    stale = FaceTracker()
+    stale.add(vip, 0.0)
+    assert stale.add(vip, 5.0) is None            # votos viejos caducan

@@ -183,7 +183,7 @@ class ReceptionAgentNode(Node):
         asr_engine = p("asr_engine", "faster-whisper").value
         asr_model = p("asr_model", "small").value
         gestures_enabled = p("gestures_enabled", False).value
-        self.gallery_refresh_s = p("gallery_refresh_s", 120).value
+        self.gallery_poll_s = p("gallery_poll_s", 5.0).value  # segundos entre consultas de cambios
         self.rotate = p("rotate_90", False).value  # cámara trasera del X2 Ultra (new version)
         robot_key = os.environ.get("NCLUB_ROBOT_KEY", "")
         if not robot_key:
@@ -210,8 +210,9 @@ class ReceptionAgentNode(Node):
         self.frames = QueueFrameSource()
         self.dropped_frames = 0
         threading.Thread(target=self._vision_loop, daemon=True, name="nclub-vision").start()
+        self.audio_topic = audio_topic
         self.heartbeat = HeartbeatLoop(self.client, lambda: {
-            **self.agent.status(), "name": robot_id, "model": "AGIBOT X2 Ultra",
+            **self.agent.status(), **self._mic_status(), "name": robot_id, "model": "AGIBOT X2 Ultra",
             "firmware": os.environ.get("NCLUB_FIRMWARE"), "sdk_version": os.environ.get("NCLUB_AIMDK_VERSION"),
             "camera_topic": camera_topic, "audio_topic": audio_topic,
         })
@@ -230,6 +231,16 @@ class ReceptionAgentNode(Node):
             self.get_logger().warning("aimdk_msgs no está disponible: voz y TTS deshabilitados.")
         self.get_logger().info(f"Cámara: {camera_topic} · Audio: {audio_topic} · Backend: {backend_url}")
 
+    def _mic_status(self) -> dict:
+        status = self.agent.status()
+        if status["mic_ok"]:
+            return {}
+        try:
+            available = AIMDK and self.count_publishers(self.audio_topic) > 0
+        except Exception:
+            available = False
+        return {"mic_ok": True, "mic_state": "silencio"} if available else {}
+
     # ---------- galería y decisiones ----------
 
     def _sync_gallery(self) -> int:
@@ -245,13 +256,58 @@ class ReceptionAgentNode(Node):
         return report["downloaded"]
 
     def _gallery_loop(self) -> None:
-        while self.gallery_refresh_s > 0:
-            time.sleep(self.gallery_refresh_s)
-            if self._sync_gallery():
-                engine = FaceEngine()
-                engine.enroll_folder(self.registro)
-                self.agent.face = engine  # reemplazo atómico entre fotogramas
-                self.get_logger().info(f"Galería actualizada: {engine.gallery.identities}")
+        """Sincronización en vivo: si cambia la versión del manifiesto, descarga lo
+        nuevo y actualiza solo esas personas (motor aparte: no frena la cámara)."""
+        enroller = FaceEngine()
+        version = None
+        while self.gallery_poll_s > 0:
+            time.sleep(self.gallery_poll_s)
+            try:
+                manifest = self.client.gallery()
+            except Exception:
+                continue  # backend momentáneamente caído
+            if manifest.get("version") == version:
+                continue
+            try:
+                self._apply_manifest(manifest, enroller)
+                version = manifest.get("version")
+            except Exception as error:
+                self.get_logger().warning(f"Actualización de galería falló: {error}")
+
+    def _apply_manifest(self, manifest: dict, enroller: FaceEngine) -> None:
+        import shutil
+        from urllib.parse import quote
+
+        import cv2
+
+        root = Path(self.registro)
+        remote = manifest.get("personas", {})
+        local = {d.name: sorted(f.name for f in d.iterdir() if f.is_file()) for d in root.iterdir() if d.is_dir()}
+        engine = self.agent.face
+        for persona_id in set(local) - set(remote):  # persona sin fotos o eliminada
+            shutil.rmtree(root / persona_id, ignore_errors=True)
+            engine.remove_identity(persona_id)
+            self.get_logger().info(f"Persona retirada de la galería: {persona_id}")
+        for persona_id, files in remote.items():
+            if sorted(files) == local.get(persona_id):
+                continue
+            folder = root / persona_id
+            folder.mkdir(parents=True, exist_ok=True)
+            for old in set(local.get(persona_id, [])) - set(files):
+                (folder / old).unlink(missing_ok=True)
+            for name in set(files) - set(local.get(persona_id, [])):
+                response = self.client.http.get(f"/rostros/{quote(persona_id, safe='')}/{quote(name, safe='')}")
+                if response.status_code == 200:
+                    (folder / Path(name).name).write_bytes(response.content)
+            images = [img for img in (cv2.imread(str(f)) for f in sorted(folder.iterdir())) if img is not None]
+            features = enroller.features_for(images)
+            updated = dict(engine.gallery.features)
+            if features:
+                updated[persona_id] = features
+            else:
+                updated.pop(persona_id, None)
+            engine.gallery.features = updated  # reemplazo atómico entre fotogramas
+            self.get_logger().info(f"Galería en vivo: {persona_id} ({len(features)} plantillas)")
 
     def _on_decision(self, decision: dict) -> None:
         if self.gestures and decision.get("role") == "VIP" and decision.get("access") == "authorized":

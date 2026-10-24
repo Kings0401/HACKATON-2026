@@ -132,6 +132,7 @@ async def upload_photo(request: Request, persona_id: str = Path(pattern=PERSONA)
     except Exception as error:
         raise HTTPException(status_code=502, detail="No se pudo guardar la foto en Storage") from error
     enrolled = _call(c.gallery.add, persona_id, image)
+    c.reception.invalidate_gallery()  # el robot la descarga en segundos
     c.reception.audit(f"admin:{admin['id']}", "subir_foto_registro", "persona", persona_id,
                       {"archivo": name, "consentimiento": True})
     return {"persona_id": persona_id, "stored": True, "file": name, "enrolled": enrolled}
