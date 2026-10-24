@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nclub-vision"
+version = "2.0.0"
+description = "Reconocimiento facial (YuNet + SFace) y lectura QR sobre fotogramas en memoria"
+requires-python = ">=3.10"
+dependencies = [
+  "opencv-python-headless>=4.8",
+  "numpy>=1.24",
+  "httpx>=0.27",
+  "python-dotenv>=1.0",
+]
+
+[tool.setuptools]
+packages = ["nclub_vision"]

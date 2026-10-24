@@ -1,0 +1,5 @@
+# Probado con Python 3.14 (Windows) y compatible con 3.10 (Ubuntu 22.04 / ROS 2 Humble).
+opencv-python-headless>=4.8
+numpy>=1.24
+httpx>=0.27
+python-dotenv>=1.0

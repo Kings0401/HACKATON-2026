@@ -1,0 +1,20 @@
+# Parámetros del agente para AGIBOT X2 Ultra.
+# Topics/servicios según AimDK_X2 1.1.0 (https://x2-aimdk.agibot.com/en/latest/).
+# NO verificados en el robot físico: confirmar con `ros2 topic list` y
+# `ros2 topic info -v <topic>` antes de usar. La clave del robot va en la
+# variable de entorno NCLUB_ROBOT_KEY, nunca en este archivo.
+nclub_reception_agent:
+  ros__parameters:
+    backend_url: "http://10.0.1.2:8000"   # PC host en la red SDK cableada (10.0.1.2/24)
+    robot_id: "robot1"
+    # Color RGB-D frontal, MJPEG 1280x720 a 30 Hz (CompressedImage).
+    camera_topic: "/aima/hal/sensor/rgbd_head_front/rgb_image/compressed"
+    rotate_90: false                       # true solo para la cámara trasera del X2 Ultra (new version)
+    # VAD de AimDK: PCM 16 kHz, 16 bits, mono; requiere palabra de activación en modo por defecto.
+    audio_topic: "/agent/process_audio_output"
+    registro_dir: "/data/nclub/dataset/registro"
+    # TTS desactivado por defecto: activarlo solo con autorización del responsable del robot.
+    tts_enabled: false
+    tts_service: "/aimdk_5Fmsgs/srv/PlayTts"
+    asr_engine: "faster-whisper"           # faster-whisper | vosk | none
+    asr_model: "small"

@@ -16,6 +16,7 @@ import { sessionState } from "./data.js";
 import { configured, demoEnabled, backendUrl } from "./config.js";
 import { demoPeople } from "./demo.js";
 import { clubMapBanner } from "./clubmap.js";
+import { routeCard } from "./navigation.js";
 
 const link = (route, label, ico, active) =>
   `<a href="#/${route}" class="nav-item ${active === route ? "active" : ""}" ${active === route ? 'aria-current="page"' : ""}>${icon(ico)}<span>${label}</span>${icon("chevron-right", "nav-chevron")}</a>`;
@@ -182,6 +183,7 @@ export function shell(content, route, p) {
         ["admin/invitations", "Invitaciones", "ticket"],
         ["admin/work", "Turnos y órdenes", "briefcase-business"],
         ["admin/access", "Registro de accesos", "activity"],
+        ["admin/robots", "Seguimiento de robots", "bot"],
         ["reception", "Recepción", "bot"],
       ]
     : [
@@ -259,6 +261,7 @@ export function shell(content, route, p) {
             ["admin", "Inicio", "layout-dashboard"],
             ["admin/users", "Personas", "users"],
             ["reception", "Recepción", "bot"],
+            ["admin/robots", "Robots", "activity"],
             ["profile", "Perfil", "user-round"],
           ]
         : [
@@ -740,6 +743,7 @@ export function adminPage(tab, data) {
     invitations: "Invitaciones",
     work: "Turnos y órdenes de trabajo",
     access: "Registro de accesos",
+    robots: "Seguimiento de robots",
   };
   if (!tab) {
     const stats = [
@@ -825,6 +829,7 @@ export function adminPage(tab, data) {
           ["invitations", "Crear invitación", "ticket"],
           ["work", "Órdenes y turnos", "briefcase-business"],
           ["access", "Registro de accesos", "activity"],
+          ["robots", "Seguimiento de robots", "bot"],
         ]
           .map(
             ([r, l, i]) =>
@@ -862,6 +867,7 @@ export function adminPage(tab, data) {
         ["invitations", "Invitados"],
         ["work", "Órdenes"],
         ["access", "Accesos"],
+        ["robots", "Robots"],
       ]
         .map(
           ([r, l]) =>
@@ -869,7 +875,66 @@ export function adminPage(tab, data) {
         )
         .join("")}
     </div>
-    <section class="panel admin-panel">${content}</section>`;
+      <section class="panel admin-panel">${tab === "robots" ? adminRobotMonitor(data.robot_monitor) : content}</section>`;
+}
+
+export function adminRobotMonitor(monitor) {
+  const connected = monitor?.connected === true;
+  const cameraUrl =
+    connected && typeof monitor.camera_stream_url === "string"
+      ? monitor.camera_stream_url
+      : "";
+  const latest = Array.isArray(monitor?.events) ? monitor.events.slice(0, 8) : [];
+  const transcripts = Array.isArray(monitor?.transcripts)
+    ? monitor.transcripts.slice(0, 6)
+    : [];
+  const active = Array.isArray(monitor?.active_sessions)
+    ? monitor.active_sessions
+    : [];
+  const current = latest[0];
+  const mic = monitor?.microphone || {};
+  const roleNames = { VIP: "VIP", REGULAR: "Miembro", GUEST: "Invitado", STAFF: "Personal", EXTERNAL: "Proveedor" };
+  const categoryNames = { VIP: "VIP", REGULAR: "Miembro", INVITADO: "Invitado", PERSONAL_INTERNO: "Personal", TRABAJADOR_EXTERNO: "Proveedor" };
+  const decisionNames = { AUTORIZADO: "Autorizado", DENEGADO: "Denegado", REVISION: "Revisión manual", ACOMPANAMIENTO: "Acompañamiento", PENDIENTE: "Pendiente" };
+  const accessNames = { authorized: "Autorizado", review: "Revisión", denied: "Denegado", pending: "Pendiente" };
+  const decisionClass = (d) =>
+    ({ AUTORIZADO: "authorized", DENEGADO: "denied", REVISION: "review", ACOMPANAMIENTO: "pending" })[d] || "pending";
+  const time = (v) =>
+    v
+      ? new Date(v).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      : "—";
+  return `<div class="robot-monitor" data-robot-monitor data-robot-id="${e(monitor?.robot_id || "")}">
+    <div class="robot-monitor-top"><div><span class="eyebrow">CENTRO DE OPERACIONES</span><h2>Recepción AGIBOT</h2><p>Vista del robot, voz transcrita, identificación y decisión de cada llegada.</p></div><div class="robot-badges">${monitor?.simulation ? `<span class="demo-tag">SIMULACIÓN</span>` : ""}<span class="robot-connection ${connected ? "is-online" : "is-offline"}"><i></i>${connected ? "CONECTADO" : "SIN CONEXIÓN"}</span></div></div>
+    ${monitor?.error ? `<div class="notice robot-monitor-notice"><p>${e(monitor.error)}</p></div>` : ""}
+    ${monitor?.persistence && !monitor.persistence.ok ? `<div class="notice robot-monitor-notice">${icon("alert-circle")}<p>Persistencia degradada: ${e(Object.keys(monitor.persistence.degraded).join(", "))}. Ejecute supabase/recepcion_robot.sql; mientras tanto el historial vive solo en memoria.</p></div>` : ""}
+    <div class="robot-status-strip">
+      <span class="${connected ? "ok" : "off"}">${icon(connected ? "wifi" : "wifi-off")}Robot<strong>${connected ? "En línea" : "Desconectado"}</strong></span>
+      <span class="${monitor?.camera?.live ? "ok" : "off"}">${icon("camera")}Cámara<strong>${monitor?.camera?.live ? "Transmitiendo" : monitor?.camera?.ok ? "Sin fotogramas" : "Sin señal"}</strong></span>
+      <span class="${mic.ok ? "ok" : "off"}">${icon("mic")}Micrófono<strong>${e(mic.ok ? mic.state || "activo" : "Sin señal")}</strong></span>
+      <span>${icon("radio")}Sesiones activas<strong>${active.length}</strong></span>
+    </div>
+    <div class="robot-monitor-grid"><section class="robot-camera panel"><div class="monitor-section-heading"><div><span class="eyebrow">CÁMARA EN VIVO</span><strong>${e(monitor?.robot_name || "AGIBOT recepción")}</strong></div><span>${cameraUrl ? "STREAM PRIVADO" : "ESPERANDO SEÑAL"}</span></div>${cameraUrl ? `<img data-robot-stream src="${e(cameraUrl)}" alt="Transmisión de cámara del robot" />` : `<div class="camera-placeholder">${icon("camera")}<strong>${connected ? "Cámara sin señal" : "La transmisión aparecerá cuando el agente del robot se conecte"}</strong><span>Stream MJPEG privado con token de corta duración; no se graba video.</span></div>`}</section>
+      <section class="robot-listening panel"><div class="monitor-section-heading"><div><span class="eyebrow">ESCUCHA Y VOZ · EN VIVO</span><strong>Transcripción</strong></div>${icon("audio-lines")}</div>${monitor?.last_heard ? `<p class="heard-text" data-live-transcript>“${e(monitor.last_heard.transcript || "Audio recibido; sin transcripción")}”</p><div class="heard-meta">${e(monitor.last_heard.language || "Idioma no indicado")} · ${e(monitor.last_heard.intent || "")} · ${e(time(monitor.last_heard.created_at))}</div>${monitor.last_heard.audio_url ? `<audio controls preload="none" src="${e(monitor.last_heard.audio_url)}">El navegador no admite reproducción de audio.</audio>` : ""}` : `<div class="listening-empty">${icon("mic")}<span data-live-transcript>${connected ? "Esperando una interacción de voz…" : "La transcripción aparecerá al conectar el robot."}</span></div>`}
+        ${transcripts.length > 1 ? `<ul class="transcript-list">${transcripts.slice(1).map((t) => `<li><span>${e(time(t.created_at))}</span>${e(t.texto)}</li>`).join("")}</ul>` : ""}
+        <p class="monitor-privacy">La voz solo orienta el diálogo: nunca confirma identidad. Los clips se guardan únicamente con consentimiento y política del club.</p></section></div>
+    ${
+      current
+        ? `<section class="panel monitor-current"><div class="monitor-section-heading"><div><span class="eyebrow">ÚLTIMA ATENCIÓN · ${e(time(current.created_at))}</span><strong>${e(current.display_name || "Visitante")}</strong></div><span class="status status-${decisionClass(current.decision)}"><span></span>${e(decisionNames[current.decision] || current.decision || "Sin decisión")}</span></div>
+      <div class="details-list monitor-details">
+        <div><span>Categoría detectada</span><strong>${e(categoryNames[current.category_detected] || "—")}</strong></div>
+        <div><span>Categoría confirmada</span><strong>${e(roleNames[current.role] || "No confirmada")}</strong></div>
+        <div><span>Método</span><strong>${e(current.method)}</strong></div>
+        <div><span>Destino</span><strong>${e(current.destination || "—")}</strong></div>
+        <div><span>Justificación</span><strong>${e(current.reason || "—")}</strong></div>
+      </div>
+      ${Array.isArray(current.checks) && current.checks.length ? `<ul class="check-list">${current.checks.map((c) => `<li class="${c.ok ? "ok" : "fail"}">${icon(c.ok ? "check-circle-2" : "alert-circle")}<strong>${e(c.name)}</strong><span>${e(c.detail)}</span></li>`).join("")}</ul>` : ""}
+      ${current.route?.steps ? routeCard(current.route, { title: "Ruta entregada al visitante", compact: true }) : ""}
+      </section>`
+        : ""
+    }
+    <section class="classification-panel panel"><div class="monitor-section-heading"><div><span class="eyebrow">HISTORIAL Y EVIDENCIAS</span><strong>Interacciones</strong></div><span>Tiempo real · respaldo cada 3 s</span></div>${latest.length ? `<div class="table-scroll"><table><thead><tr><th>Hora</th><th>Persona</th><th>Detectada</th><th>Confirmada</th><th>Método</th><th>Decisión</th><th>Voz</th><th>Robot</th></tr></thead><tbody>${latest.map((item) => `<tr><td>${e(time(item.created_at))}</td><td>${e(item.display_name || "Visitante")}${item.simulation ? "<small>simulación</small>" : ""}</td><td>${e(categoryNames[item.category_detected] || "—")}</td><td>${e(roleNames[item.role] || "—")}</td><td>${e(item.method || "—")}</td><td>${e(decisionNames[item.decision] || accessNames[item.access] || "Sin decisión")}</td><td>${e((item.transcripts || []).join(" · ") || "—")}</td><td>${e(item.robot_name || item.robot_target || "AGIBOT")}</td></tr>`).join("")}</tbody></table></div>` : Array.isArray(monitor?.stored_sessions) && monitor.stored_sessions.length ? `<div class="table-scroll"><table><thead><tr><th>Inicio</th><th>Robot</th><th>Detectada</th><th>Confirmada</th><th>Método</th><th>Decisión</th></tr></thead><tbody>${monitor.stored_sessions.map((s) => `<tr><td>${e(time(s.iniciada_en))}</td><td>${e(s.robot_id)}</td><td>${e(categoryNames[s.categoria_detectada] || "—")}</td><td>${e(categoryNames[s.categoria_confirmada] || "—")}</td><td>${e((s.metodo_verificacion || []).join(" + ") || "—")}</td><td>${e(decisionNames[s.decision] || s.estado)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="monitor-no-events">${icon("scan-eye")}<span>${connected ? "Todavía no hay interacciones reportadas." : "Los eventos se cargarán cuando /robot/monitor esté disponible."}</span></div>`}</section>
+    <p class="monitor-updated">${monitor?.updated_at ? `Última actualización: ${e(new Date(monitor.updated_at).toLocaleTimeString("es-CO"))}` : "El monitor requiere una sesión ADMIN real y el backend de robots."}</p>
+  </div>`;
 }
 
 export function reception(data, flow) {
@@ -939,7 +1004,7 @@ export function reception(data, flow) {
           </div>
           <div>
             <span>Destino</span
-            ><strong>${e(f.destination || "Pendiente de validación")}</strong>
+            ><strong>${e(f.route?.destination_label || f.destination || "Pendiente de validación")}</strong>
           </div>
           <div>
             <span>Reserva asociada</span
@@ -986,6 +1051,7 @@ export function reception(data, flow) {
         </div>
       </section>
     </div>
+    ${f.route && !f.busy ? routeCard(f.route, { qrId: "route-qr", title: f.simulation !== false ? "Recorrido · simulación" : "Recorrido autorizado" }) : ""}
     <section class="panel simulation-panel">
       <div class="section-heading">
         <div>

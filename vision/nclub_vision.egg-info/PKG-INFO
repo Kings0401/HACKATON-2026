@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: nclub-vision
+Version: 2.0.0
+Summary: Reconocimiento facial (YuNet + SFace) y lectura QR sobre fotogramas en memoria
+Requires-Python: >=3.10
+Requires-Dist: opencv-python-headless>=4.8
+Requires-Dist: numpy>=1.24
+Requires-Dist: httpx>=0.27
+Requires-Dist: python-dotenv>=1.0

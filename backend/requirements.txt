@@ -1,0 +1,8 @@
+# Probado con Python 3.14 (Windows); compatible con Python 3.10+ (Ubuntu 22.04).
+fastapi>=0.115
+uvicorn[standard]>=0.30
+supabase>=2.10
+python-dotenv>=1.0
+httpx>=0.27
+# Pruebas
+pytest>=8

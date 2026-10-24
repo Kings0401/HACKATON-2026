@@ -5,3 +5,15 @@ dist/
 .env.*.local
 output/
 .playwright-cli/
+
+# Integración robot / visión / backend
+__pycache__/
+.venv/
+backend/.env
+vision/.env
+robot_agent/.env
+vision/dataset/
+vision/models/*.onnx
+# Entregas originales: contienen claves, entorno de macOS y fotografías
+nclub-backend.zip
+nclub-vision.zip

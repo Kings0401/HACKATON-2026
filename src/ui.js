@@ -58,6 +58,23 @@ import {
   ScanLine,
   Shield,
   Gem,
+  Camera,
+  AudioLines,
+  Mic,
+  ScanEye,
+  Navigation,
+  Route,
+  Smartphone,
+  Footprints,
+  CornerUpLeft,
+  CornerUpRight,
+  MoveUp,
+  Undo2,
+  UserCheck,
+  WifiOff,
+  Radio,
+  Hourglass,
+  MapPinned,
 } from "lucide";
 import QRCode from "qrcode";
 import { escape, roles } from "./lib.js";
@@ -121,6 +138,23 @@ const iconSet = {
   ScanLine,
   Shield,
   Gem,
+  Camera,
+  AudioLines,
+  Mic,
+  ScanEye,
+  Navigation,
+  Route,
+  Smartphone,
+  Footprints,
+  CornerUpLeft,
+  CornerUpRight,
+  MoveUp,
+  Undo2,
+  UserCheck,
+  WifiOff,
+  Radio,
+  Hourglass,
+  MapPinned,
 };
 export const icon = (name, cls = "") =>
   `<i data-lucide="${name}" class="${cls}" aria-hidden="true"></i>`;
@@ -175,6 +209,16 @@ export async function drawQR(token, id = "credential-qr") {
       margin: 2,
       errorCorrectionLevel: "M",
       color: { dark: "#102c24", light: "#ffffff" },
+    });
+}
+export async function drawLinkQR(url, id) {
+  const canvas = document.getElementById(id);
+  if (canvas)
+    await QRCode.toCanvas(canvas, url, {
+      width: 220,
+      margin: 2,
+      errorCorrectionLevel: "M",
+      color: { dark: "#0b1f19", light: "#ffffff" },
     });
 }
 export function empty(title, text, action = "") {

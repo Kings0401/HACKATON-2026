@@ -2,6 +2,47 @@
 
 FastAPI es la única autoridad de identificación y acceso físico. El navegador presenta resultados; no prueba una identidad enviando un rol. Las simulaciones no emiten comandos físicos.
 
+## Implementación incluida (`backend/`)
+
+Este contrato está implementado en `backend/app` (reorganización de `nclub-backend.zip/main.py`): `routers/` (public, robot, admin), `services/` (access, reception, navigation, dialogue), `repository.py` (Supabase) y `memory_repo.py` (datos ficticios para pruebas y simulación).
+
+```powershell
+cd backend
+python -m venv .venv; .venv\Scripts\activate
+pip install -r requirements.txt
+Copy-Item .env.example .env   # completar claves de servidor
+uvicorn app.main:app --reload --port 8000
+pytest
+```
+
+| Endpoint | Autenticación | Uso |
+| --- | --- | --- |
+| `GET /health`, `GET /` | Pública | Estado; indica `simulation` en modo memoria |
+| `GET /navigation/map` | Pública | Grafo esquemático (simulado) del club |
+| `GET /navigation/shared/{token}` | Token de la ruta | Ruta para el celular; solo lectura, vence en 30 min |
+| `POST /resolve-access` | X-Robot-Key | **Contrato original** conservado (`face_group` + `credential_code`) |
+| `GET /rostros`, `/rostros/{id}`, `/rostros/{id}/{archivo}` | X-Robot-Key | Fotografías de registro; corrige los 404 (ver `docs/VISION.md`) |
+| `POST /robot/{robot_id}/heartbeat` | X-Robot-Key | Estado de cámara/micrófono, modelo y firmware |
+| `PUT /robot/{robot_id}/frame` | X-Robot-Key | Último JPEG para el stream (solo memoria, ≤ 600 KB) |
+| `POST /robot/sessions` | X-Robot-Key | Inicia una sesión de atención |
+| `POST /robot/sessions/{id}/faces` | X-Robot-Key | Candidato facial `{persona_id, similarity, …}` |
+| `POST /robot/sessions/{id}/credentials` | X-Robot-Key | QR, carné o NFC leído (se registra enmascarado) |
+| `POST /robot/sessions/{id}/utterances` | X-Robot-Key | Transcripción en español; responde la intención y el texto a decir |
+| `POST /robot/sessions/{id}/evidence` | X-Robot-Key | Fotograma puntual, solo con `STORE_EVIDENCE` y consentimiento |
+| `POST /robot/sessions/{id}/resolve` | X-Robot-Key | Decisión + checks + ruta + QR + texto para TTS (idempotente) |
+| `POST /robot/sessions/{id}/close` | X-Robot-Key | Cierra la sesión |
+| `GET /robot/monitor` | JWT ADMIN | Panel `#/admin/robots` (ver abajo; campos ampliados) |
+| `GET /robot/stream/{robot_id}.mjpeg?token=` | Token HMAC corto | Cámara en vivo privada |
+| `GET /admin/sessions`, `GET /admin/evidence/{id}` | JWT ADMIN | Historial y URL firmadas de evidencias (auditado) |
+| `POST /validate`, `POST /access/check` | JWT ADMIN | Verificación real (validation_id de un solo uso) y simulación |
+| `GET /vip/context/{id}` | JWT ADMIN | Contexto mínimo para AGIBOT 02 |
+| `POST /events` | JWT miembro | Solo `assistance_requested` |
+| `POST /navigation/route` | JWT ADMIN | Calcular una ruta por categoría y destino |
+
+Respuesta de `resolve` (y de `access/check`): campos del contrato más `decision` (`AUTORIZADO`, `DENEGADO`, `REVISION`, `ACOMPANAMIENTO`), `category`, `methods`, `checks[]` (`name`, `ok`, `detail`), `escort_required`, `route` (ruta, pasos, `share_url`) y `speech`. Un proveedor con acompañamiento devuelve `access:"pending"`.
+
+**Reglas aplicadas**: credencial obligatoria (token `nclub:v1:` → hash en `credenciales`, o código estático de demostración si `ALLOW_STATIC_CREDENTIALS=true`; `demo_` siempre se rechaza). El rostro es obligatorio para VIP y personal y opcional para el resto, pero si corresponde a otra persona → revisión. Miembros: membresía y reserva en la ventana de llegada (tolerancia de 60 min). Invitados: invitación vigente + anfitrión con membresía vigente (si no, revisión). Personal y proveedores: permiso vigente; acompañamiento → `ACOMPANAMIENTO`. La decisión se registra en `eventos_acceso` **antes** de responder; si falla, se responde revisión.
+
 ## Configuración del servidor
 
 - Permitir CORS exclusivamente para los orígenes de Vite usados por el equipo (`http://127.0.0.1:5173`, `http://localhost:5173` y, al probar teléfono, la IP LAN explícita), y el dominio HTTPS final. Métodos GET/POST; cabeceras Authorization y Content-Type.
@@ -15,6 +56,39 @@ FastAPI es la única autoridad de identificación y acceso físico. El navegador
 ### GET /health
 
 Público, sin información sensible. Respuesta: `{"status":"ok","database":"supabase"}`. El cliente usa timeout de 10 segundos.
+
+### GET /robot/monitor
+
+Solo ADMIN activo. La pantalla `#/admin/robots` consulta este endpoint cada 3 segundos y espera una respuesta con esta forma:
+
+```json
+{
+  "connected": true,
+  "robot_name": "AGIBOT recepción",
+  "updated_at": "2026-10-24T15:00:00Z",
+  "camera_stream_url": "https://api.example/robot/stream?token=URL_FIRMADA_CORTA",
+  "last_heard": {
+    "transcript": "Buenos días, tengo una reserva",
+    "language": "es-CO",
+    "robot_name": "AGIBOT recepción",
+    "audio_url": "https://api.example/robot/audio/CLIP?token=URL_FIRMADA_CORTA"
+  },
+  "events": [
+    {
+      "created_at": "2026-10-24T15:00:00Z",
+      "display_name": "Visitante",
+      "role": "VIP",
+      "method": "facial + voz",
+      "access": "review",
+      "robot_name": "AGIBOT recepción"
+    }
+  ]
+}
+```
+
+`camera_stream_url` debe ser un stream privado de solo lectura (por ejemplo MJPEG para la vista web), con token de corta duración porque el elemento `<img>` del navegador no puede adjuntar el JWT de la sesión. El token debe limitarse al stream y expirar pronto. Los clips también deben usar URL temporal; no devolver audio de otras interacciones. No retransmitir un feed público ni incluir identificadores biométricos. `events` contiene únicamente los campos mínimos de auditoría; la categoría devuelta es la decisión del backend, no una clasificación del navegador. Si el endpoint no está configurado, la interfaz indica que el robot está desconectado.
+
+Para reconocimiento facial, solicitar consentimiento y enrolamiento revocable, y devolver una coincidencia candidata con su nivel de confianza; una coincidencia facial o de voz por sí sola nunca concede ingreso ni acredita categoría VIP. La voz VIP debe comprobarse contra una credencial/enrolamiento autorizado y, ante duda, pasar a revisión o QR. Registrar método, rol candidato, decisión final y motivo sin guardar audio o imágenes salvo necesidad y política explícitas.
 
 ### POST /recognition
 
@@ -148,4 +222,17 @@ Los destinos se guardan como textos del club, por ejemplo `VIP Lounge`, `Restaur
 
 ## Integración física pendiente
 
+> Actualización: el agente ROS 2/AimDK está en `robot_agent/` y su procedimiento verificado contra la documentación oficial, en [ROBOT.md](ROBOT.md). Sigue pendiente probarlo en el robot físico.
+
 Conectar el SDK/protocolo real de AGIBOT desde FastAPI. El robot1 verifica al visitante; solo una decisión `authorized` VIP puede generar `vip_handoff`. Robot2 recibe contexto mínimo verificado. Una prueba `simulation:true` jamás debe cruzar el adaptador físico. Movimiento, síntesis de voz y callbacks de finalización dependen del hardware del equipo y no están implementados en esta aplicación web.
+
+### Preparar AGIBOT X2 Ultra con Ubuntu
+
+1. Confirma en la placa si es **X2 Ultra** o **X2 Ultra (new version)** y anota la versión de firmware. Descarga AimDK_X2 compatible con ese firmware; no mezcles versiones.
+2. Para desarrollar desde un PC Ubuntu, la guía vigente indica Ubuntu 22.04 LTS y ROS 2 Humble para el flujo de host externo. Conecta el puerto Ethernet SDK dedicado del robot al PC, configura el PC como `10.0.1.2/24` y usa el nodo de desarrollo en `10.0.1.41`. Las credenciales SSH las entrega AGIBOT/soporte.
+3. Desde AimDK_X2 1.2.0, los programas de desarrollo ejecutados dentro del computador del robot deben compilarse y correr en el contenedor de desarrollo. La alternativa PC/Computing Pack + red entre dispositivos sigue el flujo de SDK cruzado. Sigue la guía para el modo exacto de tu firmware.
+4. Primero ejecuta desde los ejemplos AimDK los lectores de cámara/audio y las demos de sensores, sin movimiento. Verifica la API disponible para tu versión y qué cámara/micrófono puedes suscribir. Luego crea un proceso agente en el X2 que tome esos datos y publique eventos al backend FastAPI por una red privada autenticada.
+5. FastAPI valida la identidad y permisos con Supabase, guarda el evento y la decisión, y publica solo el stream/transcripción y eventos autorizados al panel ADMIN. Mantén una conexión persistente desde el agente al backend para medios (por ejemplo WebRTC para vídeo/audio interactivo); no envíes vídeo/audio continuo dentro de JSON ni conectes el navegador directamente a ROS/robot.
+6. Prueba primero con acceso físico deshabilitado. Habilita movimientos o guía de visitantes solo tras validar hardware, frenos/parada de emergencia, red, latencia y reglas de seguridad junto al integrador AGIBOT.
+
+La topología recomendada es `cámaras/micrófonos X2 → agente AimDK/ROS 2 → FastAPI privado → panel ADMIN`. La app web ya presenta el monitor y requiere implementar `/robot/monitor` y los endpoints privados de stream en el backend. AimDK expone el acceso de desarrollo, pero los nombres concretos de topics, APIs y ejemplos de audio/video dependen de la versión/modelo; confirma esos detalles en el SDK que corresponda al equipo.

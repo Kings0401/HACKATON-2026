@@ -1,0 +1,3371 @@
+[
+{
+"category": "VIP",
+"destination": "Campo de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 1",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 1",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 2",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2"
+],
+"steps": [
+"start",
+"left",
+"right",
+"straight",
+"arrive"
+],
+"distance_m": 316,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 2",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"straight",
+"arrive"
+],
+"distance_m": 316,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 3",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1",
+"cancha_3"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"right",
+"arrive"
+],
+"distance_m": 411,
+"minutes": 6
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 3",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1",
+"cancha_3"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"right",
+"arrive"
+],
+"distance_m": 411,
+"minutes": 6
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 4",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2",
+"cancha_4"
+],
+"steps": [
+"start",
+"left",
+"right",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 410,
+"minutes": 6
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 4",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2",
+"cancha_4"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 410,
+"minutes": 6
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 5",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_5"
+],
+"steps": [
+"start",
+"left",
+"right",
+"right",
+"arrive"
+],
+"distance_m": 322,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Campo de golf · Cancha 5",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_5"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"right",
+"arrive"
+],
+"distance_m": 322,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Cocina",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Cocina",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Entrada de servicio",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Entrada de servicio",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "GOLF_OPERATIONS",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "GOLF_OPERATIONS",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "GOLF_RECEPTION",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "VIP",
+"destination": "GOLF_RECEPTION",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "VIP",
+"destination": "KITCHEN",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "KITCHEN",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "MAINTENANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "MAINTENANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Mantenimiento",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Mantenimiento",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Oficina administrativa",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Oficina administrativa",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Operación de golf",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Operación de golf",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "RECEPTION",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "VIP",
+"destination": "RECEPTION",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "VIP",
+"destination": "RESTAURANT",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "VIP",
+"destination": "RESTAURANT",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "VIP",
+"destination": "Recepción",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "VIP",
+"destination": "Recepción",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "VIP",
+"destination": "Recepción VIP",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"recepcion_vip"
+],
+"steps": [
+"start",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 197,
+"minutes": 3
+},
+{
+"category": "VIP",
+"destination": "Recepción VIP",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"recepcion_vip"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"straight",
+"arrive"
+],
+"distance_m": 197,
+"minutes": 3
+},
+{
+"category": "VIP",
+"destination": "Recepción de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "VIP",
+"destination": "Recepción de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "VIP",
+"destination": "Recepción de miembros",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "VIP",
+"destination": "Recepción de miembros",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"wait_escort",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "VIP",
+"destination": "Recepción de proveedores",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Recepción de proveedores",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Restaurante principal",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "VIP",
+"destination": "Restaurante principal",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "VIP",
+"destination": "SERVICE_ENTRANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "SERVICE_ENTRANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "VIP Lounge",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"recepcion_vip",
+"pasillo_vip",
+"lounge_vip"
+],
+"steps": [
+"start",
+"straight",
+"straight",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 309,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "VIP Lounge",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"recepcion_vip",
+"pasillo_vip",
+"lounge_vip"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"straight",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 309,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "VIP_LOUNGE",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"recepcion_vip",
+"pasillo_vip",
+"lounge_vip"
+],
+"steps": [
+"start",
+"straight",
+"straight",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 309,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "VIP_LOUNGE",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"recepcion_vip",
+"pasillo_vip",
+"lounge_vip"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"straight",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 309,
+"minutes": 4
+},
+{
+"category": "VIP",
+"destination": "Zona técnica",
+"escort": false,
+"error": true
+},
+{
+"category": "VIP",
+"destination": "Zona técnica",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 1",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 1",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 2",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2"
+],
+"steps": [
+"start",
+"left",
+"right",
+"straight",
+"arrive"
+],
+"distance_m": 316,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 2",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"straight",
+"arrive"
+],
+"distance_m": 316,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 3",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1",
+"cancha_3"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"right",
+"arrive"
+],
+"distance_m": 411,
+"minutes": 6
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 3",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1",
+"cancha_3"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"right",
+"arrive"
+],
+"distance_m": 411,
+"minutes": 6
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 4",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2",
+"cancha_4"
+],
+"steps": [
+"start",
+"left",
+"right",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 410,
+"minutes": 6
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 4",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2",
+"cancha_4"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 410,
+"minutes": 6
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 5",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_5"
+],
+"steps": [
+"start",
+"left",
+"right",
+"right",
+"arrive"
+],
+"distance_m": 322,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Campo de golf · Cancha 5",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_5"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"right",
+"arrive"
+],
+"distance_m": 322,
+"minutes": 4
+},
+{
+"category": "REGULAR",
+"destination": "Cocina",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Cocina",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Entrada de servicio",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Entrada de servicio",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "GOLF_OPERATIONS",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "GOLF_OPERATIONS",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "GOLF_RECEPTION",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "REGULAR",
+"destination": "GOLF_RECEPTION",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "REGULAR",
+"destination": "KITCHEN",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "KITCHEN",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "MAINTENANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "MAINTENANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Mantenimiento",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Mantenimiento",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Oficina administrativa",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Oficina administrativa",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Operación de golf",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Operación de golf",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "RECEPTION",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "REGULAR",
+"destination": "RECEPTION",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "REGULAR",
+"destination": "RESTAURANT",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "REGULAR",
+"destination": "RESTAURANT",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "REGULAR",
+"destination": "Recepción",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "REGULAR",
+"destination": "Recepción",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "REGULAR",
+"destination": "Recepción VIP",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Recepción VIP",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Recepción de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "REGULAR",
+"destination": "Recepción de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "REGULAR",
+"destination": "Recepción de miembros",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "REGULAR",
+"destination": "Recepción de miembros",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"wait_escort",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "REGULAR",
+"destination": "Recepción de proveedores",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Recepción de proveedores",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Restaurante principal",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "REGULAR",
+"destination": "Restaurante principal",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "REGULAR",
+"destination": "SERVICE_ENTRANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "SERVICE_ENTRANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "VIP Lounge",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "VIP Lounge",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "VIP_LOUNGE",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "VIP_LOUNGE",
+"escort": true,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Zona técnica",
+"escort": false,
+"error": true
+},
+{
+"category": "REGULAR",
+"destination": "Zona técnica",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 1",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 1",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 2",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 2",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 3",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 3",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 4",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 4",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 5",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Campo de golf · Cancha 5",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Cocina",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Cocina",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Entrada de servicio",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Entrada de servicio",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "GOLF_OPERATIONS",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "GOLF_OPERATIONS",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "GOLF_RECEPTION",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "INVITADO",
+"destination": "GOLF_RECEPTION",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "INVITADO",
+"destination": "KITCHEN",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "KITCHEN",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "MAINTENANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "MAINTENANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Mantenimiento",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Mantenimiento",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Oficina administrativa",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Oficina administrativa",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Operación de golf",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Operación de golf",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "RECEPTION",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "INVITADO",
+"destination": "RECEPTION",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "INVITADO",
+"destination": "RESTAURANT",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "INVITADO",
+"destination": "RESTAURANT",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "INVITADO",
+"destination": "Recepción",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "INVITADO",
+"destination": "Recepción",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "INVITADO",
+"destination": "Recepción VIP",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Recepción VIP",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Recepción de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "INVITADO",
+"destination": "Recepción de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "INVITADO",
+"destination": "Recepción de miembros",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "INVITADO",
+"destination": "Recepción de miembros",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"wait_escort",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "INVITADO",
+"destination": "Recepción de proveedores",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Recepción de proveedores",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Restaurante principal",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "INVITADO",
+"destination": "Restaurante principal",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"galeria",
+"restaurante"
+],
+"steps": [
+"start",
+"straight",
+"wait_escort",
+"right",
+"arrive"
+],
+"distance_m": 248,
+"minutes": 3
+},
+{
+"category": "INVITADO",
+"destination": "SERVICE_ENTRANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "SERVICE_ENTRANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "VIP Lounge",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "VIP Lounge",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "VIP_LOUNGE",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "VIP_LOUNGE",
+"escort": true,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Zona técnica",
+"escort": false,
+"error": true
+},
+{
+"category": "INVITADO",
+"destination": "Zona técnica",
+"escort": true,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 1",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 1",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 308,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 2",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2"
+],
+"steps": [
+"start",
+"left",
+"right",
+"straight",
+"arrive"
+],
+"distance_m": 316,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 2",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"straight",
+"arrive"
+],
+"distance_m": 316,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 3",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1",
+"cancha_3"
+],
+"steps": [
+"start",
+"left",
+"right",
+"left",
+"right",
+"arrive"
+],
+"distance_m": 411,
+"minutes": 6
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 3",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_1",
+"cancha_3"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"left",
+"right",
+"arrive"
+],
+"distance_m": 411,
+"minutes": 6
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 4",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2",
+"cancha_4"
+],
+"steps": [
+"start",
+"left",
+"right",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 410,
+"minutes": 6
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 4",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_2",
+"cancha_4"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"straight",
+"right",
+"arrive"
+],
+"distance_m": 410,
+"minutes": 6
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 5",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_5"
+],
+"steps": [
+"start",
+"left",
+"right",
+"right",
+"arrive"
+],
+"distance_m": 322,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Campo de golf · Cancha 5",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"sendero_golf",
+"cancha_5"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"right",
+"right",
+"arrive"
+],
+"distance_m": 322,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Cocina",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 229,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Cocina",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 229,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Entrada de servicio",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 246,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Entrada de servicio",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"right",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 246,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "GOLF_OPERATIONS",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"operacion_golf"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 247,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "GOLF_OPERATIONS",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"operacion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"straight",
+"arrive"
+],
+"distance_m": 247,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "GOLF_RECEPTION",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "GOLF_RECEPTION",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "KITCHEN",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 229,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "KITCHEN",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 229,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "MAINTENANCE",
+"escort": false,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "MAINTENANCE",
+"escort": true,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Mantenimiento",
+"escort": false,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Mantenimiento",
+"escort": true,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Oficina administrativa",
+"escort": false,
+"path": [
+"recepcion",
+"oficina_admin"
+],
+"steps": [
+"start",
+"arrive"
+],
+"distance_m": 84,
+"minutes": 1
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Oficina administrativa",
+"escort": true,
+"path": [
+"recepcion",
+"oficina_admin"
+],
+"steps": [
+"start",
+"arrive",
+"wait_escort"
+],
+"distance_m": 84,
+"minutes": 1
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Operación de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"operacion_golf"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 247,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Operación de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf",
+"operacion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"straight",
+"arrive"
+],
+"distance_m": 247,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "RECEPTION",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "RECEPTION",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "RESTAURANT",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina",
+"restaurante"
+],
+"steps": [
+"start",
+"left",
+"left",
+"arrive"
+],
+"distance_m": 319,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "RESTAURANT",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina",
+"restaurante"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"left",
+"arrive"
+],
+"distance_m": 319,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción VIP",
+"escort": false,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción VIP",
+"escort": true,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción de miembros",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción de miembros",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_miembros"
+],
+"steps": [
+"start",
+"right",
+"wait_escort",
+"arrive"
+],
+"distance_m": 132,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción de proveedores",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"recepcion_proveedores"
+],
+"steps": [
+"start",
+"right",
+"arrive"
+],
+"distance_m": 174,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Recepción de proveedores",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"recepcion_proveedores"
+],
+"steps": [
+"start",
+"right",
+"arrive",
+"wait_escort"
+],
+"distance_m": 174,
+"minutes": 2
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Restaurante principal",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina",
+"restaurante"
+],
+"steps": [
+"start",
+"left",
+"left",
+"arrive"
+],
+"distance_m": 319,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Restaurante principal",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"cocina",
+"restaurante"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"left",
+"arrive"
+],
+"distance_m": 319,
+"minutes": 4
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "SERVICE_ENTRANCE",
+"escort": false,
+"path": [
+"recepcion",
+"corredor_personal",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"right",
+"left",
+"arrive"
+],
+"distance_m": 246,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "SERVICE_ENTRANCE",
+"escort": true,
+"path": [
+"recepcion",
+"corredor_personal",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"right",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 246,
+"minutes": 3
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "VIP Lounge",
+"escort": false,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "VIP Lounge",
+"escort": true,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "VIP_LOUNGE",
+"escort": false,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "VIP_LOUNGE",
+"escort": true,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Zona técnica",
+"escort": false,
+"error": true
+},
+{
+"category": "PERSONAL_INTERNO",
+"destination": "Zona técnica",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 1",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 1",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 2",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 2",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 3",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 3",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 4",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 4",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 5",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Campo de golf · Cancha 5",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Cocina",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Cocina",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Entrada de servicio",
+"escort": false,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 243,
+"minutes": 3
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Entrada de servicio",
+"escort": true,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"wait_escort",
+"arrive"
+],
+"distance_m": 243,
+"minutes": 3
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "GOLF_OPERATIONS",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "GOLF_OPERATIONS",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "GOLF_RECEPTION",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "GOLF_RECEPTION",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "KITCHEN",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "KITCHEN",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "MAINTENANCE",
+"escort": false,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio",
+"via_servicio",
+"mantenimiento"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 407,
+"minutes": 6
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "MAINTENANCE",
+"escort": true,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio",
+"via_servicio",
+"mantenimiento"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"wait_escort",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 407,
+"minutes": 6
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Mantenimiento",
+"escort": false,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio",
+"via_servicio",
+"mantenimiento"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 407,
+"minutes": 6
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Mantenimiento",
+"escort": true,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio",
+"via_servicio",
+"mantenimiento"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"wait_escort",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 407,
+"minutes": 6
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Oficina administrativa",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Oficina administrativa",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Operación de golf",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Operación de golf",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "RECEPTION",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "RECEPTION",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "RESTAURANT",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "RESTAURANT",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción",
+"escort": false,
+"path": [
+"recepcion"
+],
+"steps": [
+"start"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción",
+"escort": true,
+"path": [
+"recepcion"
+],
+"steps": [
+"start",
+"wait_escort"
+],
+"distance_m": 0,
+"minutes": 1
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción VIP",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción VIP",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción de golf",
+"escort": false,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción de golf",
+"escort": true,
+"path": [
+"recepcion",
+"lobby",
+"recepcion_golf"
+],
+"steps": [
+"start",
+"left",
+"wait_escort",
+"arrive"
+],
+"distance_m": 162,
+"minutes": 2
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción de miembros",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción de miembros",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción de proveedores",
+"escort": false,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores"
+],
+"steps": [
+"start",
+"left",
+"arrive"
+],
+"distance_m": 170,
+"minutes": 2
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Recepción de proveedores",
+"escort": true,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores"
+],
+"steps": [
+"start",
+"left",
+"arrive",
+"wait_escort"
+],
+"distance_m": 170,
+"minutes": 2
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Restaurante principal",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Restaurante principal",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "SERVICE_ENTRANCE",
+"escort": false,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"arrive"
+],
+"distance_m": 243,
+"minutes": 3
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "SERVICE_ENTRANCE",
+"escort": true,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"wait_escort",
+"arrive"
+],
+"distance_m": 243,
+"minutes": 3
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "VIP Lounge",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "VIP Lounge",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "VIP_LOUNGE",
+"escort": false,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "VIP_LOUNGE",
+"escort": true,
+"error": true
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Zona técnica",
+"escort": false,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio",
+"via_servicio",
+"mantenimiento",
+"zona_tecnica"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"left",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 491,
+"minutes": 7
+},
+{
+"category": "TRABAJADOR_EXTERNO",
+"destination": "Zona técnica",
+"escort": true,
+"path": [
+"recepcion",
+"paso_servicio",
+"recepcion_proveedores",
+"entrada_servicio",
+"via_servicio",
+"mantenimiento",
+"zona_tecnica"
+],
+"steps": [
+"start",
+"left",
+"straight",
+"wait_escort",
+"left",
+"straight",
+"straight",
+"arrive"
+],
+"distance_m": 491,
+"minutes": 7
+}
+]

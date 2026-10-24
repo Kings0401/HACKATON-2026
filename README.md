@@ -93,13 +93,51 @@ Configurar `VITE_BACKEND_URL` y reiniciar Vite. En una sesión ADMIN real:
 - Los eventos persistidos por FastAPI actualizan recepción y el historial mediante Realtime y la reconciliación periódica.
 - La asistencia real necesita que FastAPI acepte el evento no privilegiado `assistance_requested`. Si no responde, se muestra error; nunca se confirma un envío inexistente.
 
+## Recepción robótica integrada
+
+```text
+AGIBOT X2 Ultra ─ AimDK/ROS 2 ─▶ robot_agent (cámara + VAD/ASR) ─▶ vision (rostro + QR)
+        ─▶ FastAPI backend/ ─▶ Supabase (reglas, registros, Storage privado, Realtime privado)
+        ─▶ decisión + ruta ─▶ voz del robot · pantalla · QR al celular ─▶ panel #/admin/robots
+```
+
+| Carpeta | Contenido |
+| --- | --- |
+| `backend/` | FastAPI organizado (rutas, servicios, repositorio); reutiliza `/resolve-access` y `/rostros` del ZIP |
+| `vision/` | Reconocimiento facial y QR sobre fotogramas en memoria, sincronización y calibración |
+| `robot_agent/` | Paquete ROS 2 Humble `nclub_agent`, núcleo independiente de ROS, voz, simulador y Docker |
+| `shared/club-map.json` | Grafo editable del club (**esquemático y simulado**), común al backend y al frontend |
+| `supabase/recepcion_robot.sql` | Robots, sesiones, identificación, transcripciones, evidencias, rutas compartidas y auditoría con RLS |
+
+Puesta en marcha completa sin hardware:
+
+```powershell
+# 1. Backend con datos ficticios (no toca Supabase; todo queda marcado como simulación)
+cd backend; pip install -r requirements.txt
+$env:NCLUB_BACKEND_MODE="memory"; $env:ROBOT_API_KEY="clave-simulada-0123456789"
+uvicorn app.main:app --port 8000          # imprime un token ADMIN de memoria para probar /robot/monitor
+# 2. Visión (modelos verificados por SHA-256) y robot simulado
+pip install -e ..\vision; python -m nclub_vision.models
+cd ..\robot_agent; $env:NCLUB_ROBOT_KEY="clave-simulada-0123456789"; python -m nclub_agent.sim
+# 3. Frontend
+npm run dev
+```
+
+Con Supabase real: ejecutar `supabase/recepcion_robot.sql` después de `nclub_completo.sql`, completar `backend/.env` (ver `backend/.env.example`) e iniciar FastAPI sin `NCLUB_BACKEND_MODE`. Si las tablas nuevas aún no existen, la recepción funciona y el monitor avisa de "persistencia degradada".
+
+**Mapa interactivo del recorrido (diferencial)**: cuando FastAPI autoriza a alguien (o aprueba su ingreso con acompañamiento), calcula con Dijkstra la ruta desde recepción hasta el destino autorizado, solo por las zonas permitidas para su categoría: VIP por el ala VIP; invitados únicamente por la casa club; personal por los corredores de servicio; proveedores solo por la vía de servicio, con parada de acompañamiento. Recepción, el monitor ADMIN y la página pública `#/ruta` dibujan el recorrido con inicio, destino, giros numerados, puntos de referencia, pasos y tiempo estimado. Un QR temporal (30 min, sin datos personales) abre la misma ruta en el celular y **no concede permisos**. En DEMO la ruta se calcula en el navegador con el mismo grafo, verificado contra la versión Python en 270 combinaciones. Para cargar el plano real, edite nodos, coordenadas, conexiones, zonas y alias de destino en `shared/club-map.json`.
+
+Documentación: [FASTAPI.md](docs/FASTAPI.md) · [ROBOT.md](docs/ROBOT.md) (AimDK) · [VISION.md](docs/VISION.md) (calibración y causa de los 404) · [SEGURIDAD.md](docs/SEGURIDAD.md) (rotación de claves) · [VALIDATION.md](docs/VALIDATION.md).
+
 ## Estado del MVP
 
 **Ejecutable sin servicios externos:** portada, login, dashboards diferenciados, navegación móvil, siete servicios, reserva/modificación/cancelación con persistencia local DEMO, QR reales escaneables con tokens ficticios, administración de personas/invitaciones/turnos/órdenes, cinco escenarios, revisión/denegación, transferencia VIP y registro DEMO.
 
 **Implementado para servicios reales, requiere configurar y verificar en tu proyecto:** Supabase Auth, perfiles, CRUD autorizado de reservas, administración, emisión QR por RPC, restricciones SQL/RLS, Realtime y polling, llamadas autenticadas a FastAPI y recepción de sus decisiones.
 
-**Simulado o fuera de alcance:** movimiento/voz física de AGIBOT, identificación facial (no se captura biometría), evaluación de acceso cuando no hay FastAPI, recomendaciones VIP curadas (no IA generativa), información ambiental/meteorológica (no se inventa), pagos y notificaciones push. La interfaz de robots es una ilustración conceptual, no una representación técnica certificada del hardware.
+**Implementado y probado con hardware simulado** (falta validarlo en el robot): agente ROS 2/AimDK, reconocimiento facial y QR, voz en español (VAD de AimDK o por energía; ASR faster-whisper/Vosk), sesiones y auditoría, stream privado de cámara, transcripción en vivo y mapa de rutas.
+
+**Simulado o fuera de alcance:** movimiento físico de AGIBOT (el agente no envía comandos de movimiento); TTS físico (desactivado por defecto); plano real del club (el mapa es esquemático); identificación facial dentro del navegador (el navegador no captura biometría); evaluación de acceso cuando no hay FastAPI, recomendaciones VIP curadas (no IA generativa), información ambiental/meteorológica (no se inventa), pagos y notificaciones push. La interfaz de robots es una ilustración conceptual, no una representación técnica certificada del hardware.
 
 El navegador no contiene un motor de autorización real. Los controles visuales son de experiencia; Supabase protege los datos y FastAPI es la autoridad exclusiva de acceso físico.
 
@@ -114,6 +152,8 @@ src/
   schema.js         Adaptación de las tablas en español a la interfaz
   api.js            Contratos y cliente FastAPI con timeout/JWT
   realtime.js       Suscripciones privadas y respaldo cada 8 s
+  navigation.js     Mapa de recorrido, Dijkstra DEMO y página pública #/ruta
+  clubmap.js        Mapa ilustrativo de miembros (#/map)
   demo.js           Fixtures y escenarios estrictamente simulados
   lib.js            Formato, validaciones y utilidades
   styles.css        Identidad visual

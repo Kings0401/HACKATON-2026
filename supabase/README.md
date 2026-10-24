@@ -4,6 +4,7 @@
 2. Solo si quieres cargar los ejemplos, ejecuta [datos_demo.sql](datos_demo.sql). Mantiene a Valeria, Santiago, Camila, Daniel y Laura, y agrega `ADMIN001`. No sobrescribe registros existentes ni renueva membresías vencidas.
 3. Crea cuentas en **Authentication → Users → Add user** para los miembros y el administrador. Define sus contraseñas allí. Vincula cada UUID ejecutando [vincular_cuenta.sql](vincular_cuenta.sql) con el ID de persona correcto.
 4. Configura la URL y clave pública del proyecto en `.env.local` y reinicia Vite.
+5. Para la recepción robótica, ejecuta [recepcion_robot.sql](recepcion_robot.sql) después de `nclub_completo.sql`. Agrega `robots`, `sesiones_atencion`, `eventos_identificacion`, `transcripciones`, `evidencias`, `rutas_compartidas` y `auditoria` (de solo inserción), con RLS: ADMIN lee y solo FastAPI escribe. También crea el bucket privado `evidencias-recepcion` y la política del canal Realtime privado `nclub:monitor`. Es aditivo y repetible. **Aún no se ha ejecutado en el proyecto remoto**; se probó en PostgreSQL embebido (`tests/robot-database.test.js`).
 
 **No ejecutes las migraciones antiguas `migrations/001_nclub.sql`, `002_app_access.sql`, `seed.sql` ni `link-account.sql` con este esquema.** Corresponden a la versión anterior con tablas en inglés y se conservan como referencia histórica. La aplicación actual consulta las tablas en español.
 

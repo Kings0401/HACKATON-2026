@@ -1,0 +1,14 @@
+pyproject.toml
+nclub_vision/__init__.py
+nclub_vision/calibrate.py
+nclub_vision/face.py
+nclub_vision/models.py
+nclub_vision/qr.py
+nclub_vision/sources.py
+nclub_vision/sync.py
+nclub_vision.egg-info/PKG-INFO
+nclub_vision.egg-info/SOURCES.txt
+nclub_vision.egg-info/dependency_links.txt
+nclub_vision.egg-info/requires.txt
+nclub_vision.egg-info/top_level.txt
+tests/test_vision.py

@@ -25,6 +25,13 @@ import {
   revealMapRoute,
 } from "./clubmap.js";
 import { api, validateDecision } from "./api.js";
+import {
+  routePage,
+  computeRoute,
+  roleToCategory,
+  shareUrlFor,
+  revealRoutes,
+} from "./navigation.js";
 import { evaluateDemo, readDemo, seed } from "./demo.js";
 import {
   icon,
@@ -33,6 +40,7 @@ import {
   modal,
   closeModal,
   drawQR,
+  drawLinkQR,
   empty,
 } from "./ui.js";
 import {
@@ -56,7 +64,11 @@ let data = null,
   subscribedId = null,
   renderId = 0,
   refreshBusy = false,
-  formBusy = false;
+  formBusy = false,
+  robotMonitorTimer = null,
+  robotMonitorBusy = false,
+  monitorChannel = null,
+  monitorRefreshQueued = null;
 let syncStatus = "connecting";
 const QR_ROTATION_MS = 15 * 60 * 1000;
 let qrTimer = null,
@@ -79,6 +91,76 @@ function stopSync() {
   unsubscribe?.();
   unsubscribe = null;
   subscribedId = null;
+}
+function stopRobotMonitor() {
+  if (robotMonitorTimer) clearInterval(robotMonitorTimer);
+  robotMonitorTimer = null;
+}
+async function refreshRobotMonitor() {
+  if (robotMonitorBusy || routeInfo().path !== "admin/robots") return;
+  robotMonitorBusy = true;
+  try {
+    if (sessionState.mode === "demo") {
+      data.robot_monitor = { connected: false, error: "El monitor requiere sesión administrativa real; DEMO no accede a cámaras ni micrófonos." };
+    } else {
+      data.robot_monitor = await api.robotMonitor();
+    }
+  } catch (err) {
+    data.robot_monitor = { connected: false, error: readableError(err) };
+  } finally {
+    robotMonitorBusy = false;
+  }
+  if (routeInfo().path === "admin/robots") {
+    const panel = document.querySelector(".admin-panel");
+    if (!panel) return;
+    // Conserva el <img> MJPEG abierto para no reconectar el stream cada 3 s.
+    const oldStream = panel.querySelector("[data-robot-stream]");
+    const sameRobot =
+      panel.querySelector("[data-robot-monitor]")?.dataset.robotId ===
+      (data.robot_monitor.robot_id || "");
+    panel.innerHTML = pages.adminRobotMonitor(data.robot_monitor);
+    const newStream = panel.querySelector("[data-robot-stream]");
+    if (oldStream && newStream && sameRobot && !oldStream.dataset.failed)
+      newStream.replaceWith(oldStream);
+    hydrate();
+    revealRoutes(panel);
+  }
+}
+function queueMonitorRefresh() {
+  clearTimeout(monitorRefreshQueued);
+  monitorRefreshQueued = setTimeout(refreshRobotMonitor, 250);
+}
+async function startMonitorChannel() {
+  if (monitorChannel || !supabase || sessionState.mode === "demo") return;
+  // Canal privado: la política en realtime.messages solo admite ADMIN activo.
+  await supabase.realtime.setAuth();
+  monitorChannel = supabase
+    .channel("nclub:monitor", { config: { private: true } })
+    .on("broadcast", { event: "*" }, ({ event, payload }) => {
+      const live = document.querySelector("[data-live-transcript]");
+      if (event === "transcript" && live && payload?.texto)
+        live.textContent = `“${payload.texto}”`;
+      queueMonitorRefresh();
+    })
+    .subscribe();
+}
+function stopMonitorChannel() {
+  if (monitorChannel) supabase?.removeChannel(monitorChannel);
+  monitorChannel = null;
+}
+function startRobotMonitor(path) {
+  if (path !== "admin/robots") {
+    stopRobotMonitor();
+    stopMonitorChannel();
+    return;
+  }
+  startMonitorChannel().catch(() => {
+    /* Sin Realtime, el respaldo de 3 s mantiene el panel actualizado. */
+  });
+  if (!robotMonitorTimer) {
+    refreshRobotMonitor();
+    robotMonitorTimer = setInterval(refreshRobotMonitor, 3000);
+  }
 }
 function paintSync() {
   const el = document.querySelector("#sync-status");
@@ -162,6 +244,10 @@ async function render(scroll = true) {
   try {
     if (path === "") {
       app.innerHTML = pages.landing();
+    } else if (path === "ruta") {
+      stopRobotMonitor();
+      stopMonitorChannel();
+      app.innerHTML = await routePage(params, backendUrl);
     } else if (path === "login" || path === "demo") {
       if (path === "demo" && !demoEnabled) {
         go("login");
@@ -232,11 +318,15 @@ async function render(scroll = true) {
         );
       app.innerHTML = pages.shell(content, path, p);
       startSync();
+      startRobotMonitor(path);
     }
     hydrate();
     if (path === "map") revealMapRoute();
     if (scroll) window.scrollTo({ top: 0, behavior: "instant" });
     if (path === "credential") refreshQr();
+    if (path === "reception" && flow?.route?.steps && !flow.busy)
+      await drawLinkQR(shareUrlFor(flow.route), "route-qr");
+    revealRoutes();
   } catch (err) {
     app.innerHTML = `<main id="main" class="page-error">${icon("alert-circle")}<span class="eyebrow">N CLUB WORLD</span><h1>No pudimos preparar tu experiencia.</h1><p>${e(readableError(err))}</p><button class="button primary" data-action="retry">Intentar de nuevo</button><a href="#/login" class="button outline">Volver</a></main>`;
     hydrate();
@@ -490,6 +580,32 @@ const accepted = {
     "Su orden de trabajo está vigente. Puede dirigirse únicamente al área asignada.",
 };
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+const stageFor = (access) =>
+  ({
+    authorized: "Acceso autorizado",
+    pending: "Acompañamiento requerido",
+    review: "Revisión requerida",
+  })[access] || "Acceso denegado";
+function messageFor(decision) {
+  if (decision.access === "authorized") return accepted[decision.role];
+  if (decision.access === "pending")
+    return "Su orden de trabajo está vigente. Espere a su acompañante en la recepción de proveedores.";
+  if (decision.access === "review")
+    return "Necesitamos una verificación adicional. Nuestro equipo de recepción le acompañará.";
+  return "No ha sido posible validar su autorización. Por favor, solicite asistencia en recepción.";
+}
+// Sin backend: la ruta se calcula en el navegador con el mismo grafo (DEMO).
+function demoRoute(decision) {
+  if (!["authorized", "pending"].includes(decision.access) || !decision.destination)
+    return null;
+  try {
+    return computeRoute(roleToCategory[decision.role], decision.destination, {
+      escort: decision.role === "EXTERNAL",
+    });
+  } catch (err) {
+    return { error: readableError(err), destination: decision.destination };
+  }
+}
 async function simulate(role) {
   if (sessionState.profile?.role !== "ADMIN" || flow?.busy) return;
   const outcome =
@@ -585,20 +701,11 @@ async function simulate(role) {
   Object.assign(flow, decision, {
     source,
     step: 4,
-    identity_confirmed: decision.access === "authorized",
+    identity_confirmed: ["authorized", "pending"].includes(decision.access),
     busy: false,
-    stage:
-      decision.access === "authorized"
-        ? "Acceso autorizado"
-        : decision.access === "review"
-          ? "Revisión requerida"
-          : "Acceso denegado",
-    message:
-      decision.access === "authorized"
-        ? accepted[decision.role]
-        : decision.access === "review"
-          ? "Necesitamos una verificación adicional. Nuestro equipo de recepción le acompañará."
-          : "No ha sido posible validar su autorización. Por favor, solicite asistencia en recepción.",
+    stage: stageFor(decision.access),
+    message: messageFor(decision),
+    route: decision.route ?? demoRoute(decision),
   });
   if (decision.access === "authorized" && decision.role === "REGULAR")
     flow.reservation_label = "Cancha 1 · Hora de llegada DEMO";
@@ -874,17 +981,12 @@ document.addEventListener("submit", async (event) => {
             ...decision,
             step: 4,
             busy: false,
-            identity_confirmed: decision.access === "authorized",
-            method: "Credencial QR · Backend",
-            stage:
-              decision.access === "authorized"
-                ? "Acceso autorizado"
-                : "Revisión / acceso denegado",
-            message:
-              decision.access === "authorized"
-                ? accepted[decision.role]
-                : "Acérquese a recepción para recibir asistencia.",
+            identity_confirmed: ["authorized", "pending"].includes(decision.access),
+            method: (decision.methods || []).join(" + ") || "Credencial QR · Backend",
+            stage: stageFor(decision.access),
+            message: messageFor(decision),
             reason: decision.reason || "",
+            route: decision.route || null,
           };
           if (
             decision.event_type === "vip_handoff" &&
@@ -920,6 +1022,14 @@ document.querySelector("#modal").addEventListener("click", (event) => {
       closeModal();
   }
 });
+document.addEventListener(
+  "error",
+  (event) => {
+    if (event.target.matches?.("[data-robot-stream]"))
+      event.target.dataset.failed = "true";
+  },
+  true,
+);
 window.addEventListener("hashchange", () => {
   closeModal();
   render();

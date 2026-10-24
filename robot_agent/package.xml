@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>nclub_agent</name>
+  <version>2.0.0</version>
+  <description>Agente de recepción N Club para AGIBOT X2 Ultra (AimDK / ROS 2 Humble): percepción, voz y conexión con FastAPI. No controla movimiento.</description>
+  <maintainer email="equipo@nclub.invalid">Equipo N Club</maintainer>
+  <license>Proprietary</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <!-- aimdk_msgs proviene del SDK AimDK_X2 de la versión exacta del firmware. -->
+  <exec_depend>aimdk_msgs</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

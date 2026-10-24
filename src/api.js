@@ -29,6 +29,7 @@ export async function request(
 }
 export const api = {
   health: () => request("/health", { anonymous: true }),
+  robotMonitor: () => request("/robot/monitor"),
   recognition: (body) => request("/recognition", { method: "POST", body }),
   validate: (body) => request("/validate", { method: "POST", body }),
   check: (body) => request("/access/check", { method: "POST", body }),

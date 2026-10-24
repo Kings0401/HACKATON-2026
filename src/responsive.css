@@ -2733,3 +2733,31 @@
     font-size: 30px;
   }
 }
+@media (max-width: 700px) {
+  .robot-monitor-top, .monitor-section-heading { align-items: flex-start; }
+  .robot-monitor-top { flex-direction: column; }
+  .robot-monitor-grid { grid-template-columns: 1fr; }
+  .camera-placeholder { min-height: 200px; }
+  .robot-camera, .robot-listening, .classification-panel { padding: 13px; }
+}
+
+@media (max-width: 960px) {
+  .nav-body,
+  .nav-body.is-compact { grid-template-columns: minmax(0, 1fr); }
+  .robot-status-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .nav-card { padding: 16px; border-radius: 18px; }
+  .nav-map { min-width: 460px; }
+  .nav-qr { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .nav-qr strong { justify-content: center; }
+}
+@media (max-width: 359px) {
+  .robot-status-strip { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-route-dash,
+  .nav-start .pulse,
+  .nav-dest .pulse { animation: none; }
+  .nav-traveller { display: none; }
+}
