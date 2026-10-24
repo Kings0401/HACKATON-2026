@@ -2,8 +2,14 @@
 (/resolve-access) y añade credenciales seguras, rostro + credencial, anfitrión
 y registro de cada comprobación.
 
-Principios: el rostro solo propone una identidad; la categoría se confirma con
-credencial + Supabase; ante cualquier duda se responde REVISIÓN.
+Principios: ante cualquier duda se responde REVISIÓN. Cada categoría tiene su
+propio segundo factor junto al rostro:
+
+- VIP: rostro + voz registrada (sin credencial).
+- REGULAR: rostro + nombre completo + últimos cuatro dígitos del documento + voz registrada.
+- INVITADO: rostro + QR de invitación con anfitrión vigente.
+- PERSONAL_INTERNO: rostro + carné/QR cruzado con el horario del turno.
+- TRABAJADOR_EXTERNO: rostro + QR de la orden de trabajo.
 """
 
 from __future__ import annotations
@@ -52,6 +58,15 @@ class FaceEvidence:
     persona_id: str | None
     similarity: float | None = None
     reason: str = ""
+    voice_identity: str | None = None
+    voice_similarity: float | None = None
+    voice_checked: bool = False
+    document_identity: str | None = None  # persona que verificó nombre, documento y voz (regular)
+    identity_voice_similarity: float | None = None
+
+
+# Socios que se identifican sin credencial: rostro + su factor propio.
+FACE_FIRST = ("VIP", "REGULAR")
 
 
 @dataclass
@@ -153,7 +168,7 @@ class AccessEngine:
     def check_face(self, persona: dict, face: FaceEvidence | None, face_group: str | None,
                    checks: list[Check], methods: list[str]) -> str | None:
         """Devuelve None si el rostro es aceptable o un motivo de revisión."""
-        required = persona["categoria"] in self.settings.face_required
+        required = persona["categoria"] in self.settings.face_required or persona["categoria"] in FACE_FIRST
         if face_group is not None:  # contrato original /resolve-access
             methods.append("grupo facial")
             if face_group == "unknown":
@@ -163,6 +178,12 @@ class AccessEngine:
                 checks.append(Check("rostro", False, "El grupo facial no coincide con la credencial"))
                 return "La identificación facial no coincide con la credencial."
             checks.append(Check("rostro", True, f"Grupo facial {face_group} coincide"))
+            if persona["categoria"] == "VIP":
+                checks.append(Check("voz", False, "El contrato heredado no incluye audio para verificar al locutor"))
+                return "Recepción debe verificar la voz antes de autorizar el acceso."
+            if persona["categoria"] == "REGULAR":
+                checks.append(Check("pregunta de identidad", False, "El contrato heredado no incluye la pregunta"))
+                return "Recepción debe confirmar la identidad del socio."
             return None
         if face is None or face.persona_id is None:
             detail = "Rostro no reconocido" if face else "Sin observación facial"
@@ -175,7 +196,20 @@ class AccessEngine:
         if face.similarity is None or face.similarity < self.settings.face_threshold:
             checks.append(Check("rostro", False, f"Similitud {face.similarity} bajo el umbral {self.settings.face_threshold}"))
             return "La similitud facial es insuficiente."
-        checks.append(Check("rostro", True, f"Coincide con la credencial (similitud {face.similarity:.2f})"))
+        checks.append(Check("rostro", True, f"Coincide con el registro (similitud {face.similarity:.2f})"))
+        if persona["categoria"] == "VIP":
+            if not face.voice_checked or face.voice_identity != persona["id"]:
+                checks.append(Check("voz", False, "La voz no coincide o todavía no se verificó"))
+                return "Confirme su identidad hablando con recepción; la voz registrada no coincidió."
+            checks.append(Check("voz", True, f"Coincide con la voz registrada (similitud {face.voice_similarity:.2f})"))
+        if persona["categoria"] == "REGULAR":
+            if face.document_identity != persona["id"]:
+                checks.append(Check("pregunta de identidad", False, "Nombre, documento o voz sin confirmar"))
+                return "Confirme su identidad en recepción con su documento."
+            checks.append(Check("pregunta de identidad", True, "Nombre completo y últimos cuatro dígitos del documento"))
+            similarity = face.identity_voice_similarity
+            checks.append(Check("voz", True, "Coincide con la voz registrada"
+                                + (f" (similitud {similarity:.2f})" if similarity is not None else "")))
         return None
 
     # ---------- reglas por categoría ----------
@@ -207,6 +241,9 @@ class AccessEngine:
             methods.append("simulación ADMIN")
             checks.append(Check("credencial", persona is not None, "Credencial supuesta en simulación"))
             static_code = persona.get("codigo_credencial") if persona else None
+        elif not (credential or "").strip() and self._face_first(face):
+            # VIP y regular: el rostro propone la identidad y su factor propio la confirma.
+            persona = self.repo.persona(face.persona_id)
         else:
             persona, static_code = self.resolve_credential(credential or "", checks, methods)
 
@@ -223,6 +260,7 @@ class AccessEngine:
                             destination="Recepción")
             return done("denied", "Credencial no válida", "Credencial no encontrada. Acérquese a recepción.")
         category = persona["categoria"]
+        first = persona["nombre"].split()[0]
         if not persona["activo"]:
             checks.append(Check("persona activa", False, "Registro inactivo"))
             return done("denied", "Persona inactiva", "El usuario se encuentra inactivo.")
@@ -246,12 +284,14 @@ class AccessEngine:
                                 else "Sin reserva en la ventana de llegada"))
             label = f"{current['actividad']} · {parse_time(current['fecha_inicio']).astimezone(timezone(timedelta(hours=-5))).strftime('%H:%M')}" if current else None
             if category == "VIP":
-                return done("authorized", "Membresía VIP y credencial verificadas",
-                            f"Bienvenida, {persona['nombre']}. Disfrute de su experiencia VIP.",
+                return done("authorized", "Membresía VIP, rostro y voz verificados",
+                            f"Gracias, {first}. Reconocí su rostro y su voz; es un placer atenderle. "
+                            "Disfrute de su experiencia VIP.",
                             destination=current["destino"] if current else "Recepción VIP",
                             robot_target="robot2", event_type="vip_handoff", reservation_label=label)
-            return done("authorized", "Membresía y credencial verificadas",
-                        f"Bienvenido, {persona['nombre']}. Le indicaré cómo llegar a su actividad.",
+            return done("authorized", "Membresía, rostro e identidad verificados",
+                        f"Acceso aprobado, {first}. Su membresía regular está vigente. "
+                        "Le indicaré cómo llegar a su actividad.",
                         destination=current["destino"] if current else "Recepción de miembros",
                         reservation_label=label)
 
@@ -279,7 +319,7 @@ class AccessEngine:
                             destination="Recepción")
             checks.append(Check("destino", True, invitation["destino"]))
             return done("authorized", "Invitación y anfitrión verificados",
-                        f"Bienvenida, {persona['nombre']}. Su anfitrión es {invitation['anfitrion']}.",
+                        f"Invitación confirmada, {first}. Su anfitrión es {invitation['anfitrion']}.",
                         destination=invitation["destino"])
 
         if category in ("PERSONAL_INTERNO", "TRABAJADOR_EXTERNO"):
@@ -295,20 +335,44 @@ class AccessEngine:
                 and permit["estado"] == "ACTIVO"
                 and self._in_window(permit, "valido_desde", "valido_hasta")
             )
-            checks.append(Check("permiso laboral", valid, f"{permit['actividad']} · {permit['destino']}"
-                                if valid else "Sin permiso vigente"))
-            if not valid:
-                return done("denied", "Sin permiso laboral vigente", "No existe un permiso laboral vigente.")
+            if category == "PERSONAL_INTERNO":
+                checks.append(Check("horario de trabajo", valid, f"{permit['actividad']} · {self._shift(permit)}"
+                                    if valid else "Fuera de su horario de trabajo o sin turno asignado"))
+                if not valid:
+                    return done("denied", "Fuera del horario de trabajo", "No tiene un turno asignado en este horario.")
+            else:
+                checks.append(Check("orden de trabajo", valid, f"{permit['actividad']} · {permit['destino']}"
+                                    if valid else "Sin orden de trabajo vigente"))
+                if not valid:
+                    return done("denied", "Sin orden de trabajo vigente", "No existe una orden de trabajo vigente.")
             if permit["requiere_acompanamiento"]:
                 checks.append(Check("acompañamiento", True, "Requerido: espere en Recepción de proveedores"))
                 return done("pending_escort", "Orden vigente; requiere acompañamiento",
-                            f"Su orden para {permit['actividad']} está vigente. Espere a su acompañante.",
+                            f"Gracias. Su orden de servicio para {permit['actividad']} está vigente. "
+                            "Espere a su acompañante.",
                             destination=permit["destino"], escort=True)
             return done("authorized", "Permiso laboral verificado",
-                        f"Bienvenido, {persona['nombre']}. Puede dirigirse a su área de trabajo.",
+                        f"Listo, {first}. Su carné es válido y su turno está activo hasta las "
+                        f"{self._local_time(permit['valido_hasta'])}. "
+                        "Puede dirigirse a su área de trabajo.",
                         destination=permit["destino"])
 
         return done("denied", "Categoría no admitida", "Categoría no admitida.")
+
+    def _face_first(self, face: FaceEvidence | None) -> bool:
+        if not face or not face.persona_id or face.persona_id == "__conflict__":
+            return False
+        if face.similarity is None or face.similarity < self.settings.face_threshold:
+            return False
+        persona = self.repo.persona(face.persona_id)
+        return bool(persona and persona["categoria"] in FACE_FIRST)
+
+    @staticmethod
+    def _local_time(value: str) -> str:
+        return parse_time(value).astimezone(timezone(timedelta(hours=-5))).strftime("%H:%M")
+
+    def _shift(self, permit: dict) -> str:
+        return f"turno {self._local_time(permit['valido_desde'])}–{self._local_time(permit['valido_hasta'])}, dentro del horario"
 
     def _host_member(self, host: dict) -> bool:
         m = self.repo.membership(host["id"])

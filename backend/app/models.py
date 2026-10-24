@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -59,6 +60,8 @@ class Utterance(BaseModel):
     # WAV 16 kHz mono en base64, solo con consentimiento y STORE_EVIDENCE=true.
     audio_wav_b64: str | None = Field(default=None, max_length=2_800_000)
     consent: bool = False
+    # Verificación biométrica transitoria: no se guarda como evidencia.
+    speaker_audio_wav_b64: str | None = Field(default=None, max_length=1_400_000)
 
 
 class ValidateRequest(BaseModel):
@@ -97,3 +100,8 @@ class MemberRequest(BaseModel):
     telefono: str | None = Field(default=None, max_length=30)
     tipo_documento: Literal["CC", "CE", "PASAPORTE", "OTRO"]
     numero_documento: str = Field(min_length=5, max_length=30)
+
+
+class InvitationDates(BaseModel):
+    valid_from: datetime
+    valid_until: datetime

@@ -36,12 +36,15 @@ try:  # Mensajes del SDK AimDK (compilados desde aimdk_msgs del SDK del robot).
 except ImportError:  # el agente sigue funcionando sin audio, TTS ni gestos
     AIMDK = False
 
-# Cámaras con nombre. "frente" prioriza la cámara RGB frontal de interacción
-# (la de la frente, pensada para reconocer personas); si este firmware no la
-# publica, usa la estéreo frontal y por último la RGB-D. Ver camera_candidates().
+# Cámaras con nombre. "frente" usa la RGB frontal central de la cabeza
+# (/aima/hal/sensor/rgb_head_front_center/rgb_image, la que N Club eligió para
+# reconocer personas); si este firmware no la publica, la de interacción, la
+# estéreo frontal y por último la RGB-D. Ver camera_candidates().
 SENSOR = "/aima/hal/sensor"
+CENTER_CAMERA = f"{SENSOR}/rgb_head_front_center/rgb_image"
 CAMERA_PRESETS = {
-    "frente": ("interaction", "rgb_head_front", "stereo_head_front_left", "rgbd_head_front"),
+    "frente": ("rgb_head_front_center", "interaction", "rgb_head_front", "stereo_head_front_left", "rgbd_head_front"),
+    "centro": ("rgb_head_front_center",),
     "interaccion": ("interaction", "rgb_head_front"),
     "estereo": ("stereo_head_front_left",),
     "rgbd": ("rgbd_head_front",),
@@ -49,7 +52,8 @@ CAMERA_PRESETS = {
 }
 # Si no se puede consultar la lista de topics, se usa el primero documentado.
 CAMERA_FALLBACK = {
-    "frente": f"{SENSOR}/stereo_head_front_left/rgb_image/compressed",
+    "frente": CENTER_CAMERA,
+    "centro": CENTER_CAMERA,
     "interaccion": f"{SENSOR}/stereo_head_front_left/rgb_image/compressed",
     "estereo": f"{SENSOR}/stereo_head_front_left/rgb_image/compressed",
     "rgbd": f"{SENSOR}/rgbd_head_front/rgb_image/compressed",
@@ -64,8 +68,11 @@ def camera_candidates(available: list[str], choice: str) -> str:
         return choice
     keys = CAMERA_PRESETS.get(choice, CAMERA_PRESETS["frente"])
     compressed = sorted(t for t in available if t.endswith("/compressed") and "depth" not in t)
+    raw = sorted(t for t in available if t.endswith("/rgb_image"))
     for key in keys:
-        for topic in compressed:
+        # Para cada cámara se prefiere su versión JPEG (menos tráfico DDS) y si
+        # no existe, la imagen sin comprimir (sensor_msgs/Image).
+        for topic in compressed + raw:
             if key in topic and "h265" not in topic:
                 return topic
     return CAMERA_FALLBACK.get(choice, CAMERA_FALLBACK["frente"])
@@ -276,7 +283,7 @@ class ReceptionAgentNode(Node):
             if any(t.endswith("/compressed") for t in available):
                 break
             time.sleep(0.5)
-        cameras = sorted(t for t in available if t.endswith("/rgb_image/compressed"))
+        cameras = sorted(t for t in available if t.endswith(("/rgb_image", "/rgb_image/compressed")))
         topic = camera_candidates(available, choice)
         self.get_logger().info(f"Cámaras disponibles: {cameras or 'ninguna detectada aún'}")
         self.get_logger().info(f"Cámara elegida ({choice}): {topic}")
@@ -389,8 +396,14 @@ class ReceptionAgentNode(Node):
         self._push(decode_jpeg(data))
 
     def _on_image(self, msg: Image) -> None:
-        if msg.encoding.lower() == "rgb8":
-            self._push(rgb8_to_bgr(bytes(msg.data), msg.width, msg.height, msg.step))
+        encoding = msg.encoding.lower()
+        if encoding in ("rgb8", "bgr8"):
+            frame = rgb8_to_bgr(bytes(msg.data), msg.width, msg.height, msg.step)
+            self._push(frame[:, :, ::-1].copy() if encoding == "bgr8" else frame)
+        elif not getattr(self, "_warned_encoding", False):
+            self._warned_encoding = True
+            self.get_logger().error(f"Codificación de cámara no soportada: {msg.encoding}; "
+                                    "use la versión /compressed o -Camara estereo")
 
     def _on_audio(self, msg) -> None:
         state = msg.audio_vad_state.value

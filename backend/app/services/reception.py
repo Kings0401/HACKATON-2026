@@ -11,6 +11,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import logging
+import re
 import secrets
 import threading
 import time
@@ -28,12 +29,39 @@ log = logging.getLogger(__name__)
 MONITOR_TOPIC = "nclub:monitor"
 # Cierre hablado de cada uno de los cinco flujos.
 CATEGORY_CLOSING = {
-    ("VIP", "authorized"): "Mi compañero AGIBOT 02 le acompañará para una atención personalizada.",
+    ("VIP", "authorized"): "Mi compañero AGIBOT 02 ya viene por usted para darle una atención preferencial.",
     ("REGULAR", "authorized"): "Que disfrute su visita en N Club.",
     ("INVITADO", "authorized"): "Su anfitrión ya fue notificado; la ruta solo incluye las áreas de su invitación.",
-    ("PERSONAL_INTERNO", "authorized"): "Recuerde llevar su carné visible durante el turno.",
+    ("PERSONAL_INTERNO", "authorized"): "Que tenga una excelente jornada, y recuerde llevar su carné visible.",
     ("TRABAJADOR_EXTERNO", "pending_escort"): "Por seguridad, permanezca en la recepción de proveedores hasta que llegue su acompañante y no ingrese a áreas sociales.",
 }
+
+
+# Primer saludo al reconocer el rostro: cada categoría tiene su propio trato y su paso de diálogo.
+GREETINGS = {
+    # VIP: trato preferencial; su voz al responder es el segundo factor.
+    "VIP": ("activity", "{salutation}, {first}. ¡Qué gusto tenerle de nuevo en N Club! Con su membresía VIP "
+                        "tiene atención preferencial. Cuénteme, ¿qué le gustaría disfrutar hoy?"),
+    # Regular: verificación estricta de nombre, documento y voz antes de continuar.
+    "REGULAR": ("identity", "{salutation}, {first}. Le damos la bienvenida a N Club. Antes de continuar debo "
+                            "verificar su identidad: dígame su nombre completo y los últimos cuatro dígitos "
+                            "de su documento, por favor."),
+    # Invitado: bienvenida directa y pide el QR de invitación apenas lo detecta.
+    "INVITADO": ("guest_qr", "¡{first}, bienvenidos a N Club! Por favor, muéstrame tu código QR de invitación."),
+    # Personal interno: conversación cercana antes de pedir el carné.
+    "PERSONAL_INTERNO": ("staff_card", "¡Hola, {first}! Qué gusto verle por aquí. ¿Cómo va su día? "
+                                       "Cuando quiera, acerque su carné a mi cámara y verifico su turno."),
+    "TRABAJADOR_EXTERNO": ("work_order", "{salutation}, {first}. Le damos la bienvenida al área de proveedores de N Club. "
+                                         "Para registrar su ingreso, muestre a mi cámara el código QR de su "
+                                         "orden de servicio, por favor."),
+}
+# Respuesta mientras se espera el QR de cada categoría.
+QR_PROMPTS = {
+    "guest_qr": "Por favor, muéstrame tu código QR de invitación para confirmar a tu anfitrión.",
+    "staff_card": "¡Me alegra! Ahora acerque su carné a mi cámara, por favor, y reviso que su turno esté activo.",
+    "work_order": "Gracias. Muestre a mi cámara el código QR de su orden de servicio, por favor.",
+}
+REGULAR_PARTS = {"name": "su nombre completo", "document": "los últimos cuatro dígitos de su documento"}
 
 
 def now_iso() -> str:
@@ -182,6 +210,11 @@ class ReceptionService:
             "decision": None,
             "simulation": simulated or self.repo.simulated,
             "last_activity": time.time(),
+            "dialogue_step": None,
+            "voice_identity": None,
+            "document_identity": None,
+            "identity_attempts": 0,
+            "requested_activity": None,
         }
         with self.state.lock:
             self.state.sessions[session["id"]] = session
@@ -221,10 +254,15 @@ class ReceptionService:
                              {k: obs.get(k) for k in ("reason", "second_persona_id", "second_similarity", "detection_score")},
                              persona if ok else None, similarity)
         greeting = None
-        if candidate and candidate["activo"]:
+        # El robot reporta el rostro cada pocos segundos: se saluda y se fija el paso solo una vez.
+        if candidate and candidate["activo"] and session.get("dialogue_step") is None:
             first = candidate["nombre"].split()[0]
-            # Saludo ágil: personaliza la atención pero NO autoriza.
-            greeting = f"Hola, {first}. Para confirmar su ingreso, muestre su credencial, por favor."
+            hour = datetime.now(timezone(timedelta(hours=-5))).hour
+            salutation = "Buenos días" if hour < 12 else "Buenas tardes" if hour < 19 else "Buenas noches"
+            step, greeting = GREETINGS.get(candidate["categoria"], (None, None))
+            if step:
+                session["dialogue_step"] = step
+                greeting = greeting.format(salutation=salutation, first=first)
         return {"accepted": ok, "category_hint": session["category_hint"], "speech": greeting}
 
     def add_credential(self, session: dict, payload: str, kind: str) -> dict:
@@ -237,18 +275,75 @@ class ReceptionService:
 
     def add_utterance(self, session: dict, text: str, language: str = "es-CO", confidence: float | None = None,
                       engine: str | None = None, started_at: str | None = None, ended_at: str | None = None,
-                      audio_b64: str | None = None, consent: bool = False) -> dict:
+                      audio_b64: str | None = None, consent: bool = False,
+                      speaker_audio_b64: str | None = None) -> dict:
         text = text.strip()[:1000]
-        # Orientación en el club: solo se guía a quien ya tiene categoría confirmada.
-        decision = session.get("decision") or {}
-        confirmed = decision.get("category") if decision.get("access") in ("authorized", "pending") else None
-        guide = club_guide.answer(text, confirmed) if text else None
-        if guide:
-            understanding = {"intent": guide["intent"], "category_hint": None, "reply": guide["reply"],
-                             "handoff": False, "route": guide["route"]}
+        speaker_match = None
+        ready = False  # identificación completa: el robot puede pedir la decisión
+        face = self.best_face(session)
+        if face and face.persona_id not in (None, "__conflict__"):
+            session["voice_identity"] = None
+            session["voice_similarity"] = None
+            session["voice_checked"] = False
+        if speaker_audio_b64 and face and face.persona_id not in (None, "__conflict__"):
+            try:
+                audio = base64.b64decode(speaker_audio_b64, validate=True)
+                files = self.repo.voice_files(face.persona_id)
+                phrase_files = [name for name in files if name.startswith("frase-") and name.endswith(".wav")]
+                phrase_ids = {name[6:-4] for name in phrase_files if name[6:-4].isdigit()}
+                if phrase_files:
+                    references = phrase_files if {"1", "2", "3"}.issubset(phrase_ids) else []
+                else:
+                    references = ["enrollment.wav"] if "enrollment.wav" in files else files[:1]
+                if references:
+                    from .speaker_id import verify_many
+
+                    speaker_match = verify_many(
+                        [self.repo.download_voice(face.persona_id, name) for name in references], audio,
+                        self.settings.speaker_threshold,
+                    )
+                    session["voice_identity"] = face.persona_id if speaker_match["matched"] else None
+                    session["voice_similarity"] = speaker_match["similarity"]
+                    session["voice_checked"] = True
+                    self._identification(session, "VOZ", "COINCIDE" if speaker_match["matched"] else "NO_COINCIDE",
+                                         {"modelo": speaker_match["model"], "umbral": speaker_match["threshold"],
+                                          "coincidencias": speaker_match["matches"],
+                                          "muestras": speaker_match["samples"]}, face.persona_id,
+                                         speaker_match["similarity"])
+            except Exception as error:
+                log.warning("No se pudo verificar la voz en esta intervención: %s", error)
+        step = session.get("dialogue_step")
+        if step == "identity" and face and face.persona_id:
+            understanding = self._regular_identity(session, face.persona_id, text)
+            ready = understanding.pop("ready", False)
+        elif step == "activity" and text:
+            session["requested_activity"] = text[:160]
+            persona = self.repo.persona(face.persona_id) if face and face.persona_id else None
+            voice_ok = bool(face and session.get("voice_identity") == face.persona_id)
+            if persona and persona["categoria"] == "VIP" and not voice_ok and self._retry(session):
+                reply = ("Disculpe, no alcancé a reconocer su voz. ¿Sería tan amable de repetirme "
+                         "qué le gustaría disfrutar hoy?")
+                understanding = {"intent": "VOZ_PENDIENTE", "category_hint": "VIP", "reply": reply, "handoff": False}
+            else:
+                # VIP (rostro + voz) y regular (rostro + nombre, documento y voz) no necesitan credencial.
+                session["dialogue_step"] = "done"
+                ready = True
+                understanding = {"intent": "ACTIVIDAD_SOLICITADA", "category_hint": session.get("category_hint"),
+                                 "reply": None, "handoff": False}
+        elif step in QR_PROMPTS and text and not session.get("decision"):
+            understanding = {"intent": "ESPERANDO_CREDENCIAL", "category_hint": session.get("category_hint"),
+                             "reply": QR_PROMPTS[step], "handoff": False}
         else:
-            understanding = dialogue.understand(text) if text else {"intent": "VACIO", "category_hint": None,
-                                                                        "reply": None, "handoff": False}
+            # Orientación en el club: solo se guía a quien ya tiene categoría confirmada.
+            decision = session.get("decision") or {}
+            confirmed = decision.get("category") if decision.get("access") in ("authorized", "pending") else None
+            guide = club_guide.answer(text, confirmed) if text else None
+            if guide:
+                understanding = {"intent": guide["intent"], "category_hint": None, "reply": guide["reply"],
+                                 "handoff": False, "route": guide["route"]}
+            else:
+                understanding = dialogue.understand(text) if text else {"intent": "VACIO", "category_hint": None,
+                                                                            "reply": None, "handoff": False}
         if understanding["category_hint"] and not session["category_hint"]:
             session["category_hint"] = understanding["category_hint"]
         if understanding["intent"] == "DESCONOCIDO":
@@ -259,8 +354,9 @@ class ReceptionService:
         evidence_id = None
         if audio_b64 and consent and self.settings.store_evidence:
             evidence_id = self.store_evidence(session, base64.b64decode(audio_b64, validate=True), "audio/wav", "AUDIO")
+        transcript = "[dato de identidad omitido]" if step == "identity" else text
         item = {
-            "sesion_id": session["id"], "robot_id": session["robot_id"], "texto": text, "idioma": language,
+            "sesion_id": session["id"], "robot_id": session["robot_id"], "texto": transcript, "idioma": language,
             "confianza": confidence, "motor": engine, "inicio": started_at, "fin": ended_at,
             "intencion": understanding["intent"], "evidencia_id": evidence_id,
         }
@@ -269,9 +365,60 @@ class ReceptionService:
         with self.state.lock:
             self.state.transcripts.appendleft({**item, "created_at": now_iso()})
         self._safe("transcripciones", self.repo.insert, item)
-        self._publish("transcript", {"sesion_id": session["id"], "robot_id": session["robot_id"], "texto": text,
+        self._publish("transcript", {"sesion_id": session["id"], "robot_id": session["robot_id"], "texto": transcript,
                                      "idioma": language, "intencion": understanding["intent"]})
-        return {**understanding, "speech": understanding["reply"]}
+        return {**understanding, "speech": understanding["reply"], "ready": ready}
+
+    @staticmethod
+    def _retry(session: dict, allowed: int = 1) -> bool:
+        """Permite repetir la pregunta de identidad `allowed` veces."""
+        session["identity_attempts"] = session.get("identity_attempts", 0) + 1
+        return session["identity_attempts"] <= allowed
+
+    def _regular_identity(self, session: dict, persona_id: str, text: str) -> dict:
+        """Socio regular: nombre completo + últimos cuatro dígitos del documento + voz registrada.
+
+        Los datos pueden llegar en varias frases; la voz debe coincidir en cada frase que aporta un dato.
+        """
+        persona = self.repo.persona(persona_id) or {}
+        first = (persona.get("nombre") or "").split()[0] if persona.get("nombre") else ""
+        words = set(re.findall(r"[a-z0-9]+", dialogue.normalize(text)))
+        names = [t for t in re.findall(r"[a-z]+", dialogue.normalize(persona.get("nombre") or "")) if len(t) >= 3]
+        tail = "".join(c for c in persona.get("numero_documento") or "" if c.isalnum())[-4:].upper()
+        digits = "".join(c for c in text if c.isdigit())
+        verified = set(session.get("regular_verified", []))
+        given, wrong = set(), []
+        if names and all(n in words for n in names):
+            given.add("name")
+        elif any(n in words for n in names):
+            wrong.append("el nombre no coincide con el registro")
+        if tail and tail in digits:
+            given.add("document")
+        elif len(digits) >= 4:
+            wrong.append("los dígitos no coinciden con el documento registrado")
+        if given or wrong:
+            if session.get("voice_identity") == persona_id:
+                verified |= given | {"voice"}
+                session["identity_voice_similarity"] = session.get("voice_similarity")
+            else:  # los datos dichos con otra voz no cuentan
+                verified.discard("voice")
+                wrong.append("no logré reconocer su voz")
+        session["regular_verified"] = sorted(verified)  # la sesión debe seguir siendo serializable
+        if {"name", "document", "voice"} <= verified:
+            session["dialogue_step"] = "activity"
+            session["document_identity"] = persona_id
+            session["identity_attempts"] = 0
+            reply = (f"Gracias, {first}. Su nombre, su documento y su voz coinciden con el registro. "
+                     "¿Qué actividad va a realizar hoy?")
+            return {"intent": "IDENTIDAD_CONFIRMADA", "category_hint": "REGULAR", "reply": reply, "handoff": False}
+        if not self._retry(session, allowed=2):  # tercer intento fallido: recepción decide
+            return {"intent": "IDENTIDAD_NO_CONFIRMADA", "category_hint": "REGULAR", "reply": None,
+                    "handoff": True, "ready": True}
+        missing = [REGULAR_PARTS[p] for p in ("name", "document") if p not in verified]
+        reason = ("Lo siento, " + " y ".join(wrong) + ". ") if wrong else ""
+        ask = (f"Por favor, dígame {' y '.join(missing)}." if missing
+               else "Por favor, repita su nombre completo con calma para verificar su voz.")
+        return {"intent": "IDENTIDAD_PENDIENTE", "category_hint": "REGULAR", "reply": reason + ask, "handoff": False}
 
     def store_evidence(self, session: dict, content: bytes, mime: str, tipo: str) -> str | None:
         if len(content) > 2_000_000:
@@ -305,7 +452,10 @@ class ReceptionService:
             if len(ids) > 1:  # rostros distintos en la misma sesión: dudoso
                 return FaceEvidence("__conflict__", 0.0, "conflict")
             best = max(accepted, key=lambda f: f["similarity"])
-            return FaceEvidence(best["persona_id"], best["similarity"], best.get("reason", ""))
+            return FaceEvidence(best["persona_id"], best["similarity"], best.get("reason", ""),
+                                session.get("voice_identity"), session.get("voice_similarity"),
+                                session.get("voice_checked", False), session.get("document_identity"),
+                                session.get("identity_voice_similarity"))
         return FaceEvidence(None, max(f.get("similarity") or -1 for f in session["faces"]), "unknown")
 
     def persist_decision(self, decision: Decision, origin: str) -> Decision:
@@ -378,7 +528,8 @@ class ReceptionService:
         decision = self.persist_decision(decision, f"robot:{session['robot_id']}")
         route = self.route_for(decision)
         result = {**decision.to_api(), "session_id": session["id"], "route": route,
-                  "category_detected": session["category_hint"]}
+                  "category_detected": session["category_hint"],
+                  "requested_activity": session.get("requested_activity")}
         session["decision"] = result
         session["last_activity"] = time.time()
         self._safe("sesiones_atencion", self.repo.update, "id", session["id"], {
@@ -398,6 +549,10 @@ class ReceptionService:
                                    "decision": result["decision"], "role": result["role"],
                                    "destination": result["destination"]})
         result["speech"] = self.speech(decision, route)
+        if decision.access == "authorized" and session.get("requested_activity"):
+            # Acuse de la actividad pedida: cálido con la VIP, sobrio con el regular.
+            ack = "¡Con mucho gusto!" if decision.category == "VIP" else "Entendido."
+            result["speech"] = f"{ack} {result['speech']}"
         return result
 
     @staticmethod

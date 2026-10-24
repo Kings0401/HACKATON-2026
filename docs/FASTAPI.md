@@ -10,6 +10,7 @@ Este contrato está implementado en `backend/app` (reorganización de `nclub-bac
 cd backend
 python -m venv .venv; .venv\Scripts\activate
 pip install -r requirements.txt
+python -c "from app.services.speaker_id import warmup; warmup()"  # descarga el modelo ECAPA antes de abrir recepción
 Copy-Item .env.example .env   # completar claves de servidor
 uvicorn app.main:app --reload --port 8000
 pytest
@@ -27,7 +28,7 @@ pytest
 | `POST /robot/sessions` | X-Robot-Key | Inicia una sesión de atención |
 | `POST /robot/sessions/{id}/faces` | X-Robot-Key | Candidato facial `{persona_id, similarity, …}` |
 | `POST /robot/sessions/{id}/credentials` | X-Robot-Key | QR, carné o NFC leído (se registra enmascarado) |
-| `POST /robot/sessions/{id}/utterances` | X-Robot-Key | Transcripción en español; responde la intención y el texto a decir |
+| `POST /robot/sessions/{id}/utterances` | X-Robot-Key | Transcripción en español y audio WAV transitorio del robot para verificar al locutor; el audio biométrico no se archiva |
 | `POST /robot/sessions/{id}/evidence` | X-Robot-Key | Fotograma puntual, solo con `STORE_EVIDENCE` y consentimiento |
 | `POST /robot/sessions/{id}/resolve` | X-Robot-Key | Decisión + checks + ruta + QR + texto para TTS (idempotente) |
 | `POST /robot/sessions/{id}/close` | X-Robot-Key | Cierra la sesión |
@@ -41,11 +42,15 @@ pytest
 | `GET /admin/lab/status`, `POST /admin/lab/frame` (JPEG), `/admin/lab/text`, `/admin/lab/reset`, `/admin/lab/reload` | JWT ADMIN | Robot simulado con la cámara del dispositivo (mismo agente del robot) |
 | `POST /admin/members` | JWT ADMIN | Alta de miembro VIP/REGULAR con membresía; devuelve un QR seguro |
 | `POST /admin/personas/{id}/photos?consent=true` | JWT ADMIN | Foto de registro facial (1 rostro, sin EXIF) → Storage privado + galería |
+| `POST /admin/personas/{id}/voice?consent=true` | JWT ADMIN | Muestra WAV mono 16 kHz; registro privado para verificar la voz con SpeechBrain ECAPA-TDNN |
+| `GET /admin/personas/{id}/biometrics` | JWT ADMIN | Previsualizaciones firmadas de foto y audio del bucket privado |
+| `POST /admin/personas/{id}/voice?sample_id=1..3&consent=true` | JWT ADMIN | Registra cada una de tres frases guiadas WAV; se reemplaza solo la frase del mismo numero |
+| `POST /admin/personas/{id}/voice/verify?consent=true` | JWT ADMIN | Compara una frase transitoria con las tres muestras; exige mayoria de coincidencias y no guarda el audio de prueba |
 | `POST /admin/personas/{id}/credential` | JWT ADMIN | QR seguro temporal de un miembro |
 
 Respuesta de `resolve` (y de `access/check`): campos del contrato más `decision` (`AUTORIZADO`, `DENEGADO`, `REVISION`, `ACOMPANAMIENTO`), `category`, `methods`, `checks[]` (`name`, `ok`, `detail`), `escort_required`, `route` (ruta, pasos, `share_url`) y `speech`. Un proveedor con acompañamiento devuelve `access:"pending"`.
 
-**Reglas aplicadas**: credencial obligatoria (token `nclub:v1:` → hash en `credenciales`, o código estático de demostración si `ALLOW_STATIC_CREDENTIALS=true`; `demo_` siempre se rechaza). El rostro es obligatorio para VIP y personal y opcional para el resto, pero si corresponde a otra persona → revisión. Miembros: membresía y reserva en la ventana de llegada (tolerancia de 60 min). Invitados: invitación vigente + anfitrión con membresía vigente (si no, revisión). Personal y proveedores: permiso vigente; acompañamiento → `ACOMPANAMIENTO`. La decisión se registra en `eventos_acceso` **antes** de responder; si falla, se responde revisión.
+**Reglas aplicadas**: cada categoría combina el rostro con su propio factor. VIP: rostro + voz enrolada, sin credencial y con trato preferencial. Regular: rostro + nombre completo + últimos cuatro dígitos del documento + voz enrolada, sin credencial; la verificación es estricta (cada dato debe decirse con la voz registrada y al tercer intento fallido pasa a revisión). Cuando la identificación de un socio queda completa, `/utterances` responde `ready: true` y el robot pide la decisión. Invitado, personal y proveedor: credencial obligatoria (token `nclub:v1:` → hash en `credenciales`, o código estático de demostración si `ALLOW_STATIC_CREDENTIALS=true`; `demo_` siempre se rechaza). El rostro es obligatorio para VIP, regular, personal y proveedor (`FACE_REQUIRED_CATEGORIES`) y opcional para el invitado, pero si corresponde a otra persona → revisión. Miembros: membresía y reserva en la ventana de llegada (tolerancia de 60 min). Invitados: invitación vigente + anfitrión con membresía vigente (si no, revisión). Personal y proveedores: permiso vigente; acompañamiento → `ACOMPANAMIENTO`. La decisión se registra en `eventos_acceso` **antes** de responder; si falla, se responde revisión.
 
 ## Configuración del servidor
 
@@ -151,11 +156,11 @@ Reglas que debe implementar el responsable de FastAPI consultando Supabase al mo
 
 | Categoría | Verificar                                                                               | Destino / robot                                                         |
 | --------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| VIP       | Credencial/identidad y membresía activa; reserva si corresponde                         | Destino permitido VIP; `vip_handoff` a robot2 solo tras autorización    |
-| REGULAR   | Membresía activa, credencial y reserva válida en ventana de llegada                     | Servicio reservado, robot1; sin reserva, review según política del club |
+| VIP       | Rostro + voz enrolada (sin credencial), membresía activa; reserva si corresponde        | Destino permitido VIP; `vip_handoff` a robot2 solo tras autorización    |
+| REGULAR   | Rostro + nombre, últimos 4 dígitos del documento y voz; membresía y reserva en ventana  | Servicio reservado, robot1; sin reserva, recepción de miembros          |
 | GUEST     | Invitación activa, rango `valid_from`/`valid_until`, anfitrión miembro activo y destino | Solo destino de invitación, robot1                                      |
-| STAFF     | Credencial y asignación SHIFT activa dentro del horario                                 | Solo `authorized_zone`, robot1                                          |
-| EXTERNAL  | Credencial, empresa y EXTERNAL_ORDER activa dentro del horario                          | Solo zona de trabajo; jamás zona social, robot1                         |
+| STAFF     | Rostro + carné/QR y asignación SHIFT activa dentro del horario del turno                | Solo `authorized_zone`, robot1                                          |
+| EXTERNAL  | Rostro + QR de la orden, empresa y EXTERNAL_ORDER activa dentro del horario             | Solo zona de trabajo; jamás zona social, robot1                         |
 
 Si se requiere verificación adicional de identidad, devolver `review`; una consulta fallida, timeout o perfil desconocido nunca implica `authorized`. El backend determina su ventana de llegada para reservas; todos los tiempos de reserva se interpretan en `America/Bogota`, mientras las vigencias son `timestamptz`.
 

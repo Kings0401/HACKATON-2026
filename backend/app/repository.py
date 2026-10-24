@@ -37,6 +37,9 @@ class Repository(Protocol):
     def face_files(self, persona_id: str) -> list[str]: ...
     def download_face(self, persona_id: str, name: str) -> bytes: ...
     def upload_face(self, persona_id: str, name: str, content: bytes, mime: str) -> None: ...
+    def voice_files(self, persona_id: str) -> list[str]: ...
+    def download_voice(self, persona_id: str, name: str) -> bytes: ...
+    def upload_voice(self, persona_id: str, name: str, content: bytes, mime: str) -> None: ...
     def delete(self, table: str, key: str, value: Any) -> None: ...
     def revoke_credentials(self, persona_id: str, when: str) -> None: ...
     def upload(self, bucket: str, path: str, content: bytes, mime: str) -> None: ...
@@ -158,6 +161,20 @@ class SupabaseRepository:
 
     def upload_face(self, persona_id: str, name: str, content: bytes, mime: str) -> None:
         self.upload(self.settings.faces_bucket, f"{persona_id}/{name}", content, mime)
+
+    def voice_files(self, persona_id: str) -> list[str]:
+        items = self.client.storage.from_(self.settings.voices_bucket).list(
+            path=persona_id, options={"limit": 100}
+        )
+        return sorted(i["name"] for i in items if i.get("id") is not None and i["name"].lower().endswith(".wav"))
+
+    def download_voice(self, persona_id: str, name: str) -> bytes:
+        return self.client.storage.from_(self.settings.voices_bucket).download(f"{persona_id}/{name}")
+
+    def upload_voice(self, persona_id: str, name: str, content: bytes, mime: str) -> None:
+        self.client.storage.from_(self.settings.voices_bucket).upload(
+            f"{persona_id}/{name}", content, {"content-type": mime, "upsert": "true"}
+        )
 
     def delete(self, table: str, key: str, value: Any) -> None:
         self.client.table(table).delete().eq(key, value).execute()

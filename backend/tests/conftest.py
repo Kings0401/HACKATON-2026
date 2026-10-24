@@ -12,6 +12,8 @@ from app.memory_repo import MemoryRepository  # noqa: E402
 
 ROBOT_KEY = "test-robot-key-0123456789"
 ADMIN_TOKEN = "test-admin-token"
+VIP_VOICE = b"voz registrada de Valeria"
+REG_VOICE = b"voz registrada de Santiago"
 
 
 @pytest.fixture
@@ -29,8 +31,17 @@ def faces(tmp_path):
 
 
 @pytest.fixture
-def repo(faces):
-    return MemoryRepository(faces_dir=faces, admin_token=ADMIN_TOKEN)
+def repo(faces, monkeypatch):
+    from app.services import speaker_id
+
+    # Locutor simulado: coincide si el audio es idéntico a la voz registrada.
+    monkeypatch.setattr(speaker_id, "verify_many", lambda refs, spoken, threshold=0.25: {
+        "similarity": 0.9 if spoken in refs else 0.1, "matched": spoken in refs, "matches": int(spoken in refs),
+        "samples": len(refs), "threshold": threshold, "model": "prueba"})
+    r = MemoryRepository(faces_dir=faces, admin_token=ADMIN_TOKEN)
+    r.upload_voice("VIP001", "enrollment.wav", VIP_VOICE, "audio/wav")
+    r.upload_voice("REG001", "enrollment.wav", REG_VOICE, "audio/wav")
+    return r
 
 
 @pytest.fixture

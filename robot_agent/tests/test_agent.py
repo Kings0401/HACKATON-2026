@@ -19,6 +19,7 @@ from app.memory_repo import MemoryRepository  # noqa: E402
 from nclub_agent import sim  # noqa: E402
 from nclub_agent.backend_client import BackendClient, BackendUnavailable  # noqa: E402
 from nclub_agent.core import OFFLINE_MESSAGE, AgentConfig, LogSpeaker, ReceptionAgent  # noqa: E402
+from nclub_agent.speech import pcm_to_wav  # noqa: E402
 from nclub_agent.speech import VAD_BEGIN, VAD_END, VAD_PROCESSING, AimdkVadAssembler, EnergyVAD  # noqa: E402
 from nclub_vision.qr import QrReader, encode_qr  # noqa: E402
 
@@ -27,11 +28,22 @@ HAS_DATASET = (ROOT / "vision" / "dataset" / "registro").is_dir() and (
     ROOT / "vision" / "models" / "face_recognition_sface_2021dec.onnx").is_file()
 
 
+VIP_PCM = b"\x10\x00" * 16000  # voz de Valeria para el locutor simulado
+REG_PCM = b"\x20\x00" * 16000  # voz de Santiago
+
+
 @pytest.fixture
-def backend():
+def backend(monkeypatch):
+    from app.services import speaker_id
+
+    monkeypatch.setattr(speaker_id, "verify_many", lambda refs, spoken, threshold=0.25: {
+        "similarity": 0.9 if spoken in refs else 0.1, "matched": spoken in refs, "matches": int(spoken in refs),
+        "samples": len(refs), "threshold": threshold, "model": "prueba"})
     s = Settings()
     s.mode, s.robot_api_key = "memory", KEY
     repo = MemoryRepository(admin_token="adm")
+    repo.upload_voice("VIP001", "enrollment.wav", pcm_to_wav(VIP_PCM), "audio/wav")
+    repo.upload_voice("REG001", "enrollment.wav", pcm_to_wav(REG_PCM), "audio/wav")
     return TestClient(create_app(s, repo)), repo
 
 
@@ -42,8 +54,11 @@ def client_for(test_client):
 @pytest.mark.skipif(not HAS_DATASET, reason="requiere vision/dataset y modelos ONNX locales")
 def test_five_flows_end_to_end_with_faces(backend):
     tc, repo = backend
-    results = {r["scenario"]: r for r in sim.run("", KEY, client=client_for(tc))}
+    results = {r["scenario"]: r for r in sim.run("", KEY, client=client_for(tc), voices={"VIP001": VIP_PCM, "REG001": REG_PCM})}
     assert results["VIP"]["decision"] == "AUTORIZADO" and results["VIP"]["robot_target"] == "robot2"
+    checks = {k: {c["name"] for c in r["checks"] if c["ok"]} for k, r in results.items()}
+    assert "voz" in checks["VIP"] and {"pregunta de identidad", "voz"} <= checks["REGULAR"]
+    assert "horario de trabajo" in checks["PERSONAL"] and "orden de trabajo" in checks["PROVEEDOR"]
     assert results["REGULAR"]["decision"] == "AUTORIZADO" and results["REGULAR"]["destination"].startswith("Campo")
     assert results["INVITADO"]["decision"] == "AUTORIZADO" and results["INVITADO"]["destination"] == "Restaurante principal"
     assert results["PERSONAL"]["decision"] == "AUTORIZADO"
@@ -52,18 +67,17 @@ def test_five_flows_end_to_end_with_faces(backend):
     assert all("facial" in r["methods"] for r in results.values())
     sessions = repo.tables["sesiones_atencion"]
     assert len(sessions) == 5 and all(s["estado"] == "CERRADA" for s in sessions)
-    assert len(repo.tables["transcripciones"]) == 5
+    assert len(repo.tables["transcripciones"]) == 6  # el regular responde dos veces
 
 
 def test_flows_without_faces_send_doubtful_cases_to_review(backend):
     tc, _ = backend
     results = {r["scenario"]: r for r in sim.run("", KEY, with_faces=False, client=client_for(tc))}
-    # VIP y personal exigen rostro: sin él pasan a recepción.
-    assert results["VIP"]["decision"] == "REVISION"
-    assert results["PERSONAL"]["decision"] == "REVISION"
-    assert results["REGULAR"]["decision"] == "AUTORIZADO"
+    # Todas las categorías salvo el invitado combinan rostro con su factor: sin rostro nadie más entra.
     assert results["INVITADO"]["decision"] == "AUTORIZADO"
-    assert results["PROVEEDOR"]["decision"] == "ACOMPANAMIENTO"
+    for flow in ("VIP", "REGULAR", "PERSONAL", "PROVEEDOR"):
+        assert results[flow]["decision"] in ("REVISION", "DENEGADO"), flow
+    assert results["PERSONAL"]["decision"] == "REVISION" and results["PROVEEDOR"]["decision"] == "REVISION"
 
 
 def test_agent_speaks_offline_message_when_backend_is_down():
@@ -121,7 +135,7 @@ def test_same_qr_is_not_resolved_twice_while_visible(backend):
     t = [0.0]
     agent = ReceptionAgent(client_for(tc), None, QrReader(), LogSpeaker(),
                            config=AgentConfig(analyze_every_s=0), clock=lambda: t[0])
-    qr = encode_qr("APP-REG-001")
+    qr = encode_qr("QR-INV-001")
     assert agent.on_frame(qr)["decision"] == "AUTORIZADO"
     t[0] += 1
     assert agent.on_frame(qr) is None

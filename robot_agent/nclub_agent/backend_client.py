@@ -91,7 +91,7 @@ class BackendClient:
         return self.request("POST", f"/robot/sessions/{session_id}/credentials", json={"payload": payload, "kind": kind})
 
     def utterance(self, session_id: str, **body) -> dict:
-        return self.request("POST", f"/robot/sessions/{session_id}/utterances", json=body)
+        return self.request("POST", f"/robot/sessions/{session_id}/utterances", json=body, timeout=120.0)
 
     def resolve(self, session_id: str) -> dict:
         return self.request("POST", f"/robot/sessions/{session_id}/resolve")

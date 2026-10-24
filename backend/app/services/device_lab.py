@@ -132,6 +132,7 @@ class InProcessClient:
         return self.reception.add_utterance(
             self._session(session_id), body.get("text", ""), body.get("language", "es-CO"),
             body.get("confidence"), body.get("engine"), body.get("started_at"), body.get("ended_at"),
+            speaker_audio_b64=body.get("speaker_audio_wav_b64"),
         )
 
     def resolve(self, session_id: str) -> dict:

@@ -174,6 +174,7 @@ export const status = (value) => {
     review: "Revisión requerida",
     pending: "Pendiente",
     revoked: "Revocada",
+    expired: "Vencida",
   };
   return /* HTML */ `<span class="status status-${escape(value)}"
     ><span></span>${escape(labels[value] || value)}</span

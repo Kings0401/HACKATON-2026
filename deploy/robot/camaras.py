@@ -11,9 +11,11 @@ from pathlib import Path
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import CompressedImage, Image
 
 OUT = Path.home() / "nclub" / "capturas"
+# Cámara elegida por N Club: puede publicarse solo sin comprimir (sensor_msgs/Image).
+CENTER = "/aima/hal/sensor/rgb_head_front_center/rgb_image"
 
 
 class Probe(Node):
@@ -25,10 +27,13 @@ class Probe(Node):
         deadline = time.time() + 6
         found = []
         while time.time() < deadline:
+            listed = self.get_topic_names_and_types()
             found = sorted(
-                name for name, types in self.get_topic_names_and_types()
+                name for name, types in listed
                 if "sensor_msgs/msg/CompressedImage" in types and "depth" not in name and "h265" not in name
             )
+            if any(name == CENTER for name, _ in listed) and f"{CENTER}/compressed" not in found:
+                found.append(CENTER)
             if found:
                 break
             rclpy.spin_once(self, timeout_sec=0.5)
@@ -36,7 +41,23 @@ class Probe(Node):
 
     def sample(self, topic, seconds=3.0):
         info = {"count": 0, "saved": None, "format": ""}
-        name = topic.strip("/").replace("aima/hal/sensor/", "").replace("/rgb_image/compressed", "").replace("/", "_")
+        name = topic.strip("/").replace("aima/hal/sensor/", "").replace("/rgb_image/compressed", "")
+        name = name.replace("/rgb_image", "").replace("/", "_")
+
+        def on_raw(msg):
+            info["count"] += 1
+            info["format"] = msg.encoding
+            if info["saved"] is None and info["count"] >= 3 and msg.encoding.lower() in ("rgb8", "bgr8"):
+                import cv2
+                import numpy as np
+
+                arr = np.frombuffer(bytes(msg.data), np.uint8).reshape(msg.height, msg.step)[:, : msg.width * 3]
+                arr = arr.reshape(msg.height, msg.width, 3)
+                if msg.encoding.lower() == "rgb8":
+                    arr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+                path = OUT / f"{name}.jpg"
+                cv2.imwrite(str(path), arr)
+                info["saved"] = path
 
         def on_image(msg):
             info["count"] += 1
@@ -48,7 +69,8 @@ class Probe(Node):
                 info["saved"] = path
 
         qos = QoSProfile(reliability=ReliabilityPolicy.BEST_EFFORT, history=HistoryPolicy.KEEP_LAST, depth=5)
-        sub = self.create_subscription(CompressedImage, topic, on_image, qos)
+        raw = not topic.endswith("/compressed")
+        sub = self.create_subscription(Image if raw else CompressedImage, topic, on_raw if raw else on_image, qos)
         end = time.time() + seconds
         while time.time() < end:
             rclpy.spin_once(self, timeout_sec=0.05)
@@ -66,6 +88,6 @@ print(f"CAMARAS={len(topics)}")
 for topic in topics:
     name, info = node.sample(topic)
     hz = info["count"] / 3.0
-    print(f"{name:<32} {hz:5.1f} fps  foto={'si' if info['saved'] else 'no'}  topic={topic}")
+    print(f"{name:<32} {hz:5.1f} fps  foto={'si' if info['saved'] else 'no'}  {info['format']:<6} topic={topic}")
 node.destroy_node()
 rclpy.shutdown()

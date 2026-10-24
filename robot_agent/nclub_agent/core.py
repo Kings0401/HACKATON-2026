@@ -144,7 +144,7 @@ class ReceptionAgent:
             return self.state.session_id
         try:
             self.state.session_id = self.client.start_session(self.config.simulated)["id"]
-            self._say("Bienvenido a N Club. Será un placer atenderle.")
+            self._say("Hola, le damos la bienvenida a N Club.")
             if self.on_session_start:
                 self.on_session_start()
         except BackendError:
@@ -243,10 +243,12 @@ class ReceptionAgent:
         if is_phantom(text):
             return None
         return self.on_text(text, confidence, self.transcriber.name, started_at,
-                            audio=pcm if (consent and self.config.store_audio) else None)
+                            audio=pcm if (consent and self.config.store_audio) else None,
+                            speaker_audio=pcm)
 
     def on_text(self, text: str, confidence: float | None = None, engine: str = "manual",
-                started_at: str | None = None, audio: bytes | None = None) -> dict | None:
+                started_at: str | None = None, audio: bytes | None = None,
+                speaker_audio: bytes | None = None) -> dict | None:
         if not text.strip():
             return None
         with self.lock:
@@ -259,6 +261,9 @@ class ReceptionAgent:
             }
             if audio:
                 body.update(audio_wav_b64=base64.b64encode(pcm_to_wav(audio)).decode(), consent=True)
+            if speaker_audio is not None:
+                # Audio transitorio para verificar locutor; no se archiva como evidencia.
+                body["speaker_audio_wav_b64"] = base64.b64encode(pcm_to_wav(speaker_audio)).decode()
             try:
                 reply = self.client.utterance(self.state.session_id, **body)
             except BackendError:
@@ -267,6 +272,9 @@ class ReceptionAgent:
             # Tras decidir, el robot sigue respondiendo preguntas de orientación.
             if not self.state.decision or reply.get("intent") in ("UBICACION", "ESPACIOS"):
                 self._say(reply.get("speech"))
+            # VIP (rostro + voz) y regular (rostro + pregunta) se deciden sin credencial.
+            if reply.get("ready") and not self.state.decision:
+                return self._resolve()
             return reply
 
     def on_mic_state(self, state: str) -> None:

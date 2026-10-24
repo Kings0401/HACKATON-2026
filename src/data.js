@@ -1,6 +1,7 @@
 import { supabase, configurationError } from "./config.js";
 import { readDemo, writeDemo, demoBook } from "./demo.js";
 import { uid, today, isMember, canUseApp } from "./lib.js";
+import { api } from "./api.js";
 import {
   personColumns, profileFromRow, serviceFromRow, reservationFromRow,
   invitationFromRow, assignmentFromRow, eventFromRow, bookingToRow,
@@ -272,6 +273,34 @@ export async function updateProfile(id, values) {
       p_vigencia_hasta: allowed.membership_expires_at,
     }),
   );
+}
+function colombiaTimestamp(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))
+    throw new Error("Completa las fechas y horas de inicio y final.");
+  return `${value}:00-05:00`;
+}
+export async function updateAuthorizationDates(table, id, values) {
+  if (sessionState.profile?.role !== "ADMIN") throw new Error("Solo administradores.");
+  if (!["invitations", "work_assignments"].includes(table)) throw new Error("Tipo de autorización no válido.");
+  const valid_from = colombiaTimestamp(values.valid_from);
+  const valid_until = colombiaTimestamp(values.valid_until);
+  const start = Date.parse(valid_from);
+  const end = Date.parse(valid_until);
+  if (end <= start) throw new Error("La fecha final debe ser posterior a la inicial.");
+  if (end - start > 7 * 24 * 60 * 60 * 1000) throw new Error("La vigencia no puede superar 7 días.");
+  if (sessionState.mode === "demo") {
+    const demo = readDemo();
+    const row = demo[table].find((item) => item.id === id);
+    if (!row || row.status !== "active") throw new Error("La autorización ya no está activa.");
+    row.valid_from = valid_from;
+    row.valid_until = valid_until;
+    if (table === "invitations") row.visit_date = valid_from.slice(0, 10);
+    writeDemo(demo);
+    return;
+  }
+  const body = { valid_from, valid_until };
+  if (table === "invitations") return api.updateInvitationDates(id, body);
+  return api.updateExternalAssignmentDates(id, body);
 }
 export async function createVisitor(values) {
   if (sessionState.profile.role !== "ADMIN")

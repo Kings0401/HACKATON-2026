@@ -160,6 +160,10 @@ do $$ begin
     insert into storage.buckets(id, name, public, file_size_limit, allowed_mime_types)
     values ('evidencias-recepcion', 'evidencias-recepcion', false, 2000000, array['image/jpeg','audio/wav'])
     on conflict (id) do nothing;
+    insert into storage.buckets(id, name, public, file_size_limit, allowed_mime_types)
+    values ('voces-nclub', 'voces-nclub', false, 8000000, array['audio/wav'])
+    on conflict (id) do update set name=excluded.name, public=false,
+      file_size_limit=excluded.file_size_limit, allowed_mime_types=excluded.allowed_mime_types;
   end if;
 end $$;
 

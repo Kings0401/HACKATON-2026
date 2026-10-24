@@ -16,6 +16,7 @@ import {
   updateProfile,
   createVisitor,
   revoke,
+  updateAuthorizationDates,
   appendDemoEvent,
 } from "./data.js";
 import { supabase, demoEnabled, backendUrl } from "./config.js";
@@ -98,6 +99,23 @@ const home = () =>
   sessionState.profile.membership_status === "active"
     ? "admin"
     : "dashboard";
+function bogotaDateTimeInput(value) {
+  if (!value) return "";
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Bogota",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(new Date(value))
+      .map(({ type, value: part }) => [type, part]),
+  );
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+}
 function stopSync() {
   unsubscribe?.();
   unsubscribe = null;
@@ -558,6 +576,80 @@ async function updateSlots() {
 }
 const photoFields = (required) =>
   `<label>Foto del rostro<input name="photo" type="file" accept="image/*" capture="user" ${required ? "required" : ""} /></label><p class="form-hint">Rostro de frente, bien iluminado y una sola persona. Se recodifica sin metadatos y se guarda en Storage privado.</p><label class="consent-check"><input name="consent" type="checkbox" required /> El titular autorizó el uso de su foto para reconocimiento facial en la recepción del club.</label>`;
+const voiceFields = (required) =>
+  `<label>Grabación de voz<input name="voice" type="file" accept="audio/wav,.wav" ${required ? "required" : ""} /></label><button type="button" class="button outline" data-action="record-voice">${icon("mic")} Grabar muestra de 8 segundos</button><p class="form-hint" data-voice-status role="status">Puedes subir un WAV mono de 16 kHz y 16 bits o grabar una frase natural, sin música ni otras voces.</p><label class="consent-check"><input name="voice_consent" type="checkbox" required /> El titular autorizó registrar y verificar su voz para confirmar su identidad en recepción.</label>`;
+async function recordVoiceSample(button) {
+  const form = button.closest("form");
+  const input = form?.querySelector('[name="voice"]');
+  const status = button.closest("[data-sample-row]")?.querySelector("[data-voice-status]") || form?.querySelector("[data-voice-status]");
+  if (!form?.querySelector('[name="voice_consent"]').checked)
+    throw new Error("Confirma el consentimiento para grabar la muestra de voz.");
+  if (!window.isSecureContext && location.hostname !== "localhost" && location.hostname !== "127.0.0.1")
+    throw new Error("El navegador bloquea el microfono en HTTP por IP local. Abre el panel en HTTPS o en localhost, o sube un WAV mono de 16 kHz.");
+  if (!navigator.mediaDevices?.getUserMedia || !(window.AudioContext || window.webkitAudioContext))
+    throw new Error("Este navegador no admite grabar audio. Sube un archivo WAV mono de 16 kHz.");
+  button.disabled = true;
+  status.textContent = "Solicitando acceso al micrófono…";
+  let stream;
+  let context;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    });
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    context = new AudioContextClass({ sampleRate: 16000 });
+    await context.resume();
+    const source = context.createMediaStreamSource(stream);
+    const processor = context.createScriptProcessor(4096, 1, 1);
+    const mute = context.createGain();
+    mute.gain.value = 0;
+    const chunks = [];
+    processor.onaudioprocess = (event) => chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+    source.connect(processor);
+    processor.connect(mute);
+    mute.connect(context.destination);
+    status.textContent = "Grabando. Di una frase natural con voz clara…";
+    await new Promise((resolve) => setTimeout(resolve, 8000));
+    processor.disconnect();
+    source.disconnect();
+    mute.disconnect();
+    const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const captured = new Float32Array(total);
+    let offset = 0;
+    for (const chunk of chunks) { captured.set(chunk, offset); offset += chunk.length; }
+    const rms = Math.sqrt(captured.reduce((sum, sample) => sum + sample * sample, 0) / Math.max(1, captured.length));
+    if (rms < 0.003) throw new Error("No se oyó suficiente voz. Acércate al micrófono e inténtalo de nuevo.");
+    const targetRate = 16000;
+    const length = Math.floor(captured.length * targetRate / context.sampleRate);
+    const wav = new ArrayBuffer(44 + length * 2);
+    const view = new DataView(wav);
+    const write = (at, value) => [...value].forEach((char, i) => view.setUint8(at + i, char.charCodeAt(0)));
+    write(0, "RIFF"); view.setUint32(4, 36 + length * 2, true); write(8, "WAVE");
+    write(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true); view.setUint32(24, targetRate, true);
+    view.setUint32(28, targetRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+    write(36, "data"); view.setUint32(40, length * 2, true);
+    for (let i = 0; i < length; i++) {
+      const position = i * context.sampleRate / targetRate;
+      const left = Math.floor(position);
+      const fraction = position - left;
+      const sample = (captured[left] || 0) * (1 - fraction) + (captured[Math.min(left + 1, captured.length - 1)] || 0) * fraction;
+      view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, sample)) * (sample < 0 ? 32768 : 32767), true);
+    }
+    const file = new File([wav], "muestra-voz.wav", { type: "audio/wav" });
+    if (input) {
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      input.files = transfer.files;
+    }
+    status.textContent = "Muestra grabada y lista (WAV mono, 16 kHz).";
+    return file;
+  } finally {
+    stream?.getTracks().forEach((track) => track.stop());
+    await context?.close();
+    button.disabled = false;
+  }
+}
 function appendPersonFields(form, profile = {}, required = false) {
   const container = form.querySelector(".form-grid") || form;
   const type = profile.document_type || "";
@@ -579,10 +671,9 @@ function openMember() {
     "Nuevo miembro.",
     `<form id="member-form">${backendNotice()}<label>Nombre completo<input name="nombre" minlength="3" maxlength="100" required autocomplete="off" /></label><label>Membresía<select name="categoria"><option value="REGULAR">Miembro regular</option><option value="VIP">VIP · Black</option></select></label><label>Tipo de documento<select name="tipo_documento" required><option value="CC">Cédula de ciudadanía</option><option value="CE">Cédula de extranjería</option><option value="PASAPORTE">Pasaporte</option><option value="OTRO">Otro</option></select></label><label>Número de documento<input name="numero_documento" minlength="5" maxlength="30" required autocomplete="off" /></label><label>Teléfono<input name="telefono" type="tel" maxlength="30" autocomplete="tel" /></label><label>Correo (opcional)<input name="email" type="email" maxlength="120" autocomplete="email" /></label><label>Vigente hasta<input name="vigencia_hasta" type="date" min="${today()}" value="${until}" required /></label>${photoFields(false)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("check")} Crear miembro</button></form>`,
   );
-  const photo = document.querySelector('#member-form [name="photo"]');
-  const consent = document.querySelector('#member-form [name="consent"]');
-  consent.required = false;
-  photo.addEventListener("change", () => (consent.required = Boolean(photo.files.length)));
+  const form = document.querySelector("#member-form");
+  form.querySelector('[name="photo"]').required = true;
+  form.insertAdjacentHTML("beforeend", voiceFields(true));
 }
 function openPhoto(id, name) {
   modal(
@@ -590,8 +681,43 @@ function openPhoto(id, name) {
     `<form id="photo-form" data-id="${e(id)}">${backendNotice()}<p class="confirm-copy">${e(name)}: la foto se usará para reconocer su rostro en recepción. El acceso seguirá dependiendo de su credencial y membresía.</p>${photoFields(true)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("camera")} Subir foto</button></form>`,
   );
 }
+function openVoice(id, name) {
+  modal(
+    "Voz de reconocimiento.",
+    `<form id="voice-form" data-id="${e(id)}">${backendNotice()}<p class="confirm-copy">${e(name)}: se guardará una muestra en Storage privado y se comparará en recepción. El audio de las visitas solo se conserva como evidencia con consentimiento adicional y STORE_EVIDENCE activado.</p>${voiceFields(true)}<p class="form-error" role="alert"></p><button class="button primary full">${icon("mic")} Registrar voz</button></form>`,
+  );
+}
+const enrollmentPrompts = (name) => [
+  `Mi nombre es ${name}. Soy parte de N Club y hoy vengo a disfrutar de mis actividades.`,
+  "Por favor, ayudenme a confirmar mi identidad para continuar con mi visita.",
+  "Estoy en recepcion de N Club para validar mi membresia y dirigirme a mi actividad.",
+];
+const verificationPrompt = "Quisiera confirmar mi ingreso y consultar mi proxima actividad en el club.";
+function renderBiometrics(id, name, data = { photos: [], voices: [] }) {
+  const photoCards = data.photos.map((photo) => `<a class="biometric-photo" href="${e(photo.url)}" target="_blank" rel="noreferrer"><img src="${e(photo.url)}" alt="Foto de reconocimiento de ${e(name)}" loading="lazy"/><span>${e(photo.name)}</span></a>`).join("");
+  const voiceBySample = new Map(data.voices.filter((voice) => voice.sample_id).map((voice) => [voice.sample_id, voice]));
+  const samples = enrollmentPrompts(name).map((phrase, index) => {
+    const sampleId = index + 1;
+    const voice = voiceBySample.get(sampleId);
+    return `<article class="voice-sample" data-sample-row="${sampleId}"><div><span class="eyebrow">Frase ${sampleId} ${voice ? "· Guardada" : "· Pendiente"}</span><p>${e(phrase)}</p></div>${voice ? `<audio controls preload="none" src="${e(voice.url)}">Audio no disponible</audio>` : ""}<p class="form-hint" data-voice-status role="status">${voice ? "Muestra lista para el reconocimiento." : "Lee la frase con voz natural, sin musica ni otras voces."}</p><button type="button" class="button outline" data-action="record-enrollment-voice" data-id="${e(id)}" data-name="${e(name)}" data-sample="${sampleId}">${icon("mic")} ${voice ? "Volver a grabar" : "Grabar frase"}</button></article>`;
+  }).join("");
+  const legacy = data.voices.filter((voice) => !voice.sample_id).map((voice) => `<article class="voice-sample"><span class="eyebrow">Muestra anterior</span><audio controls preload="none" src="${e(voice.url)}">Audio no disponible</audio><small>${e(voice.name)}</small></article>`).join("");
+  modal("Biometria de persona", `<div class="biometric-panel" data-persona-id="${e(id)}" data-persona-name="${e(name)}"><p class="confirm-copy">${e(name)} · La foto y las tres frases se guardan en Storage privado. La cuarta frase sirve para probar la coincidencia y no se conserva.</p><section class="biometric-block"><div class="biometric-heading"><h3>Foto de reconocimiento</h3><button type="button" class="button outline" data-action="upload-photo" data-id="${e(id)}" data-name="${e(name)}">${icon("camera")} Agregar foto</button></div><div class="biometric-photos">${photoCards || `<p class="form-hint">Aun no hay una foto registrada.</p>`}</div></section><form class="biometric-form" data-id="${e(id)}"><label class="consent-check"><input name="voice_consent" type="checkbox" required /> La persona autorizo registrar y verificar su voz.</label><section class="biometric-block"><div class="biometric-heading"><h3>Entrenamiento de voz</h3><span>${voiceBySample.size}/3 frases</span></div><p class="form-hint">Graba las tres frases, una por una. Cada audio se usa como referencia para reconocer la voz en recepcion.</p><div class="voice-samples">${samples}${legacy}</div></section><section class="biometric-block" data-sample-row="test"><div class="biometric-heading"><h3>Probar reconocimiento</h3></div><p class="voice-prompt">${e(verificationPrompt)}</p><input type="file" name="voice" accept="audio/wav,.wav" hidden/><p class="form-hint" data-voice-status role="status">Graba la frase para comparar con las muestras guardadas.</p><button type="button" class="button outline" data-action="record-test-voice">${icon("mic")} Grabar frase de prueba</button><button type="button" class="button primary full" data-action="verify-voice" data-id="${e(id)}">${icon("scan-eye")} Reconocer voz</button><div class="voice-result" data-voice-result role="status"></div></section></form></div>`, true);
+}
+async function openBiometrics(id, name) {
+  try {
+    renderBiometrics(id, name, await api.personaBiometrics(id));
+  } catch (err) {
+    toast(`No se pudo cargar la biometria: ${readableError(err)}`, "error");
+  }
+}
+async function refreshBiometrics(id, name) {
+  renderBiometrics(id, name, await api.personaBiometrics(id));
+}
+
 async function submitMember(form, values) {
   const file = form.querySelector('[name="photo"]').files[0];
+  const voice = form.querySelector('[name="voice"]').files[0];
   const created = await api.createMember({
     nombre: values.nombre.trim(),
     categoria: values.categoria,
@@ -601,15 +727,15 @@ async function submitMember(form, values) {
     tipo_documento: values.tipo_documento,
     numero_documento: values.numero_documento,
   });
-  let photoMessage = "";
-  if (file) {
-    try {
-      const result = await api.uploadPhoto(created.persona_id, await photoToJpeg(file));
-      photoMessage = result.enrolled ? " Rostro registrado." : " La foto no se pudo registrar.";
-    } catch (err) {
-      photoMessage = ` La foto no se registró: ${readableError(err)}`;
-    }
-  }
+  const feedback = [];
+  try {
+    const result = await api.uploadPhoto(created.persona_id, await photoToJpeg(file));
+    feedback.push(result.enrolled ? "rostro registrado" : "rostro pendiente");
+  } catch (err) { feedback.push(`rostro pendiente: ${readableError(err)}`); }
+  try {
+    await api.uploadVoice(created.persona_id, voice);
+    feedback.push("voz registrada para verificación");
+  } catch (err) { feedback.push(`voz pendiente: ${readableError(err)}`); }
   if (sessionState.mode === "demo") {
     // Copia visible en la lista DEMO; la autoridad es el backend en memoria.
     const d = readDemo();
@@ -631,7 +757,8 @@ async function submitMember(form, values) {
   }
   await reload();
   await showQR(created.credential, created.nombre);
-  toast(`Miembro ${created.persona_id} creado.${photoMessage}`, photoMessage.includes("no") ? "error" : "success");
+  const biometricFailure = feedback.some((item) => item.includes("pendiente"));
+  toast(`Miembro ${created.persona_id} creado: ${feedback.join("; ")}.`, biometricFailure ? "error" : "success");
 }
 function openVisitor(type) {
   const now = dateAfter();
@@ -921,6 +1048,76 @@ document.addEventListener("click", async (event) => {
     toggleLabMic(button);
     return;
   }
+  if (action === "record-voice") {
+    try {
+      await recordVoiceSample(button);
+    } catch (err) {
+      const status = button.closest("form")?.querySelector("[data-voice-status]");
+      if (status) status.textContent = readableError(err);
+      toast(readableError(err), "error");
+      button.disabled = false;
+    }
+    return;
+  }
+  if (action === "record-enrollment-voice") {
+    const form = button.closest("form");
+    const row = button.closest("[data-sample-row]");
+    const status = row?.querySelector("[data-voice-status]");
+    try {
+      if (!form?.querySelector('[name="voice_consent"]')?.checked) throw new Error("Confirma el consentimiento antes de grabar.");
+      const file = await recordVoiceSample(button);
+      status.textContent = "Guardando muestra privada…";
+      await api.uploadVoice(button.dataset.id, file, Number(button.dataset.sample));
+      await refreshBiometrics(button.dataset.id, button.dataset.name);
+      toast(`Frase ${button.dataset.sample} guardada para el reconocimiento.`);
+    } catch (err) {
+      if (status) status.textContent = readableError(err);
+      toast(readableError(err), "error");
+      button.disabled = false;
+    }
+    return;
+  }
+  if (action === "record-test-voice") {
+    try {
+      const form = button.closest("form");
+      if (!form?.querySelector('[name="voice_consent"]')?.checked) throw new Error("Confirma el consentimiento antes de grabar.");
+      await recordVoiceSample(button);
+    } catch (err) {
+      const status = button.closest("[data-sample-row]")?.querySelector("[data-voice-status]");
+      if (status) status.textContent = readableError(err);
+      toast(readableError(err), "error");
+      button.disabled = false;
+    }
+    return;
+  }
+  if (action === "verify-voice") {
+    const panel = button.closest(".biometric-panel");
+    const form = button.closest("form");
+    const file = form?.querySelector('[name="voice"]')?.files[0];
+    const result = form?.querySelector("[data-voice-result]");
+    try {
+      if (!form?.querySelector('[name="voice_consent"]')?.checked) throw new Error("Confirma el consentimiento antes de hacer la prueba.");
+      if (!file) throw new Error("Graba primero la frase de prueba.");
+      button.disabled = true;
+      result.textContent = "Comparando la voz con las muestras guardadas…";
+      const comparison = await api.verifyVoice(panel.dataset.personaId, file);
+      result.textContent = comparison.matched
+        ? `Coincidencia de voz: reconocida (${comparison.matches}/${comparison.samples}; similitud ${comparison.similarity.toFixed(2)}).`
+        : `Sin coincidencia suficiente (${comparison.matches}/${comparison.samples}; similitud ${comparison.similarity.toFixed(2)}).`;
+      result.classList.toggle("is-match", comparison.matched);
+      result.classList.toggle("is-no-match", !comparison.matched);
+    } catch (err) {
+      if (result) result.textContent = readableError(err);
+      toast(readableError(err), "error");
+    } finally {
+      button.disabled = false;
+    }
+    return;
+  }
+  if (action === "biometric-add-photo") {
+    openPhoto(button.dataset.id, button.dataset.name);
+    return;
+  }
   if (action === "generate-qr") {
     await refreshQr({ manual: true });
     return;
@@ -991,7 +1188,22 @@ document.addEventListener("click", async (event) => {
     }
     if (action === "new-visitor") openVisitor(button.dataset.type);
     if (action === "new-member") openMember();
+    if (action === "edit-authorization") {
+      const table = button.dataset.table;
+      const rows = data?.[table];
+      const row = rows?.find((item) => item.id === button.dataset.id);
+      if (!row || !["invitations", "work_assignments"].includes(table))
+        throw new Error("No se encontró la autorización para editar.");
+      const person = data.profiles.find(
+        (profile) => profile.id === (row.guest_id || row.worker_id),
+      );
+      modal(
+        "Editar vigencia.",
+        `<form id="authorization-dates-form" data-id="${e(row.id)}" data-table="${e(table)}"><p class="confirm-copy">Ajusta las fechas de ${e(person?.full_name || "la autorización")}. Puedes usar fechas pasadas para probar el reconocimiento de vigencias vencidas.</p><div class="form-grid"><label>Desde (Colombia)<input type="datetime-local" name="valid_from" value="${e(bogotaDateTimeInput(row.valid_from))}" required/></label><label>Hasta (Colombia)<input type="datetime-local" name="valid_until" value="${e(bogotaDateTimeInput(row.valid_until))}" required/></label></div><p class="form-error" role="alert"></p><button class="button primary full">${icon("check")} Guardar vigencia</button></form>`,
+      );
+    }
     if (action === "upload-photo") openPhoto(button.dataset.id, button.dataset.name);
+    if (action === "upload-voice") await openBiometrics(button.dataset.id, button.dataset.name);
     if (action === "visitor-qr") {
       const backendMember = data.profiles.find((p) => p.id === button.dataset.id)?.backend;
       const result = backendMember
@@ -1052,10 +1264,12 @@ document.addEventListener("submit", async (event) => {
       "login-form",
       "booking-form",
       "visitor-form",
+      "authorization-dates-form",
       "user-form",
       "access-form",
       "member-form",
       "photo-form",
+      "voice-form",
       "lab-text-form",
       "lab-token-form",
     ].includes(form.id)
@@ -1110,6 +1324,15 @@ document.addEventListener("submit", async (event) => {
           await showQR(result, payload.name);
           toast("Registro creado y credencial temporal generada.");
         }
+        if (form.id === "authorization-dates-form") {
+          await updateAuthorizationDates(form.dataset.table, form.dataset.id, {
+            valid_from: values.valid_from,
+            valid_until: values.valid_until,
+          });
+          closeModal();
+          await reload();
+          toast("Vigencia actualizada.");
+        }
         if (form.id === "lab-token-form") {
           memoryToken.set(values.token);
           await api.labStatus();
@@ -1126,6 +1349,11 @@ document.addEventListener("submit", async (event) => {
           const result = await api.uploadPhoto(form.dataset.id, blob);
           closeModal();
           toast(result.enrolled ? "Foto registrada: ya se puede reconocer el rostro." : "Foto guardada, pero el rostro no se pudo registrar.");
+        }
+        if (form.id === "voice-form") {
+          await api.uploadVoice(form.dataset.id, form.querySelector('[name="voice"]').files[0]);
+          closeModal();
+          toast("Voz registrada para verificación de identidad.");
         }
         if (form.id === "access-form") {
           if (

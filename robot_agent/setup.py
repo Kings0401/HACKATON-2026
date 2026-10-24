@@ -15,14 +15,16 @@ setup(
         (f"share/{package}/launch", glob("launch/*.py")),
     ],
     install_requires=["setuptools", "httpx", "numpy"],
+    extras_require={"booster": ["boosteros"]},
     zip_safe=True,
-    description="Agente de recepción N Club para AGIBOT X2 Ultra",
+    description="Agente de recepción N Club para AGIBOT X2 Ultra y BoosterOS",
     license="Proprietary",
     entry_points={
         "console_scripts": [
             "reception_agent = nclub_agent.ros_node:main",
             "reception_sim = nclub_agent.sim:main",
             "nclub_say = nclub_agent.ros_node:say_main",
+            "reception_agent_booster = nclub_agent.booster_camera:main",
         ],
     },
 )

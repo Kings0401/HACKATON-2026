@@ -28,12 +28,15 @@ from .backend_client import BackendClient
 from .core import AgentConfig, LogSpeaker, ReceptionAgent
 
 VISION = Path(__file__).resolve().parents[2] / "vision"
+# (flujo, persona, frases del visitante, credencial). Cada categoría usa su factor:
+# VIP rostro + voz, regular rostro + nombre, documento y voz (sin credencial),
+# invitado / personal / proveedor rostro + QR (invitación, carné con turno, orden).
 SCENARIOS = [
-    ("VIP", "VIP001", "Buenos días, soy socia VIP", "NFC-VIP-001"),
-    ("REGULAR", "REG001", "Hola, tengo una reserva de golf", "APP-REG-001"),
-    ("INVITADO", "INV001", "Soy invitada de Valeria Torres", "QR-INV-001"),
-    ("PERSONAL", "EMP001", "Buenos días, vengo a mi turno", "CAR-EMP-001"),
-    ("PROVEEDOR", "EXT001", "Vengo por una orden de mantenimiento", "QR-EXT-001"),
+    ("VIP", "VIP001", ["Quiero ir al VIP Lounge"], None),
+    ("REGULAR", "REG001", ["Soy Santiago Ruiz, termina en 4567", "Tengo una reserva de golf"], None),
+    ("INVITADO", "INV001", ["Soy invitada de Valeria Torres"], "QR-INV-001"),
+    ("PERSONAL", "EMP001", ["Muy bien, gracias. Aquí tiene mi carné"], "CAR-EMP-001"),
+    ("PROVEEDOR", "EXT001", ["Claro, aquí está la orden de servicio"], "QR-EXT-001"),
 ]
 
 
@@ -44,7 +47,8 @@ def probe_image(persona_id: str) -> np.ndarray | None:
 
 
 def run(backend: str, robot_key: str, robot_id: str = "robot-sim", with_faces: bool = True,
-        client: BackendClient | None = None, clock=None) -> list[dict]:
+        client: BackendClient | None = None, clock=None, voices: dict[str, bytes] | None = None) -> list[dict]:
+    """voices: PCM 16 kHz por persona para la verificación de locutor (sin ella la VIP va a revisión)."""
     engine = None
     if with_faces and (VISION / "dataset" / "registro").is_dir():
         engine = FaceEngine()
@@ -56,16 +60,19 @@ def run(backend: str, robot_key: str, robot_id: str = "robot-sim", with_faces: b
         encode_jpeg=encode_jpeg, clock=clock or (lambda: t[0]),
     )
     results = []
-    for label, persona_id, phrase, credential in SCENARIOS:
+    for label, persona_id, phrases, credential in SCENARIOS:
         t[0] += 1
         face = probe_image(persona_id) if engine else None
         if face is not None:
             for _ in range(3):  # la votación necesita varios fotogramas coincidentes
                 agent.on_frame(face)
                 t[0] += 0.3
-        agent.on_text(phrase, 0.9, "simulado")
-        t[0] += 1
-        decision = agent.on_frame(encode_qr(credential))
+        for phrase in phrases:
+            agent.on_text(phrase, 0.9, "simulado", speaker_audio=(voices or {}).get(persona_id))
+            t[0] += 1
+        decision = agent.state.decision or (agent.on_frame(encode_qr(credential)) if credential else None)
+        if decision is None and agent.state.session_id:
+            decision = agent._resolve()  # sin factor completo: el backend decide con lo que tiene
         results.append({"scenario": label, **(decision or {"access": "sin decisión"})})
         t[0] += 30  # el visitante se retira
         agent.tick()

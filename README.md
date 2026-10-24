@@ -131,6 +131,8 @@ Con Supabase real: ejecutar `supabase/recepcion_robot.sql` después de `nclub_co
 
 **Fotos para reconocimiento**: en Admin → Personas, "Nuevo miembro" crea un miembro VIP o regular con su membresía, una foto opcional y un QR seguro. El icono de cámara de cada fila sube una foto (exige consentimiento y exactamente un rostro; se recodifica sin metadatos y se guarda en el bucket privado `rostros-nclub`). La foto queda disponible al instante para el reconocimiento; el acceso sigue exigiendo credencial y membresía vigente.
 
+**Simulación MuJoCo**: [simulation/](simulation/README.md) recrea la recepción con el modelo oficial del AGIBOT X2 Ultra. El agente real reconoce rostros y QR en el render de la cámara de la frente, y el backend en memoria decide y traza la ruta de las cinco categorías. Genera un video con HUD o abre el visor interactivo.
+
 Documentación: [FASTAPI.md](docs/FASTAPI.md) · [ROBOT_PASO_A_PASO.md](docs/ROBOT_PASO_A_PASO.md) (programar el robot físico) · [ROBOT.md](docs/ROBOT.md) (AimDK) · [VISION.md](docs/VISION.md) (calibración y causa de los 404) · [SEGURIDAD.md](docs/SEGURIDAD.md) (rotación de claves) · [VALIDATION.md](docs/VALIDATION.md).
 
 ## Estado del MVP
@@ -163,6 +165,7 @@ src/
   styles.css        Identidad visual
   responsive.css    Diseño para teléfono y adaptación desktop
 supabase/           Migración, seed y asociación de cuentas
+simulation/         Simulación MuJoCo de la clasificación (X2 Ultra oficial)
 docs/               Contrato FastAPI y procedimiento de validación
 tests/              Pruebas de dominio y permisos de escenarios
 public/images/      Fotografías locales para la demostración

@@ -48,12 +48,18 @@ def test_device_camera_recognizes_face_then_qr_decides(lab_client, admin):
     assert face["faces"][0]["persona_id"] == "VIP001" and face["faces"][0]["similarity"] >= 0.62
     assert any("Valeria" in s for s in face["speech"])  # saludo personalizado; aún sin acceso
     assert face["decision"] is None
-    voice = client.post("/admin/lab/text", json={"text": "Buenos días, soy socia VIP"}, headers=admin).json()
-    assert voice["intent"] == "VIP" and voice["speech"]
-    qr = client.post("/admin/lab/frame", content=jpeg(encode_qr("NFC-VIP-001")),
+    # El navegador envía solo texto: sin voz del locutor la VIP no se autoriza.
+    voice = client.post("/admin/lab/text", json={"text": "Quiero ir al VIP Lounge"}, headers=admin).json()
+    assert voice["intent"] == "VOZ_PENDIENTE" and voice["decision"] is None
+    client.post("/admin/lab/reset", headers=admin)
+    # Personal interno: rostro + carné (QR) dentro del horario del turno.
+    for _ in range(2):
+        client.post("/admin/lab/frame", content=jpeg(DATASET / "pruebas" / "EMP001" / "foto3.png"),
+                    headers={**admin, "Content-Type": "image/jpeg"})
+    qr = client.post("/admin/lab/frame", content=jpeg(encode_qr("CAR-EMP-001")),
                      headers={**admin, "Content-Type": "image/jpeg"}).json()
-    assert qr["decision"]["decision"] == "AUTORIZADO" and qr["decision"]["robot_target"] == "robot2"
-    assert qr["decision"]["route"]["destination"] == "lounge_vip"
+    assert qr["decision"]["decision"] == "AUTORIZADO" and qr["decision"]["visitor_id"] == "EMP001"
+    assert qr["decision"]["route"]["destination"] == "oficina_admin"
     monitor = client.get("/robot/monitor", headers=admin).json()
     assert monitor["device_camera_active"] and not monitor["agibot_connected"]
     assert monitor["events"][0]["robot_name"] == "camara-dispositivo"
@@ -61,16 +67,14 @@ def test_device_camera_recognizes_face_then_qr_decides(lab_client, admin):
 
 @needs_faces
 def test_new_member_photo_enables_recognition_and_access(lab_client, admin):
-    from nclub_vision.qr import encode_qr
-
     client, repo = lab_client
-    created = client.post("/admin/members", json={"nombre": "Ana Prueba", "categoria": "VIP",
+    created = client.post("/admin/members", json={"nombre": "Ana Prueba", "categoria": "REGULAR",
                                                   "vigencia_hasta": "2027-12-31", "tipo_documento": "CC",
                                                   "numero_documento": "10000001"}, headers=admin)
     assert created.status_code == 200, created.text
     member = created.json()
     pid = member["persona_id"]
-    assert member["credential"]["token"] and repo.membership(pid)["nivel"] == "VIP"
+    assert member["credential"]["token"] and repo.membership(pid)["nivel"] == "REGULAR"
     # Una persona nueva: se reutiliza el rostro de prueba de EXT001 retirándolo de la galería.
     lab = client.app.state.ctx.gallery
     lab.get().gallery.features.pop("EXT001")
@@ -84,10 +88,10 @@ def test_new_member_photo_enables_recognition_and_access(lab_client, admin):
         seen = client.post("/admin/lab/frame", content=jpeg(DATASET / "pruebas" / "EXT001" / "foto3.png"),
                            headers={**admin, "Content-Type": "image/jpeg"}).json()
     assert seen["faces"][0]["persona_id"] == pid
-    decided = client.post("/admin/lab/frame", content=jpeg(encode_qr("nclub:v1:" + member["credential"]["token"])),
-                          headers={**admin, "Content-Type": "image/jpeg"}).json()
-    assert decided["decision"]["decision"] == "AUTORIZADO" and decided["decision"]["visitor_id"] == pid
-    assert "facial" in decided["decision"]["methods"]
+    # Socio regular: rostro + nombre, documento y voz. El navegador solo envía texto, así que la voz queda pendiente.
+    assert any("nombre completo" in s and "cuatro dígitos" in s for s in seen["speech"])
+    reply = client.post("/admin/lab/text", json={"text": "Ana Prueba, termina en 0001"}, headers=admin).json()
+    assert reply["decision"] is None and any("voz" in s for s in reply["speech"])
 
 
 @needs_faces

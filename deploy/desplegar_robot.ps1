@@ -3,7 +3,7 @@
 
   Uso (PowerShell, desde la carpeta del proyecto):
     .\deploy\desplegar_robot.ps1                    # sube, instala (1.ª vez) e inicia con la cámara de la frente
-    .\deploy\desplegar_robot.ps1 -Camara rgbd       # otra cámara: frente | estereo | rgbd | trasera | /topic
+    .\deploy\desplegar_robot.ps1 -Camara rgbd       # otra cámara: frente (centro) | centro | estereo | rgbd | trasera | /topic
     .\deploy\desplegar_robot.ps1 -ProbarCamaras     # trae una foto de cada cámara a deploy\capturas
     .\deploy\desplegar_robot.ps1 -Gestos            # además saluda con el brazo
     .\deploy\desplegar_robot.ps1 -Reinstalar        # fuerza reinstalar dependencias

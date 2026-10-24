@@ -61,7 +61,10 @@ def test_five_category_closings(client, robot):
 
     categories = {c for c, _ in CATEGORY_CLOSING}
     assert categories == {"VIP", "REGULAR", "INVITADO", "PERSONAL_INTERNO", "TRABAJADOR_EXTERNO"}
-    decision, _ = session(client, robot, "QR-EXT-001")
+    sid = client.post("/robot/sessions", json={"robot_id": "robot1"}, headers=robot).json()["id"]
+    client.post(f"/robot/sessions/{sid}/faces", json={"persona_id": "EXT001", "similarity": 0.8}, headers=robot)
+    client.post(f"/robot/sessions/{sid}/credentials", json={"payload": "QR-EXT-001"}, headers=robot)
+    decision = client.post(f"/robot/sessions/{sid}/resolve", headers=robot).json()
     assert "acompañante" in decision["speech"] and "proveedores" in decision["speech"]
 
 

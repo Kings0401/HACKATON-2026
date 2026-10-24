@@ -13,6 +13,9 @@ Ninguno de estos archivos está versionado: los ZIP, `backend/.env`, `vision/dat
 
 ## Rotación
 
+Las muestras de voz se guardan en `voces-nclub`, un bucket privado accesible al backend. El audio para verificar al locutor se procesa en memoria; solo se persiste como evidencia con consentimiento adicional y `STORE_EVIDENCE=true`.
+El umbral inicial de locutor es `SPEAKER_THRESHOLD=0.25` (coseno); puede calibrarse con grabaciones consentidas de las condiciones reales del club.
+
 1. **Secret key de Supabase**: Dashboard → Project Settings → API Keys → *Secret keys* → crear una nueva → actualizar `backend/.env` → reiniciar FastAPI → **eliminar la clave anterior**. Si se usaba la `service_role` legada (JWT), deshabilite las claves legadas.
 2. **ROBOT_API_KEY**: `python -c "import secrets; print(secrets.token_urlsafe(32))"` → actualizar `backend/.env` y la variable `NCLUB_ROBOT_KEY` del agente → reiniciar ambos. Nunca la escriba en YAML, en el frontend ni en Git.
 3. **STREAM_SECRET**: si se fija, use otro valor aleatorio. Al rotarlo, los streams abiertos dejan de ser válidos en menos de 2 minutos.

@@ -10,6 +10,8 @@
 
 El bloque `CREATE TABLE personas` estaba repetido en el SQL original. No hace falta volver a ejecutar ese bloque ni borrar ninguna tabla. `nclub_completo.sql` reutiliza las tablas existentes y agrega lo que falta. La categoría `ADMIN` permite gestionar el club y no se usa para decidir un ingreso físico.
 
+La recepción usa también el bucket privado `voces-nclub` para muestras de voz con consentimiento. VIP y REGULAR requieren rostro y coincidencia de locutor para autorizar; instala `backend/requirements.txt` para cargar SpeechBrain ECAPA-TDNN. El audio para verificar al locutor se procesa en memoria; solo se guarda como evidencia si existe consentimiento adicional y `STORE_EVIDENCE=true`.
+
 ## Acceso y datos existentes
 
 - Las altas de miembros, invitados, personal y proveedores piden tipo y numero de documento. El numero se normaliza y es unico en `personas`; una persona invitada con invitacion vigente no puede recibir una segunda invitacion activa. Las autorizaciones anteriores se conservan y el panel muestra la mas reciente por persona.

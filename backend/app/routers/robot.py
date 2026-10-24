@@ -140,6 +140,7 @@ def add_utterance(session_id: str, body: Utterance, c: Context = Depends(ctx)):
         return c.reception.add_utterance(
             _session(c, session_id), body.text, body.language, body.confidence, body.engine,
             body.started_at, body.ended_at, body.audio_wav_b64, body.consent,
+            body.speaker_audio_wav_b64,
         )
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error

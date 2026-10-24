@@ -9,6 +9,10 @@ insert into public.personas(id,nombre,categoria,grupo_facial,tipo_credencial,cod
 ('EXT001','Laura Pérez','TRABAJADOR_EXTERNO','non_member','QR','QR-EXT-001'),
 ('ADMIN001','Administración N Club','ADMIN','non_member','CUENTA','ADMIN-001')
 on conflict do nothing;
+-- Documento demo del socio regular (el robot pregunta sus últimos cuatro dígitos); solo si está vacío.
+update public.personas set tipo_documento='CC', numero_documento='1020304567'
+where id='REG001' and numero_documento is null
+  and not exists(select 1 from public.personas o where o.tipo_documento='CC' and o.numero_documento='1020304567');
 insert into public.membresias(persona_id,nivel,estado,vigencia_hasta)
 select * from (values
 ('VIP001','VIP','ACTIVA',now()+interval '180 days'),

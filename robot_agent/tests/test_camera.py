@@ -43,3 +43,13 @@ def test_named_presets_and_explicit_topic():
     assert choose(REAL_X2, "estereo") == f"{S}/stereo_head_front_left/rgb_image/compressed"
     assert choose(REAL_X2, "/mi/topic/compressed") == "/mi/topic/compressed"
     assert choose([], "rgbd") == f"{S}/rgbd_head_front/rgb_image/compressed"  # sin descubrimiento
+
+
+def test_frente_prefers_front_center_camera():
+    choose = pick()
+    center = f"{S}/rgb_head_front_center/rgb_image"
+    # Cámara elegida por N Club: gana aunque solo exista sin comprimir.
+    assert choose(REAL_X2 + [center], "frente") == center
+    assert choose(REAL_X2 + [center, center + "/compressed"], "frente") == center + "/compressed"
+    assert choose(REAL_X2 + [center], "centro") == center
+    assert choose([], "frente") == center  # sin descubrimiento

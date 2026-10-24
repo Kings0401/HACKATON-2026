@@ -30,7 +30,9 @@ def demo_tables(now: datetime | None = None) -> dict[str, list[dict]]:
     return {
         "personas": [
             persona("VIP001", "Valeria Torres", "VIP", "member", "NFC", "NFC-VIP-001"),
-            persona("REG001", "Santiago Ruiz", "REGULAR", "member", "APP", "APP-REG-001"),
+            # El socio regular confirma su identidad con los últimos cuatro dígitos del documento.
+            {**persona("REG001", "Santiago Ruiz", "REGULAR", "member", "APP", "APP-REG-001"),
+             "tipo_documento": "CC", "numero_documento": "1020304567"},
             persona("INV001", "Camila López", "INVITADO", "non_member", "QR", "QR-INV-001"),
             persona("EMP001", "Daniel Moreno", "PERSONAL_INTERNO", "non_member", "CARNET", "CAR-EMP-001"),
             persona("EXT001", "Laura Pérez", "TRABAJADOR_EXTERNO", "non_member", "QR", "QR-EXT-001"),
@@ -80,6 +82,7 @@ class MemoryRepository:
         self.faces_dir = Path(faces_dir) if faces_dir else None
         self.files: dict[tuple[str, str], bytes] = {}
         self.uploaded_faces: dict[tuple[str, str], bytes] = {}
+        self.uploaded_voices: dict[tuple[str, str], bytes] = {}
         self.broadcasts: list[tuple[str, str, dict]] = []
         self.admin_token = admin_token
         self.fail_tables: set[str] = set()  # para probar persistencia fallida
@@ -183,6 +186,18 @@ class MemoryRepository:
         if not path.is_file():
             raise StorageNotFound(name)
         return path.read_bytes()
+
+    def voice_files(self, persona_id):
+        return sorted(name for (pid, name) in self.uploaded_voices if pid == persona_id)
+
+    def download_voice(self, persona_id, name):
+        try:
+            return self.uploaded_voices[(persona_id, name)]
+        except KeyError as error:
+            raise StorageNotFound(name) from error
+
+    def upload_voice(self, persona_id, name, content, mime):
+        self.uploaded_voices[(persona_id, name)] = bytes(content)
 
     def upload_face(self, persona_id, name, content, mime):
         # Solo en memoria: nunca escribe en vision/dataset.

@@ -53,13 +53,13 @@ Para hacerlo por partes (tres ventanas): `.\deploy\iniciar_backend.ps1`, `npm ru
 
 ## Cámara
 
-El robot usa por defecto la cámara **de la frente** (`-Camara frente`). Al arrancar revisa qué cámaras publica el robot y elige en este orden: la RGB frontal de interacción (si el firmware la publica), la estéreo frontal izquierda y por último la RGB-D. El registro muestra cuál eligió (`status.sh`: «Cámara elegida»).
+El robot usa por defecto la cámara **de la frente** (`-Camara frente`): la RGB frontal central, `/aima/hal/sensor/rgb_head_front_center/rgb_image`, que es la que N Club eligió para reconocer personas. Si existe su versión `/compressed` (JPEG) se usa esa, porque genera menos tráfico; si no, la imagen sin comprimir (`rgb8` o `bgr8`). Si el firmware no publica esa cámara, elige en este orden: la de interacción, la estéreo frontal izquierda y por último la RGB-D. El registro muestra cuál eligió (`status.sh`: «Cámara elegida»). Para forzarla: `-Camara centro`.
 
 Con el firmware que tenía el robot el 24-10-2026 no aparecía una cámara de interacción aparte, así que "frente" eligió la **estéreo frontal**. Para confirmar con sus propios ojos cuál es cuál:
 
 ```powershell
 .\deploy\desplegar_robot.ps1 -ProbarCamaras     # trae una foto de cada cámara a deploy\capturas
-.\deploy\desplegar_robot.ps1 -Camara rgbd       # usar otra: frente | estereo | rgbd | trasera | /topic/exacto
+.\deploy\desplegar_robot.ps1 -Camara rgbd       # usar otra: frente | centro | estereo | rgbd | trasera | /topic/exacto
 .\deploy\desplegar_robot.ps1 -SoloReiniciar -Camara estereo   # cambiar de cámara sin volver a subir
 ```
 

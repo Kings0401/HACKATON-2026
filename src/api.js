@@ -73,6 +73,25 @@ export const api = {
       contentType: "image/jpeg",
       timeout: 30000,
     }),
+  personaBiometrics: (id) => request(`/admin/personas/${encodeURIComponent(id)}/biometrics`),
+  uploadVoice: (id, wav, sampleId = 1) =>
+    request(`/admin/personas/${encodeURIComponent(id)}/voice?consent=true&sample_id=${sampleId}`, {
+      method: "POST",
+      binary: wav,
+      contentType: "audio/wav",
+      timeout: 30000,
+    }),
+  verifyVoice: (id, wav) =>
+    request(`/admin/personas/${encodeURIComponent(id)}/voice/verify?consent=true`, {
+      method: "POST",
+      binary: wav,
+      contentType: "audio/wav",
+      timeout: 120000,
+    }),
+  updateInvitationDates: (id, body) =>
+    request(`/admin/invitations/${encodeURIComponent(id)}`, { method: "PATCH", body }),
+  updateExternalAssignmentDates: (id, body) =>
+    request(`/admin/work-assignments/${encodeURIComponent(id)}`, { method: "PATCH", body }),
   assistance: async () => {
     const result = await request("/events", {
       method: "POST",

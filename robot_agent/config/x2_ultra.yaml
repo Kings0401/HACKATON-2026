@@ -7,7 +7,8 @@ nclub_reception_agent:
   ros__parameters:
     backend_url: "http://10.0.1.2:8000" # PC host en la red SDK cableada (10.0.1.2/24)
     robot_id: "robot1"
-    # Cámara: frente (por defecto, la de la frente) | estereo | rgbd | trasera | /topic/exacto
+    # Cámara: frente (por defecto: /aima/hal/sensor/rgb_head_front_center/rgb_image) | centro |
+    # estereo | rgbd | trasera | /topic/exacto
     camera: "frente"
     rotate_90: false # true solo para la cámara trasera del X2 Ultra (new version)
     # VAD de AimDK: PCM 16 kHz, 16 bits, mono; requiere palabra de activación en modo por defecto.

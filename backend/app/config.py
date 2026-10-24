@@ -52,6 +52,7 @@ class Settings:
         )
     )
     faces_bucket: str = field(default_factory=lambda: os.getenv("FACES_BUCKET", "rostros-nclub"))
+    voices_bucket: str = field(default_factory=lambda: os.getenv("VOICES_BUCKET", "voces-nclub"))
     evidence_bucket: str = field(
         default_factory=lambda: os.getenv("EVIDENCE_BUCKET", "evidencias-recepcion")
     )
@@ -62,8 +63,9 @@ class Settings:
     )
     # Umbral mínimo que FastAPI exige a la similitud informada por el agente.
     face_threshold: float = field(default_factory=lambda: float(os.getenv("FACE_THRESHOLD", "0.62")))
+    speaker_threshold: float = field(default_factory=lambda: float(os.getenv("SPEAKER_THRESHOLD", "0.25")))
     face_required: list[str] = field(
-        default_factory=lambda: _list("FACE_REQUIRED_CATEGORIES", "VIP,PERSONAL_INTERNO")
+        default_factory=lambda: _list("FACE_REQUIRED_CATEGORIES", "VIP,REGULAR,PERSONAL_INTERNO,TRABAJADOR_EXTERNO")
     )
     # Los códigos estáticos (NFC-VIP-001, QR-INV-001…) son de demostración.
     allow_static_credentials: bool = field(

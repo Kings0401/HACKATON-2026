@@ -21,14 +21,15 @@ INTENTS = [
 ]
 
 PROMPTS = {
-    "PROVEEDOR": ("TRABAJADOR_EXTERNO", "Con gusto. Por favor, muestre el código QR de su orden de trabajo."),
-    "INVITADO": ("INVITADO", "Bienvenido. Por favor, muestre el código QR de su invitación."),
+    "PROVEEDOR": ("TRABAJADOR_EXTERNO", "Con gusto. Por favor, muestre el código QR de su orden de servicio."),
+    "INVITADO": ("INVITADO", "¡Bienvenidos a N Club! Por favor, muéstrame tu código QR de invitación."),
     "PERSONAL": ("PERSONAL_INTERNO", "Por favor, acerque su carné de personal a la cámara."),
-    "RESERVA": ("REGULAR", "Perfecto. Muestre la credencial de su aplicación y confirmaré su reserva."),
-    "VIP": ("VIP", "Será un placer atenderle. Acerque su credencial de miembro, por favor."),
-    "MIEMBRO": ("REGULAR", "Bienvenido de nuevo. Muestre la credencial de su aplicación, por favor."),
+    # Los socios se identifican por rostro (y voz o documento), no con credencial.
+    "RESERVA": ("REGULAR", "Con gusto. Para atenderle como socio, mire a mi cámara un momento, por favor."),
+    "VIP": ("VIP", "Será un placer atenderle. Mire a mi cámara un momento para reconocerle, por favor."),
+    "MIEMBRO": ("REGULAR", "Con gusto. Mire a mi cámara un momento para reconocerle, por favor."),
     "AYUDA": (None, "Enseguida le atiende un miembro de recepción."),
-    "SALUDO": (None, "Bienvenido a N Club. ¿Es miembro, invitado, personal o proveedor?"),
+    "SALUDO": (None, "Le damos la bienvenida a N Club. ¿Es socio, invitado, personal o proveedor?"),
 }
 
 

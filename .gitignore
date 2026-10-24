@@ -20,3 +20,11 @@ nclub-vision.zip
 
 # Fotos de prueba de las cámaras del robot
 deploy/capturas/
+
+# Simulación MuJoCo: modelo descargado (licencia propia), texturas y videos generados
+simulation/models/
+simulation/build/
+MUJOCO_LOG.TXT
+
+/MJMODEL.TXT
+/MJMODEL.TXT
